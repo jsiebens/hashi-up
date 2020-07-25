@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/hashicorp/go-checkpoint"
 	"github.com/jsiebens/hashi-up/pkg/config"
 	operator "github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/pkg/errors"
@@ -18,6 +19,7 @@ func InstallConsulCommand() *cobra.Command {
 	var sshKey string
 	var sshPort int
 
+	var version string
 	var datacenter string
 	var bind string
 	var advertise string
@@ -36,6 +38,7 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().StringVar(&sshKey, "ssh-key", "~/.ssh/id_rsa", "The ssh key to use for remote login")
 	command.Flags().IntVar(&sshPort, "ssh-port", 22, "The port on which to connect for ssh")
 
+	command.Flags().StringVar(&version, "version", "", "Version of Consul to install, default to latest available")
 	command.Flags().BoolVar(&server, "server", false, "Switches agent to server mode.")
 	command.Flags().StringVar(&datacenter, "datacenter", "dc1", "Specifies the data center of the local agent.")
 	command.Flags().StringVar(&bind, "bind", "", "Sets the bind address for cluster communication.")
@@ -45,6 +48,22 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().StringArrayVar(&retryJoin, "retry-join", []string{}, "Address of an agent to join at start time with retries enabled. Can be specified multiple times.")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
+
+		if len(version) == 0 {
+			updateParams := &checkpoint.CheckParams{
+				Product: "consul",
+				Version: "0.0.0",
+				Force:   true,
+			}
+
+			check, err := checkpoint.Check(updateParams)
+
+			if err != nil {
+				return errors.Wrapf(err, "unable to get latest version number, define a version manually with the --version flag")
+			}
+
+			version = check.CurrentVersion
+		}
 
 		consulConfig := config.NewConsulConfiguration(datacenter, bind, advertise, client, server, boostrapExpect, retryJoin)
 
@@ -100,7 +119,7 @@ func InstallConsulCommand() *cobra.Command {
 			serviceType = "exec"
 		}
 
-		_, err = operator.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' SERVICE_TYPE='%s' sh -\n", dir, dir, serviceType))
+		_, err = operator.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' SERVICE_TYPE='%s' CONSUL_VERSION='%s' sh -\n", dir, dir, serviceType, version))
 		if err != nil {
 			return fmt.Errorf("error received during installation: %s", err)
 		}
@@ -136,7 +155,6 @@ setup_env() {
     SUDO=
   fi
 
-  CONSUL_VERSION=1.8.0
   CONSUL_DATA_DIR=/opt/consul
   CONSUL_CONFIG_DIR=/etc/consul.d
   CONSUL_CONFIG_FILE=/etc/consul.d/consul.hcl
@@ -188,7 +206,7 @@ install_dependencies() {
 
 download_and_install() {
   if [ -x "${BIN_DIR}/consul" ]; then
-    info "Nomad binary already installed in ${BIN_DIR}, skipping downloading and installing binary"
+    info "Consul binary already installed in ${BIN_DIR}, skipping downloading and installing binary"
   else
     info "Downloading and unpacking consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"
 	curl -o "$TMP_DIR/consul.zip" -sfL "https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"

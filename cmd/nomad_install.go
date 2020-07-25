@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	checkpoint "github.com/hashicorp/go-checkpoint"
 	"github.com/jsiebens/hashi-up/pkg/config"
 	operator "github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/pkg/errors"
@@ -18,12 +19,13 @@ func InstallNomadCommand() *cobra.Command {
 	var sshKey string
 	var sshPort int
 
+	var version string
 	var datacenter string
 	var address string
 	var advertise string
 	var server bool
 	var client bool
-	var boostrapExpect int64
+	var bootstrapExpect int64
 	var retryJoin []string
 
 	var command = &cobra.Command{
@@ -36,12 +38,13 @@ func InstallNomadCommand() *cobra.Command {
 	command.Flags().StringVar(&sshKey, "ssh-key", "~/.ssh/id_rsa", "The ssh key to use for remote login")
 	command.Flags().IntVar(&sshPort, "ssh-port", 22, "The port on which to connect for ssh")
 
+	command.Flags().StringVar(&version, "version", "", "Version of Nomad to install, default to latest available")
 	command.Flags().BoolVar(&server, "server", false, "Enables the server mode of the agent.")
 	command.Flags().BoolVar(&client, "client", false, "Enables the client mode of the agent.")
 	command.Flags().StringVar(&datacenter, "datacenter", "dc1", "Specifies the data center of the local agent.")
 	command.Flags().StringVar(&address, "address", "", "The address the agent will bind to for all of its various network services.")
 	command.Flags().StringVar(&advertise, "advertise", "", "The address the agent will advertise to for all of its various network services.")
-	command.Flags().Int64Var(&boostrapExpect, "bootstrap-expect", 1, "Sets server to expect bootstrap mode.")
+	command.Flags().Int64Var(&bootstrapExpect, "bootstrap-expect", 1, "Sets server to expect bootstrap mode.")
 	command.Flags().StringArrayVar(&retryJoin, "retry-join", []string{}, "Address of an agent to join at start time with retries enabled. Can be specified multiple times.")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
@@ -49,7 +52,23 @@ func InstallNomadCommand() *cobra.Command {
 			return fmt.Errorf("either server or client mode should be enabled")
 		}
 
-		nomadConfig := config.NewNomadConfiguration(datacenter, address, advertise, server, client, boostrapExpect, retryJoin)
+		if len(version) == 0 {
+			updateParams := &checkpoint.CheckParams{
+				Product: "nomad",
+				Version: "0.0.0",
+				Force:   true,
+			}
+
+			check, err := checkpoint.Check(updateParams)
+
+			if err != nil {
+				return errors.Wrapf(err, "unable to get latest version number, define a version manually with the --version flag")
+			}
+
+			version = check.CurrentVersion
+		}
+
+		nomadConfig := config.NewNomadConfiguration(datacenter, address, advertise, server, client, bootstrapExpect, retryJoin)
 
 		fmt.Println("Public IP: " + ip.String())
 
@@ -98,7 +117,7 @@ func InstallNomadCommand() *cobra.Command {
 			return fmt.Errorf("error received during upload install script: %s", err)
 		}
 
-		_, err = operator.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' sh -\n", dir, dir))
+		_, err = operator.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' NOMAD_VERSION='%s' sh -\n", dir, dir, version))
 		if err != nil {
 			return fmt.Errorf("error received during installation: %s", err)
 		}
@@ -134,7 +153,6 @@ setup_env() {
     SUDO=
   fi
 
-  NOMAD_VERSION=0.11.3
   NOMAD_DATA_DIR=/opt/nomad
   NOMAD_CONFIG_DIR=/etc/nomad.d
   NOMAD_CONFIG_FILE=/etc/nomad.d/nomad.hcl
