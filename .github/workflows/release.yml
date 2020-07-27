@@ -1,0 +1,28 @@
+name: release
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  generate:
+    name: Generate cross-platform builds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - name: Generate build files
+        uses: thatisuday/go-build-action@v1
+        with:
+          platforms: "linux/amd64, darwin/amd64, windows/amd64, linux/arm64, linux/arm"
+          name: "hashi-up"
+          dest: "dist"
+
+      - name: Upload build-artifacts
+        uses: skx/github-action-publish-binaries@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: "./dist/*"
