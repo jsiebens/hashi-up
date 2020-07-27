@@ -195,10 +195,26 @@ get_installed_hashes() {
     $SUDO sha256sum ${BIN_DIR}/nomad ${NOMAD_CONFIG_FILE} ${NOMAD_SERVICE_FILE} 2>&1 || true
 }
 
+has_yum() {
+  [ -n "$(command -v yum)" ]
+}
+
+has_apt_get() {
+  [ -n "$(command -v apt-get)" ]
+}
+
 install_dependencies() {
   if ! [ -x "$(command -v unzip)" ] || ! [ -x "$(command -v curl)" ]; then
-    $SUDO apt-get update -y
-    $SUDO apt-get install -y curl unzip
+	  if $(has_apt_get); then
+		$SUDO apt-get update -y
+		$SUDO apt-get install -y curl unzip
+	  elif $(has_yum); then
+		$SUDO yum update -y
+		$SUDO yum install -y curl unzip
+	  else
+		fatal "Could not find apt-get or yum. Cannot install dependencies on this OS."
+		exit 1
+	  fi
   fi
 }
 
