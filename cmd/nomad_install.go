@@ -39,13 +39,13 @@ func InstallNomadCommand() *cobra.Command {
 	command.Flags().IntVar(&sshPort, "ssh-port", 22, "The port on which to connect for ssh")
 
 	command.Flags().StringVar(&version, "version", "", "Version of Nomad to install, default to latest available")
-	command.Flags().BoolVar(&server, "server", false, "Enables the server mode of the agent.")
-	command.Flags().BoolVar(&client, "client", false, "Enables the client mode of the agent.")
-	command.Flags().StringVar(&datacenter, "datacenter", "dc1", "Specifies the data center of the local agent.")
-	command.Flags().StringVar(&address, "address", "", "The address the agent will bind to for all of its various network services.")
-	command.Flags().StringVar(&advertise, "advertise", "", "The address the agent will advertise to for all of its various network services.")
-	command.Flags().Int64Var(&bootstrapExpect, "bootstrap-expect", 1, "Sets server to expect bootstrap mode.")
-	command.Flags().StringArrayVar(&retryJoin, "retry-join", []string{}, "Address of an agent to join at start time with retries enabled. Can be specified multiple times.")
+	command.Flags().BoolVar(&server, "server", false, "Nomad: enables the server mode of the agent. (see Nomad documentation for more info)")
+	command.Flags().BoolVar(&client, "client", false, "Nomad: enables the client mode of the agent. (see Nomad documentation for more info)")
+	command.Flags().StringVar(&datacenter, "dc", "dc1", "Nomad: specifies the data center of the local agent. (see Nomad documentation for more info)")
+	command.Flags().StringVar(&address, "address", "", "Nomad: the address the agent will bind to for all of its various network services. (see Nomad documentation for more info)")
+	command.Flags().StringVar(&advertise, "advertise", "", "Nomad: the address the agent will advertise to for all of its various network services. (see Nomad documentation for more info)")
+	command.Flags().Int64Var(&bootstrapExpect, "bootstrap-expect", 1, "Nomad: sets server to expect bootstrap mode. (see Nomad documentation for more info)")
+	command.Flags().StringArrayVar(&retryJoin, "retry-join", []string{}, "Nomad: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Nomad documentation for more info)")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
 		if !(server || client) {

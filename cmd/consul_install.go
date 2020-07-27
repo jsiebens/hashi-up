@@ -39,13 +39,13 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().IntVar(&sshPort, "ssh-port", 22, "The port on which to connect for ssh")
 
 	command.Flags().StringVar(&version, "version", "", "Version of Consul to install, default to latest available")
-	command.Flags().BoolVar(&server, "server", false, "Switches agent to server mode.")
-	command.Flags().StringVar(&datacenter, "datacenter", "dc1", "Specifies the data center of the local agent.")
-	command.Flags().StringVar(&bind, "bind", "", "Sets the bind address for cluster communication.")
-	command.Flags().StringVar(&advertise, "advertise", "", "Sets the advertise address to use.")
-	command.Flags().StringVar(&client, "client", "", "Sets the address to bind for client access.")
-	command.Flags().Int64Var(&boostrapExpect, "bootstrap-expect", 1, "Sets server to expect bootstrap mode.")
-	command.Flags().StringArrayVar(&retryJoin, "retry-join", []string{}, "Address of an agent to join at start time with retries enabled. Can be specified multiple times.")
+	command.Flags().BoolVar(&server, "server", false, "Consul: switches agent to server mode. (see Consul documentation for more info)")
+	command.Flags().StringVar(&datacenter, "dc", "dc1", "Consul: specifies the data center of the local agent. (see Consul documentation for more info)")
+	command.Flags().StringVar(&bind, "bind", "", "Consul: sets the bind address for cluster communication. (see Consul documentation for more info)")
+	command.Flags().StringVar(&advertise, "advertise", "", "Consul: sets the advertise address to use. (see Consul documentation for more info)")
+	command.Flags().StringVar(&client, "client", "", "Consul: sets the address to bind for client access. (see Consul documentation for more info)")
+	command.Flags().Int64Var(&boostrapExpect, "bootstrap-expect", 1, "Consul: sets server to expect bootstrap mode. (see Consul documentation for more info)")
+	command.Flags().StringArrayVar(&retryJoin, "retry-join", []string{}, "Consul: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Consul documentation for more info)")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
 
