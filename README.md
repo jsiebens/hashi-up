@@ -2,11 +2,11 @@
 
 **STATUS: Proof Of Concept**
 
-hashi-up is a lightweight utility to install HashiCorp Consul and/or Nomad on any remote Linux host. All you need is `ssh` access and the binary `hashi-up` to build a Consul and/or Nomad cluster.
+hashi-up is a lightweight utility to install HashiCorp [Consul](https://www.consul.io/) and [Nomad](https://www.nomadproject.io)  on any remote Linux host. All you need is `ssh` access and the binary `hashi-up` to build a Consul and/or Nomad cluster.
 
 The tool is written in Go and is cross-compiled for Linux, Windows, MacOS and even on Raspberry Pi.
 
-This project is heavily inspired on the work of [Alex Ellis](https://www.alexellis.io/) who created `k3sup`, a tool to to get from zero to KUBECONFIG with [k3s](https://k3s.io/)
+This project is heavily inspired on the work of [Alex Ellis](https://www.alexellis.io/) who created [k3sup](https://k3sup.dev/), a tool to to get from zero to KUBECONFIG with [k3s](https://k3s.io/)
 
 ## What's this for?
 
@@ -28,7 +28,7 @@ Provision a new VM running a compatible operating system such as Ubuntu, Debian,
 
 Imagine the IP was `192.168.0.100` and the username was `ubuntu`, then you would run this:
 
-```
+```sh
 export IP=192.168.0.100
 hashi-up consul install --ip $IP --user ubuntu --server --client 0.0.0.0
 ```
@@ -55,7 +55,7 @@ Other additional flags for `install`:
 
 Let's say you have a Consul server up and running, now you can join one or more client agents to the cluster:
 
-```
+```sh
 export SERVER_IP=192.168.0.100
 export AGENT_1_IP=192.168.0.105
 export AGENT_2_IP=192.168.0.106
@@ -74,7 +74,7 @@ Prepare, for example, 3 nodes and let's say the have the following ip addresses:
 
 With `hashi-up` it is quite easy to install 3 Consul servers which will form a cluster:
 
-```
+```sh
 export SERVER_1_IP=192.168.0.100
 export SERVER_2_IP=192.168.0.101
 export SERVER_3_IP=192.168.0.102
@@ -86,7 +86,7 @@ hashi-up consul install --ip $SERVER_3_IP --user ubuntu --server --client 0.0.0.
 
 And of course, joining client agents is the same as above:
 
-```
+```sh
 export SERVER_1_IP=192.168.0.100
 export SERVER_2_IP=192.168.0.101
 export SERVER_3_IP=192.168.0.102
@@ -107,14 +107,14 @@ Provision a new VM running a compatible operating system such as Ubuntu, Debian,
 
 Imagine the IP was `192.168.0.100` and the username was `ubuntu`, then you would run this:
 
-```
+```sh
 export IP=192.168.0.100
 hashi-up nomad install --ip $IP --user ubuntu --server
 ```
 
 When the command finishes, try to access Nomad using the UI at http://192.168.100:4646 or with the cli:
 
-```
+```sh
 nomad agent-info -address==http://192.168.0.100:4646
 ```
 
@@ -133,7 +133,7 @@ Other additional flags for `install`:
 
 Let's say you have a Nomad server up and running, now you can join one or more client agents to the cluster:
 
-```
+```sh
 export SERVER_IP=192.168.0.100
 export AGENT_1_IP=192.168.0.105
 export AGENT_2_IP=192.168.0.106
@@ -152,7 +152,7 @@ Prepare, for example, 3 nodes and let's say the have the following ip addresses:
 
 With `hashi-up` it is quite easy to install 3 Consul servers which will form a cluster:
 
-```
+```sh
 export SERVER_1_IP=192.168.0.100
 export SERVER_2_IP=192.168.0.101
 export SERVER_3_IP=192.168.0.102
@@ -164,7 +164,7 @@ hashi-up nomad install --ip $SERVER_3_IP --user ubuntu --server --bootstrap-expe
 
 And of course, joining client agents is the same as above:
 
-```
+```sh
 export SERVER_1_IP=192.168.0.100
 export SERVER_2_IP=192.168.0.101
 export SERVER_3_IP=192.168.0.102
@@ -180,7 +180,7 @@ hashi-up nomad install --ip $AGENT_2_IP --user ubuntu --client --retry-join $SER
 If a Consul agent is already available on the Nomad nodes, Nomad can use Consul the automatically bootstrap the cluster.
 So after installing a Consul cluster on all nodes, with `hashi-up` the cluster as explained above can be installed with the following commands:
 
-```
+```sh
 export SERVER_1_IP=192.168.0.100
 export SERVER_2_IP=192.168.0.101
 export SERVER_3_IP=192.168.0.102
