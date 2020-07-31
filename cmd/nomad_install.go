@@ -28,6 +28,9 @@ func InstallNomadCommand() *cobra.Command {
 	var bootstrapExpect int64
 	var retryJoin []string
 	var encrypt string
+	var caFile string
+	var certFile string
+	var keyFile string
 
 	var command = &cobra.Command{
 		Use:          "install",
@@ -48,10 +51,23 @@ func InstallNomadCommand() *cobra.Command {
 	command.Flags().Int64Var(&bootstrapExpect, "bootstrap-expect", 1, "Nomad: sets server to expect bootstrap mode. (see Nomad documentation for more info)")
 	command.Flags().StringArrayVar(&retryJoin, "retry-join", []string{}, "Nomad: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Nomad documentation for more info)")
 	command.Flags().StringVar(&encrypt, "encrypt", "", "Nomad: Provides the gossip encryption key. (see Nomad documentation for more info)")
+	command.Flags().StringVar(&caFile, "ca-file", "", "Nomad: the certificate authority used to check the authenticity of client and server connections. (see Nomad documentation for more info)")
+	command.Flags().StringVar(&certFile, "cert-file", "", "Nomad: the certificate to verify the agent's authenticity. (see Nomad documentation for more info)")
+	command.Flags().StringVar(&keyFile, "key-file", "", "Nomad: the key used with the certificate to verify the agent's authenticity. (see Nomad documentation for more info)")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
 		if !(server || client) {
 			return fmt.Errorf("either server or client mode should be enabled")
+		}
+
+		var enableTLS = false
+
+		if len(caFile) != 0 && len(certFile) != 0 && len(keyFile) != 0 {
+			enableTLS = true
+		}
+
+		if !enableTLS && (len(caFile) != 0 || len(certFile) != 0 || len(keyFile) != 0) {
+			return fmt.Errorf("ca-file, cert-file and key-file are all required when enabling tls, at least on of them is missing")
 		}
 
 		if len(version) == 0 {
@@ -70,7 +86,7 @@ func InstallNomadCommand() *cobra.Command {
 			version = check.CurrentVersion
 		}
 
-		nomadConfig := config.NewNomadConfiguration(datacenter, address, advertise, server, client, bootstrapExpect, retryJoin, encrypt)
+		nomadConfig := config.NewNomadConfiguration(datacenter, address, advertise, server, client, bootstrapExpect, retryJoin, encrypt, enableTLS)
 
 		fmt.Println("Public IP: " + ip.String())
 
@@ -107,6 +123,23 @@ func InstallNomadCommand() *cobra.Command {
 		_, err = operator.Execute("mkdir " + dir)
 		if err != nil {
 			return fmt.Errorf("error received during installation: %s", err)
+		}
+
+		if enableTLS {
+			err = operator.UploadFile(caFile, dir+"/nomad-agent-ca.pem", "0640")
+			if err != nil {
+				return fmt.Errorf("error received during upload nomad ca file: %s", err)
+			}
+
+			err = operator.UploadFile(certFile, dir+"/nomad-agent-cert.pem", "0640")
+			if err != nil {
+				return fmt.Errorf("error received during upload nomad cert file: %s", err)
+			}
+
+			err = operator.UploadFile(keyFile, dir+"/nomad-agent-key.pem", "0640")
+			if err != nil {
+				return fmt.Errorf("error received during upload nomad key file: %s", err)
+			}
 		}
 
 		err = operator.Upload(nomadConfig, dir+"/nomad.hcl", "0640")
@@ -194,7 +227,7 @@ setup_verify_arch() {
 
 # --- get hashes of the current k3s bin and service files
 get_installed_hashes() {
-    $SUDO sha256sum ${BIN_DIR}/nomad ${NOMAD_CONFIG_FILE} ${NOMAD_SERVICE_FILE} 2>&1 || true
+    $SUDO sha256sum ${BIN_DIR}/nomad /etc/nomad.d/nomad.hcl /etc/nomad.d/nomad-agent-ca.pem /etc/nomad.d/nomad-agent-cert.pem /etc/nomad.d/nomad-agent-key.pem ${FILE_CONSUL_SERVICE} 2>&1 || true
 }
 
 has_yum() {
@@ -235,6 +268,9 @@ create_user_and_config() {
   $SUDO mkdir --parents ${NOMAD_CONFIG_DIR}
 
   $SUDO cp "${TMP_DIR}/nomad.hcl" ${NOMAD_CONFIG_FILE}
+  $SUDO cp "${TMP_DIR}/nomad-agent-ca.pem" /etc/nomad.d/nomad-agent-ca.pem
+  $SUDO cp "${TMP_DIR}/nomad-agent-cert.pem" /etc/nomad.d/nomad-agent-cert.pem
+  $SUDO cp "${TMP_DIR}/nomad-agent-key.pem" /etc/nomad.d/nomad-agent-key.pem
 }
 
 # --- write systemd service file ---
