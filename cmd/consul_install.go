@@ -276,9 +276,15 @@ create_user_and_config() {
   $SUDO mkdir --parents ${CONSUL_CONFIG_DIR}
 
   $SUDO cp "${TMP_DIR}/consul.hcl" ${CONSUL_CONFIG_FILE}
-  $SUDO cp "${TMP_DIR}/consul-agent-ca.pem" /etc/consul.d/consul-agent-ca.pem
-  $SUDO cp "${TMP_DIR}/consul-agent-cert.pem" /etc/consul.d/consul-agent-cert.pem
-  $SUDO cp "${TMP_DIR}/consul-agent-key.pem" /etc/consul.d/consul-agent-key.pem
+  if [ -f "${TMP_DIR}/consul-agent-ca.pem" ]; then
+	$SUDO cp "${TMP_DIR}/consul-agent-ca.pem" /etc/consul.d/consul-agent-ca.pem
+  fi
+  if [ -f "${TMP_DIR}/consul-agent-cert.pem" ]; then
+	$SUDO cp "${TMP_DIR}/consul-agent-cert.pem" /etc/consul.d/consul-agent-cert.pem
+  fi
+  if [ -f "${TMP_DIR}/consul-agent-key.pem" ]; then
+	$SUDO cp "${TMP_DIR}/consul-agent-key.pem" /etc/consul.d/consul-agent-key.pem
+  fi
 
   $SUDO chown --recursive consul:consul /opt/consul
   $SUDO chown --recursive consul:consul /etc/consul.d
