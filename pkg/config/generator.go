@@ -13,7 +13,8 @@ func NewConsulConfiguration(
 	server bool,
 	bootstrapExpect int64,
 	retryJoin []string,
-	encrypt string) string {
+	encrypt string,
+	enableTLS bool) string {
 
 	f := hclwrite.NewEmptyFile()
 	rootBody := f.Body()
@@ -45,6 +46,15 @@ func NewConsulConfiguration(
 
 	if len(encrypt) != 0 {
 		rootBody.SetAttributeValue("encrypt", cty.StringVal(encrypt))
+	}
+
+	if enableTLS {
+		rootBody.SetAttributeValue("ca_file", cty.StringVal("/etc/consul.d/consul-agent-ca.pem"))
+		rootBody.SetAttributeValue("cert_file", cty.StringVal("/etc/consul.d/consul-agent-cert.pem"))
+		rootBody.SetAttributeValue("key_file", cty.StringVal("/etc/consul.d/consul-agent-key.pem"))
+		rootBody.SetAttributeValue("verify_incoming", cty.BoolVal(true))
+		rootBody.SetAttributeValue("verify_outgoing", cty.BoolVal(true))
+		rootBody.SetAttributeValue("verify_server_hostname", cty.BoolVal(true))
 	}
 
 	return string(f.Bytes())

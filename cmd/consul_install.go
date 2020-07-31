@@ -28,6 +28,9 @@ func InstallConsulCommand() *cobra.Command {
 	var boostrapExpect int64
 	var retryJoin []string
 	var encrypt string
+	var caFile string
+	var certFile string
+	var keyFile string
 
 	var command = &cobra.Command{
 		Use:          "install",
@@ -48,8 +51,20 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().Int64Var(&boostrapExpect, "bootstrap-expect", 1, "Consul: sets server to expect bootstrap mode. (see Consul documentation for more info)")
 	command.Flags().StringArrayVar(&retryJoin, "retry-join", []string{}, "Consul: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Consul documentation for more info)")
 	command.Flags().StringVar(&encrypt, "encrypt", "", "Consul: provides the gossip encryption key. (see Consul documentation for more info)")
+	command.Flags().StringVar(&caFile, "ca-file", "", "Consul: the certificate authority used to check the authenticity of client and server connections. (see Consul documentation for more info)")
+	command.Flags().StringVar(&certFile, "cert-file", "", "Consul: the certificate to verify the agent's authenticity. (see Consul documentation for more info)")
+	command.Flags().StringVar(&keyFile, "key-file", "", "Consul: the key used with the certificate to verify the agent's authenticity. (see Consul documentation for more info)")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
+		var enableTLS = false
+
+		if len(caFile) != 0 && len(certFile) != 0 && len(keyFile) != 0 {
+			enableTLS = true
+		}
+
+		if !enableTLS && (len(caFile) != 0 || len(certFile) != 0 || len(keyFile) != 0) {
+			return fmt.Errorf("ca-file, cert-file and key-file are all required when enabling tls, at least on of them is missing")
+		}
 
 		if len(version) == 0 {
 			updateParams := &checkpoint.CheckParams{
@@ -67,7 +82,7 @@ func InstallConsulCommand() *cobra.Command {
 			version = check.CurrentVersion
 		}
 
-		consulConfig := config.NewConsulConfiguration(datacenter, bind, advertise, client, server, boostrapExpect, retryJoin, encrypt)
+		consulConfig := config.NewConsulConfiguration(datacenter, bind, advertise, client, server, boostrapExpect, retryJoin, encrypt, enableTLS)
 
 		fmt.Println("Public IP: " + ip.String())
 
@@ -104,6 +119,23 @@ func InstallConsulCommand() *cobra.Command {
 		_, err = operator.Execute("mkdir " + dir)
 		if err != nil {
 			return fmt.Errorf("error received during installation: %s", err)
+		}
+
+		if enableTLS {
+			err = operator.UploadFile(caFile, dir+"/consul-agent-ca.pem", "0640")
+			if err != nil {
+				return fmt.Errorf("error received during upload consul ca file: %s", err)
+			}
+
+			err = operator.UploadFile(certFile, dir+"/consul-agent-cert.pem", "0640")
+			if err != nil {
+				return fmt.Errorf("error received during upload consul cert file: %s", err)
+			}
+
+			err = operator.UploadFile(keyFile, dir+"/consul-agent-key.pem", "0640")
+			if err != nil {
+				return fmt.Errorf("error received during upload consul key file: %s", err)
+			}
 		}
 
 		err = operator.Upload(consulConfig, dir+"/consul.hcl", "0640")
@@ -196,7 +228,7 @@ setup_verify_arch() {
 
 # --- get hashes of the current k3s bin and service files
 get_installed_hashes() {
-    $SUDO sha256sum ${BIN_DIR}/consul ${CONSUL_CONFIG_FILE} ${CONSUL_SERVICE_FILE} 2>&1 || true
+    $SUDO sha256sum ${BIN_DIR}/consul /etc/consul.d/consul.hcl /etc/consul.d/consul-agent-ca.pem /etc/consul.d/consul-agent-cert.pem /etc/consul.d/consul-agent-key.pem ${FILE_CONSUL_SERVICE} 2>&1 || true
 }
 
 has_yum() {
@@ -244,6 +276,9 @@ create_user_and_config() {
   $SUDO mkdir --parents ${CONSUL_CONFIG_DIR}
 
   $SUDO cp "${TMP_DIR}/consul.hcl" ${CONSUL_CONFIG_FILE}
+  $SUDO cp "${TMP_DIR}/consul-agent-ca.pem" /etc/consul.d/consul-agent-ca.pem
+  $SUDO cp "${TMP_DIR}/consul-agent-cert.pem" /etc/consul.d/consul-agent-cert.pem
+  $SUDO cp "${TMP_DIR}/consul-agent-key.pem" /etc/consul.d/consul-agent-key.pem
 
   $SUDO chown --recursive consul:consul /opt/consul
   $SUDO chown --recursive consul:consul /etc/consul.d
