@@ -68,7 +68,8 @@ func NewNomadConfiguration(
 	client bool,
 	bootstrapExpect int64,
 	retryJoin []string,
-	encrypt string) string {
+	encrypt string,
+	enableTLS bool) string {
 
 	f := hclwrite.NewEmptyFile()
 	rootBody := f.Body()
@@ -113,6 +114,15 @@ func NewNomadConfiguration(
 			serverJoinBlock := clientBlock.Body().AppendNewBlock("server_join", []string{})
 			serverJoinBlock.Body().SetAttributeValue("retry_join", cty.ListVal(transform(retryJoin)))
 		}
+	}
+
+	if enableTLS {
+		tlsBlock := rootBody.AppendNewBlock("tls", []string{})
+		tlsBlock.Body().SetAttributeValue("http", cty.BoolVal(true))
+		tlsBlock.Body().SetAttributeValue("rpc", cty.BoolVal(true))
+		tlsBlock.Body().SetAttributeValue("ca_file", cty.StringVal("/etc/nomad.d/nomad-agent-ca.pem"))
+		tlsBlock.Body().SetAttributeValue("cert_file", cty.StringVal("/etc/nomad.d/nomad-agent-cert.pem"))
+		tlsBlock.Body().SetAttributeValue("key_file", cty.StringVal("/etc/nomad.d/nomad-agent-key.pem"))
 	}
 
 	return string(f.Bytes())
