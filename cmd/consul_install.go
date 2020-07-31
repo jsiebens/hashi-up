@@ -27,6 +27,7 @@ func InstallConsulCommand() *cobra.Command {
 	var server bool
 	var boostrapExpect int64
 	var retryJoin []string
+	var encrypt string
 
 	var command = &cobra.Command{
 		Use:          "install",
@@ -46,6 +47,7 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().StringVar(&client, "client", "", "Consul: sets the address to bind for client access. (see Consul documentation for more info)")
 	command.Flags().Int64Var(&boostrapExpect, "bootstrap-expect", 1, "Consul: sets server to expect bootstrap mode. (see Consul documentation for more info)")
 	command.Flags().StringArrayVar(&retryJoin, "retry-join", []string{}, "Consul: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Consul documentation for more info)")
+	command.Flags().StringVar(&encrypt, "encrypt", "", "Consul: provides the gossip encryption key. (see Consul documentation for more info)")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
 
@@ -65,7 +67,7 @@ func InstallConsulCommand() *cobra.Command {
 			version = check.CurrentVersion
 		}
 
-		consulConfig := config.NewConsulConfiguration(datacenter, bind, advertise, client, server, boostrapExpect, retryJoin)
+		consulConfig := config.NewConsulConfiguration(datacenter, bind, advertise, client, server, boostrapExpect, retryJoin, encrypt)
 
 		fmt.Println("Public IP: " + ip.String())
 

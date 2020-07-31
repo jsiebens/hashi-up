@@ -12,7 +12,8 @@ func NewConsulConfiguration(
 	clientAddr string,
 	server bool,
 	bootstrapExpect int64,
-	retryJoin []string) string {
+	retryJoin []string,
+	encrypt string) string {
 
 	f := hclwrite.NewEmptyFile()
 	rootBody := f.Body()
@@ -42,6 +43,10 @@ func NewConsulConfiguration(
 		rootBody.SetAttributeValue("bootstrap_expect", cty.NumberIntVal(bootstrapExpect))
 	}
 
+	if len(encrypt) != 0 {
+		rootBody.SetAttributeValue("encrypt", cty.StringVal(encrypt))
+	}
+
 	return string(f.Bytes())
 }
 
@@ -52,7 +57,8 @@ func NewNomadConfiguration(
 	server bool,
 	client bool,
 	bootstrapExpect int64,
-	retryJoin []string) string {
+	retryJoin []string,
+	encrypt string) string {
 
 	f := hclwrite.NewEmptyFile()
 	rootBody := f.Body()
@@ -82,6 +88,10 @@ func NewNomadConfiguration(
 		if len(retryJoin) != 0 {
 			serverJoinBlock := serverBlock.Body().AppendNewBlock("server_join", []string{})
 			serverJoinBlock.Body().SetAttributeValue("retry_join", cty.ListVal(transform(retryJoin)))
+		}
+
+		if len(encrypt) != 0 {
+			serverBlock.Body().SetAttributeValue("encrypt", cty.StringVal(encrypt))
 		}
 	}
 
