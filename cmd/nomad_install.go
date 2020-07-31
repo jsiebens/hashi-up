@@ -27,6 +27,7 @@ func InstallNomadCommand() *cobra.Command {
 	var client bool
 	var bootstrapExpect int64
 	var retryJoin []string
+	var encrypt string
 
 	var command = &cobra.Command{
 		Use:          "install",
@@ -46,6 +47,7 @@ func InstallNomadCommand() *cobra.Command {
 	command.Flags().StringVar(&advertise, "advertise", "", "Nomad: the address the agent will advertise to for all of its various network services. (see Nomad documentation for more info)")
 	command.Flags().Int64Var(&bootstrapExpect, "bootstrap-expect", 1, "Nomad: sets server to expect bootstrap mode. (see Nomad documentation for more info)")
 	command.Flags().StringArrayVar(&retryJoin, "retry-join", []string{}, "Nomad: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Nomad documentation for more info)")
+	command.Flags().StringVar(&encrypt, "encrypt", "", "Nomad: Provides the gossip encryption key. (see Nomad documentation for more info)")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
 		if !(server || client) {
@@ -68,7 +70,7 @@ func InstallNomadCommand() *cobra.Command {
 			version = check.CurrentVersion
 		}
 
-		nomadConfig := config.NewNomadConfiguration(datacenter, address, advertise, server, client, bootstrapExpect, retryJoin)
+		nomadConfig := config.NewNomadConfiguration(datacenter, address, advertise, server, client, bootstrapExpect, retryJoin, encrypt)
 
 		fmt.Println("Public IP: " + ip.String())
 
