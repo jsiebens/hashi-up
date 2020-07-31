@@ -268,9 +268,15 @@ create_user_and_config() {
   $SUDO mkdir --parents ${NOMAD_CONFIG_DIR}
 
   $SUDO cp "${TMP_DIR}/nomad.hcl" ${NOMAD_CONFIG_FILE}
-  $SUDO cp "${TMP_DIR}/nomad-agent-ca.pem" /etc/nomad.d/nomad-agent-ca.pem
-  $SUDO cp "${TMP_DIR}/nomad-agent-cert.pem" /etc/nomad.d/nomad-agent-cert.pem
-  $SUDO cp "${TMP_DIR}/nomad-agent-key.pem" /etc/nomad.d/nomad-agent-key.pem
+  if [ -f "${TMP_DIR}/nomad-agent-ca.pem" ]; then
+	$SUDO cp "${TMP_DIR}/nomad-agent-ca.pem" /etc/nomad.d/nomad-agent-ca.pem
+  fi
+  if [ -f "${TMP_DIR}/nomad-agent-cert.pem" ]; then
+	$SUDO cp "${TMP_DIR}/nomad-agent-cert.pem" /etc/nomad.d/nomad-agent-cert.pem
+  fi
+  if [ -f "${TMP_DIR}/nomad-agent-key.pem" ]; then
+	$SUDO cp "${TMP_DIR}/nomad-agent-key.pem" /etc/nomad.d/nomad-agent-key.pem
+  fi
 }
 
 # --- write systemd service file ---
