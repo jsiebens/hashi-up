@@ -14,7 +14,9 @@ func NewConsulConfiguration(
 	bootstrapExpect int64,
 	retryJoin []string,
 	encrypt string,
-	enableTLS bool) string {
+	enableTLS bool,
+	enableACL bool,
+	agentToken string) string {
 
 	f := hclwrite.NewEmptyFile()
 	rootBody := f.Body()
@@ -57,6 +59,19 @@ func NewConsulConfiguration(
 		rootBody.SetAttributeValue("verify_server_hostname", cty.BoolVal(true))
 	}
 
+	if enableACL {
+		aclBlock := rootBody.AppendNewBlock("acl", []string{})
+		aclBlock.Body().SetAttributeValue("enabled", cty.BoolVal(true))
+		aclBlock.Body().SetAttributeValue("default_policy", cty.StringVal("deny"))
+		aclBlock.Body().SetAttributeValue("down_policy", cty.StringVal("extend-cache"))
+		aclBlock.Body().SetAttributeValue("enable_token_persistence", cty.BoolVal(true))
+
+		if len(agentToken) != 0 {
+			tokensBlock := aclBlock.Body().AppendNewBlock("tokens", []string{})
+			tokensBlock.Body().SetAttributeValue("agent", cty.StringVal(agentToken))
+		}
+	}
+
 	return string(f.Bytes())
 }
 
@@ -69,7 +84,8 @@ func NewNomadConfiguration(
 	bootstrapExpect int64,
 	retryJoin []string,
 	encrypt string,
-	enableTLS bool) string {
+	enableTLS bool,
+	enableACL bool) string {
 
 	f := hclwrite.NewEmptyFile()
 	rootBody := f.Body()
@@ -123,6 +139,11 @@ func NewNomadConfiguration(
 		tlsBlock.Body().SetAttributeValue("ca_file", cty.StringVal("/etc/nomad.d/nomad-agent-ca.pem"))
 		tlsBlock.Body().SetAttributeValue("cert_file", cty.StringVal("/etc/nomad.d/nomad-agent-cert.pem"))
 		tlsBlock.Body().SetAttributeValue("key_file", cty.StringVal("/etc/nomad.d/nomad-agent-key.pem"))
+	}
+
+	if enableACL {
+		aclBlock := rootBody.AppendNewBlock("acl", []string{})
+		aclBlock.Body().SetAttributeValue("enabled", cty.BoolVal(true))
 	}
 
 	return string(f.Bytes())

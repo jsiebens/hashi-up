@@ -86,7 +86,7 @@ func InstallNomadCommand() *cobra.Command {
 			version = check.CurrentVersion
 		}
 
-		nomadConfig := config.NewNomadConfiguration(datacenter, address, advertise, server, client, bootstrapExpect, retryJoin, encrypt, enableTLS)
+		nomadConfig := config.NewNomadConfiguration(datacenter, address, advertise, server, client, bootstrapExpect, retryJoin, encrypt, enableTLS, false)
 
 		fmt.Println("Public IP: " + ip.String())
 
