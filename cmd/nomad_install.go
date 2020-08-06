@@ -32,6 +32,7 @@ func InstallNomadCommand() *cobra.Command {
 	var caFile string
 	var certFile string
 	var keyFile string
+	var enableACL bool
 
 	var command = &cobra.Command{
 		Use:          "install",
@@ -56,6 +57,7 @@ func InstallNomadCommand() *cobra.Command {
 	command.Flags().StringVar(&caFile, "ca-file", "", "Nomad: the certificate authority used to check the authenticity of client and server connections. (see Nomad documentation for more info)")
 	command.Flags().StringVar(&certFile, "cert-file", "", "Nomad: the certificate to verify the agent's authenticity. (see Nomad documentation for more info)")
 	command.Flags().StringVar(&keyFile, "key-file", "", "Nomad: the key used with the certificate to verify the agent's authenticity. (see Nomad documentation for more info)")
+	command.Flags().BoolVar(&enableACL, "acl", false, "Nomad: enables Nomad ACL system. (see Nomad documentation for more info)")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
 		if !(server || client) {
@@ -72,7 +74,7 @@ func InstallNomadCommand() *cobra.Command {
 			return fmt.Errorf("ca-file, cert-file and key-file are all required when enabling tls, at least on of them is missing")
 		}
 
-		nomadConfig := config.NewNomadConfiguration(datacenter, address, advertise, server, client, bootstrapExpect, retryJoin, encrypt, enableTLS, false)
+		nomadConfig := config.NewNomadConfiguration(datacenter, address, advertise, server, client, bootstrapExpect, retryJoin, encrypt, enableTLS, enableACL)
 
 		if show {
 			fmt.Println(nomadConfig)
