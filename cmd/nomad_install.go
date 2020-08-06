@@ -18,6 +18,7 @@ func InstallNomadCommand() *cobra.Command {
 	var user string
 	var sshKey string
 	var sshPort int
+	var show bool
 
 	var version string
 	var datacenter string
@@ -41,6 +42,7 @@ func InstallNomadCommand() *cobra.Command {
 	command.Flags().StringVar(&user, "user", "root", "Username for SSH login")
 	command.Flags().StringVar(&sshKey, "ssh-key", "~/.ssh/id_rsa", "The ssh key to use for remote login")
 	command.Flags().IntVar(&sshPort, "ssh-port", 22, "The port on which to connect for ssh")
+	command.Flags().BoolVar(&show, "show", false, "Just show the generated config instead of deploying Consul")
 
 	command.Flags().StringVar(&version, "version", "", "Version of Nomad to install, default to latest available")
 	command.Flags().BoolVar(&server, "server", false, "Nomad: enables the server mode of the agent. (see Nomad documentation for more info)")
@@ -70,6 +72,13 @@ func InstallNomadCommand() *cobra.Command {
 			return fmt.Errorf("ca-file, cert-file and key-file are all required when enabling tls, at least on of them is missing")
 		}
 
+		nomadConfig := config.NewNomadConfiguration(datacenter, address, advertise, server, client, bootstrapExpect, retryJoin, encrypt, enableTLS, false)
+
+		if show {
+			fmt.Println(nomadConfig)
+			return nil
+		}
+
 		if len(version) == 0 {
 			updateParams := &checkpoint.CheckParams{
 				Product: "nomad",
@@ -85,8 +94,6 @@ func InstallNomadCommand() *cobra.Command {
 
 			version = check.CurrentVersion
 		}
-
-		nomadConfig := config.NewNomadConfiguration(datacenter, address, advertise, server, client, bootstrapExpect, retryJoin, encrypt, enableTLS, false)
 
 		fmt.Println("Public IP: " + ip.String())
 

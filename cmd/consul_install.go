@@ -18,6 +18,7 @@ func InstallConsulCommand() *cobra.Command {
 	var user string
 	var sshKey string
 	var sshPort int
+	var show bool
 
 	var version string
 	var datacenter string
@@ -44,6 +45,7 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().StringVar(&user, "user", "root", "Username for SSH login")
 	command.Flags().StringVar(&sshKey, "ssh-key", "~/.ssh/id_rsa", "The ssh key to use for remote login")
 	command.Flags().IntVar(&sshPort, "ssh-port", 22, "The port on which to connect for ssh")
+	command.Flags().BoolVar(&show, "show", false, "Just show the generated config instead of deploying Consul")
 
 	command.Flags().StringVar(&version, "version", "", "Version of Consul to install, default to latest available")
 	command.Flags().BoolVar(&server, "server", false, "Consul: switches agent to server mode. (see Consul documentation for more info)")
@@ -72,6 +74,13 @@ func InstallConsulCommand() *cobra.Command {
 			return fmt.Errorf("ca-file, cert-file and key-file are all required when enabling tls, at least on of them is missing")
 		}
 
+		consulConfig := config.NewConsulConfiguration(datacenter, bind, advertise, client, server, boostrapExpect, retryJoin, encrypt, enableTLS, enableACL, agentToken, enableConnect)
+
+		if show {
+			fmt.Println(consulConfig)
+			return nil
+		}
+
 		if len(version) == 0 {
 			updateParams := &checkpoint.CheckParams{
 				Product: "consul",
@@ -87,8 +96,6 @@ func InstallConsulCommand() *cobra.Command {
 
 			version = check.CurrentVersion
 		}
-
-		consulConfig := config.NewConsulConfiguration(datacenter, bind, advertise, client, server, boostrapExpect, retryJoin, encrypt, enableTLS, enableACL, agentToken, enableConnect)
 
 		fmt.Println("Public IP: " + ip.String())
 
