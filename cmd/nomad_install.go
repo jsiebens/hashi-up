@@ -48,7 +48,7 @@ func InstallNomadCommand() *cobra.Command {
 	command.Flags().StringVar(&version, "version", "", "Version of Nomad to install, default to latest available")
 	command.Flags().BoolVar(&server, "server", false, "Nomad: enables the server mode of the agent. (see Nomad documentation for more info)")
 	command.Flags().BoolVar(&client, "client", false, "Nomad: enables the client mode of the agent. (see Nomad documentation for more info)")
-	command.Flags().StringVar(&datacenter, "dc", "dc1", "Nomad: specifies the data center of the local agent. (see Nomad documentation for more info)")
+	command.Flags().StringVar(&datacenter, "datacenter", "dc1", "Nomad: specifies the data center of the local agent. (see Nomad documentation for more info)")
 	command.Flags().StringVar(&address, "address", "", "Nomad: the address the agent will bind to for all of its various network services. (see Nomad documentation for more info)")
 	command.Flags().StringVar(&advertise, "advertise", "", "Nomad: the address the agent will advertise to for all of its various network services. (see Nomad documentation for more info)")
 	command.Flags().Int64Var(&bootstrapExpect, "bootstrap-expect", 1, "Nomad: sets server to expect bootstrap mode. (see Nomad documentation for more info)")

@@ -49,7 +49,7 @@ func InstallConsulCommand() *cobra.Command {
 
 	command.Flags().StringVar(&version, "version", "", "Version of Consul to install, default to latest available")
 	command.Flags().BoolVar(&server, "server", false, "Consul: switches agent to server mode. (see Consul documentation for more info)")
-	command.Flags().StringVar(&datacenter, "dc", "dc1", "Consul: specifies the data center of the local agent. (see Consul documentation for more info)")
+	command.Flags().StringVar(&datacenter, "datacenter", "dc1", "Consul: specifies the data center of the local agent. (see Consul documentation for more info)")
 	command.Flags().StringVar(&bind, "bind", "", "Consul: sets the bind address for cluster communication. (see Consul documentation for more info)")
 	command.Flags().StringVar(&advertise, "advertise", "", "Consul: sets the advertise address to use. (see Consul documentation for more info)")
 	command.Flags().StringVar(&client, "client", "", "Consul: sets the address to bind for client access. (see Consul documentation for more info)")
