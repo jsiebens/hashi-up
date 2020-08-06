@@ -31,6 +31,7 @@ func InstallConsulCommand() *cobra.Command {
 	var caFile string
 	var certFile string
 	var keyFile string
+	var enableConnect bool
 	var enableACL bool
 	var agentToken string
 
@@ -56,6 +57,7 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().StringVar(&caFile, "ca-file", "", "Consul: the certificate authority used to check the authenticity of client and server connections. (see Consul documentation for more info)")
 	command.Flags().StringVar(&certFile, "cert-file", "", "Consul: the certificate to verify the agent's authenticity. (see Consul documentation for more info)")
 	command.Flags().StringVar(&keyFile, "key-file", "", "Consul: the key used with the certificate to verify the agent's authenticity. (see Consul documentation for more info)")
+	command.Flags().BoolVar(&enableConnect, "connect", false, "Consul: enables the Connect feature on the agent. (see Consul documentation for more info)")
 	command.Flags().BoolVar(&enableACL, "acl", false, "Consul: enables Consul ACL system. (see Consul documentation for more info)")
 	command.Flags().StringVar(&agentToken, "agent-token", "", "Consul: the token that the agent will use for internal agent operations.. (see Consul documentation for more info)")
 
@@ -86,7 +88,7 @@ func InstallConsulCommand() *cobra.Command {
 			version = check.CurrentVersion
 		}
 
-		consulConfig := config.NewConsulConfiguration(datacenter, bind, advertise, client, server, boostrapExpect, retryJoin, encrypt, enableTLS, enableACL, agentToken)
+		consulConfig := config.NewConsulConfiguration(datacenter, bind, advertise, client, server, boostrapExpect, retryJoin, encrypt, enableTLS, enableACL, agentToken, enableConnect)
 
 		fmt.Println("Public IP: " + ip.String())
 

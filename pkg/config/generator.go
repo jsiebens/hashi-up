@@ -16,7 +16,8 @@ func NewConsulConfiguration(
 	encrypt string,
 	enableTLS bool,
 	enableACL bool,
-	agentToken string) string {
+	agentToken string,
+	enableConnect bool) string {
 
 	f := hclwrite.NewEmptyFile()
 	rootBody := f.Body()
@@ -38,6 +39,11 @@ func NewConsulConfiguration(
 
 	if len(retryJoin) != 0 {
 		rootBody.SetAttributeValue("retry_join", cty.ListVal(transform(retryJoin)))
+	}
+
+	if enableConnect {
+		portsBlock := rootBody.AppendNewBlock("ports", []string{})
+		portsBlock.Body().SetAttributeValue("grpc", cty.NumberUIntVal(8502))
 	}
 
 	if server {
@@ -70,6 +76,11 @@ func NewConsulConfiguration(
 			tokensBlock := aclBlock.Body().AppendNewBlock("tokens", []string{})
 			tokensBlock.Body().SetAttributeValue("agent", cty.StringVal(agentToken))
 		}
+	}
+
+	if enableConnect {
+		connectBlock := rootBody.AppendNewBlock("connect", []string{})
+		connectBlock.Body().SetAttributeValue("enabled", cty.BoolVal(true))
 	}
 
 	return string(f.Bytes())
