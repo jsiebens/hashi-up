@@ -194,11 +194,6 @@ hashi-up nomad install --ip $AGENT_1_IP --user ubuntu --client
 hashi-up nomad install --ip $AGENT_2_IP --user ubuntu --client 
 ```
 
-## Security
-
-At the time of writing, `hashi-up` does not have support to enable Gossip Communication encryption, Agent Communication TLS encryption and ACLs.
-So it is not recommended to use this tool the build a cluster for a production-like environment.
-
 ## If your ssh-key is password-protected
 
 If the ssh-key is encrypted the first step is to try to connect to the ssh-agent. If this works, it will be used to connect to the server.
