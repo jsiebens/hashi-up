@@ -1,4 +1,4 @@
-package ssh
+package operator
 
 import (
 	"bytes"
@@ -16,10 +16,6 @@ type SSHOperator struct {
 	conn *ssh.Client
 }
 
-func (s SSHOperator) Close() error {
-	return s.conn.Close()
-}
-
 func NewSSHOperator(address string, config *ssh.ClientConfig) (*SSHOperator, error) {
 	conn, err := ssh.Dial("tcp", address, config)
 	if err != nil {
@@ -33,7 +29,11 @@ func NewSSHOperator(address string, config *ssh.ClientConfig) (*SSHOperator, err
 	return &operator, nil
 }
 
-func (s SSHOperator) Upload(content string, remotePath string, permissions string) error {
+func (s SSHOperator) Close() error {
+	return s.conn.Close()
+}
+
+func (s SSHOperator) Upload(content string, remotePath string, mode string) error {
 	sess, err := s.conn.NewSession()
 	if err != nil {
 		return err
@@ -48,19 +48,19 @@ func (s SSHOperator) Upload(content string, remotePath string, permissions strin
 		RemoteBinary: "scp",
 	}
 
-	err = client.CopyFile(strings.NewReader(content), remotePath, permissions)
+	err = client.CopyFile(strings.NewReader(content), remotePath, mode)
 
 	return err
 }
 
-func (s SSHOperator) UploadFile(path string, remotePath string, permissions string) error {
+func (s SSHOperator) UploadFile(path string, remotePath string, mode string) error {
 
 	file, err := os.Open(path)
 
 	if err != nil {
 		return err
 	}
-	
+
 	defer file.Close()
 
 	sess, err := s.conn.NewSession()
@@ -77,7 +77,7 @@ func (s SSHOperator) UploadFile(path string, remotePath string, permissions stri
 		RemoteBinary: "scp",
 	}
 
-	err = client.CopyFromFile(*file, remotePath, permissions)
+	err = client.CopyFromFile(*file, remotePath, mode)
 
 	return err
 }
@@ -130,9 +130,4 @@ func (s SSHOperator) Execute(command string) (CommandRes, error) {
 		StdErr: errorOutput.Bytes(),
 		StdOut: output.Bytes(),
 	}, nil
-}
-
-type CommandRes struct {
-	StdOut []byte
-	StdErr []byte
 }

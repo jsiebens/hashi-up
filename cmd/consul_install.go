@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"github.com/hashicorp/go-checkpoint"
 	"github.com/jsiebens/hashi-up/pkg/config"
-	operator "github.com/jsiebens/hashi-up/pkg/operator"
+	"github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/thanhpk/randstr"
-	"golang.org/x/crypto/ssh"
 	"net"
 )
 
@@ -18,6 +17,7 @@ func InstallConsulCommand() *cobra.Command {
 	var user string
 	var sshKey string
 	var sshPort int
+	var local bool
 	var show bool
 
 	var version string
@@ -45,6 +45,7 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().StringVar(&user, "user", "root", "Username for SSH login")
 	command.Flags().StringVar(&sshKey, "ssh-key", "~/.ssh/id_rsa", "The ssh key to use for remote login")
 	command.Flags().IntVar(&sshPort, "ssh-port", 22, "The port on which to connect for ssh")
+	command.Flags().BoolVar(&local, "local", false, "Running the installation locally, without ssh")
 	command.Flags().BoolVar(&show, "show", false, "Just show the generated config instead of deploying Consul")
 
 	command.Flags().StringVar(&version, "version", "", "Version of Consul to install, default to latest available")
@@ -97,81 +98,61 @@ func InstallConsulCommand() *cobra.Command {
 			version = check.CurrentVersion
 		}
 
-		fmt.Println("Public IP: " + ip.String())
+		callback := func(op operator.CommandOperator) error {
+			dir := "/tmp/consul-installation." + randstr.String(6)
 
-		sshKeyPath := expandPath(sshKey)
-		fmt.Printf("ssh -i %s -p %d %s@%s\n", sshKeyPath, sshPort, user, ip.String())
+			defer op.Execute("rm -rf " + dir)
 
-		authMethod, closeSSHAgent, err := loadPublickey(sshKeyPath)
-		if err != nil {
-			return errors.Wrapf(err, "unable to load the ssh key with path %q", sshKeyPath)
-		}
-
-		defer closeSSHAgent()
-
-		config := &ssh.ClientConfig{
-			User: user,
-			Auth: []ssh.AuthMethod{
-				authMethod,
-			},
-			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		}
-
-		address := fmt.Sprintf("%s:%d", ip.String(), sshPort)
-		operator, err := operator.NewSSHOperator(address, config)
-
-		if err != nil {
-			return errors.Wrapf(err, "unable to connect to %s over ssh", address)
-		}
-
-		dir := "/tmp/consul-installation." + randstr.String(6)
-
-		defer operator.Close()
-		defer operator.Execute("rm -rf " + dir)
-
-		_, err = operator.Execute("mkdir " + dir)
-		if err != nil {
-			return fmt.Errorf("error received during installation: %s", err)
-		}
-
-		if enableTLS {
-			err = operator.UploadFile(caFile, dir+"/consul-agent-ca.pem", "0640")
+			_, err := op.Execute("mkdir " + dir)
 			if err != nil {
-				return fmt.Errorf("error received during upload consul ca file: %s", err)
+				return fmt.Errorf("error received during installation: %s", err)
 			}
 
-			err = operator.UploadFile(certFile, dir+"/consul-agent-cert.pem", "0640")
-			if err != nil {
-				return fmt.Errorf("error received during upload consul cert file: %s", err)
+			if enableTLS {
+				err = op.UploadFile(caFile, dir+"/consul-agent-ca.pem", "0640")
+				if err != nil {
+					return fmt.Errorf("error received during upload consul ca file: %s", err)
+				}
+
+				err = op.UploadFile(certFile, dir+"/consul-agent-cert.pem", "0640")
+				if err != nil {
+					return fmt.Errorf("error received during upload consul cert file: %s", err)
+				}
+
+				err = op.UploadFile(keyFile, dir+"/consul-agent-key.pem", "0640")
+				if err != nil {
+					return fmt.Errorf("error received during upload consul key file: %s", err)
+				}
 			}
 
-			err = operator.UploadFile(keyFile, dir+"/consul-agent-key.pem", "0640")
+			err = op.Upload(consulConfig, dir+"/consul.hcl", "0640")
 			if err != nil {
-				return fmt.Errorf("error received during upload consul key file: %s", err)
+				return fmt.Errorf("error received during upload consul configuration: %s", err)
 			}
-		}
 
-		err = operator.Upload(consulConfig, dir+"/consul.hcl", "0640")
-		if err != nil {
-			return fmt.Errorf("error received during upload consul configuration: %s", err)
-		}
-
-		err = operator.Upload(InstallConsulScript, dir+"/install.sh", "0755")
+		err = op.Upload(InstallConsulScript, dir+"/install.sh", "0755")
 		if err != nil {
 			return fmt.Errorf("error received during upload install script: %s", err)
 		}
 
-		var serviceType = "notify"
-		if len(retryJoin) == 0 {
-			serviceType = "exec"
+			var serviceType = "notify"
+			if len(retryJoin) == 0 {
+				serviceType = "exec"
+			}
+
+			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' SERVICE_TYPE='%s' CONSUL_VERSION='%s' sh -\n", dir, dir, serviceType, version))
+			if err != nil {
+				return fmt.Errorf("error received during installation: %s", err)
+			}
+
+			return nil
 		}
 
-		_, err = operator.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' SERVICE_TYPE='%s' CONSUL_VERSION='%s' sh -\n", dir, dir, serviceType, version))
-		if err != nil {
-			return fmt.Errorf("error received during installation: %s", err)
+		if local {
+			return operator.ExecuteLocal(callback)
+		} else {
+			return operator.ExecuteRemote(ip, user, sshKey, sshPort, callback)
 		}
-
-		return nil
 	}
 
 	return command
