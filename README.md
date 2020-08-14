@@ -150,7 +150,7 @@ Prepare, for example, 3 nodes and let's say the have the following ip addresses:
 - 192.168.0.101
 - 192.168.0.102
 
-With `hashi-up` it is quite easy to install 3 Consul servers which will form a cluster:
+With `hashi-up` it is quite easy to install 3 Nomad servers which will form a cluster:
 
 ```sh
 export SERVER_1_IP=192.168.0.100
