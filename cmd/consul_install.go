@@ -249,12 +249,12 @@ install_dependencies() {
 }
 
 download_and_install() {
-  if [ -x "${BIN_DIR}/consul" ]; then
+  if [ -x "${BIN_DIR}/consul" ] && [ "$(${BIN_DIR}/consul version | grep Consul | cut -d' ' -f2)" = "v${CONSUL_VERSION}" ]; then
     info "Consul binary already installed in ${BIN_DIR}, skipping downloading and installing binary"
   else
     info "Downloading and unpacking consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"
 	curl -o "$TMP_DIR/consul.zip" -sfL "https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"
-    $SUDO unzip -qq "$TMP_DIR/consul.zip" -d $BIN_DIR
+    $SUDO unzip -qq -o "$TMP_DIR/consul.zip" -d $BIN_DIR
   fi
 }
 

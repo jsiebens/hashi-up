@@ -244,12 +244,12 @@ install_dependencies() {
 }
 
 download_and_install() {
-  if [ -x "${BIN_DIR}/nomad" ]; then
+  if [ -x "${BIN_DIR}/nomad" ] && [ "$(${BIN_DIR}/nomad version | grep Nomad | cut -d' ' -f2)" = "v${NOMAD_VERSION}" ]; then
     info "Nomad binary already installed in ${BIN_DIR}, skipping downloading and installing binary"
   else
     info "Downloading and unpacking nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip"
 	curl -o "$TMP_DIR/nomad.zip" -sfL "https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip"
-    $SUDO unzip -qq "$TMP_DIR/nomad.zip" -d $BIN_DIR
+    $SUDO unzip -qq -o "$TMP_DIR/nomad.zip" -d $BIN_DIR
   fi
 }
 
