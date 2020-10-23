@@ -73,28 +73,36 @@ has_apt_get() {
 }
 
 install_dependencies() {
-  if ! [ -x "$(command -v unzip)" ] || ! [ -x "$(command -v curl)" ]; then
-    if $(has_apt_get); then
-      $SUDO apt-get update -y
-      $SUDO apt-get install -y curl unzip
-    elif $(has_yum); then
-      $SUDO yum update -y
-      $SUDO yum install -y curl unzip
-    else
-      fatal "Could not find apt-get or yum. Cannot install dependencies on this OS."
-      exit 1
+  if [ ! -x "${TMP_DIR}/vault" ]; then
+    if ! [ -x "$(command -v unzip)" ] || ! [ -x "$(command -v curl)" ]; then
+      if $(has_apt_get); then
+        $SUDO apt-get update -y
+        $SUDO apt-get install -y curl unzip
+      elif $(has_yum); then
+        $SUDO yum update -y
+        $SUDO yum install -y curl unzip
+      else
+        fatal "Could not find apt-get or yum. Cannot install dependencies on this OS."
+        exit 1
+      fi
     fi
   fi
 }
 
 download_and_install() {
-  if [ -x "${BIN_DIR}/vault" ] && [ "$(${BIN_DIR}/vault version | grep Vault | cut -d' ' -f2)" = "v${VAULT_VERSION}" ]; then
-    info "Vault binary already installed in ${BIN_DIR}, skipping downloading and installing binary"
-  else
-    info "Downloading and unpacking vault_${VAULT_VERSION}_linux_${SUFFIX}.zip"
-    curl -o "$TMP_DIR/vault.zip" -sfL "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_${SUFFIX}.zip"
+  if [ -f "${TMP_DIR}/vault.zip" ]; then
+    info "Installing uploaded Vault package"
     $SUDO unzip -qq -o "$TMP_DIR/vault.zip" -d $BIN_DIR
     $SUDO setcap cap_ipc_lock=+ep "${BIN_DIR}/vault"
+  else
+    if [ -x "${BIN_DIR}/vault" ] && [ "$(${BIN_DIR}/vault version | grep Vault | cut -d' ' -f2)" = "v${VAULT_VERSION}" ]; then
+      info "Vault binary already installed in ${BIN_DIR}, skipping downloading and installing binary"
+    else
+      info "Downloading and unpacking vault_${VAULT_VERSION}_linux_${SUFFIX}.zip"
+      curl -o "$TMP_DIR/vault.zip" -sfL "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_${SUFFIX}.zip"
+      $SUDO unzip -qq -o "$TMP_DIR/vault.zip" -d $BIN_DIR
+      $SUDO setcap cap_ipc_lock=+ep "${BIN_DIR}/vault"
+    fi
   fi
 }
 

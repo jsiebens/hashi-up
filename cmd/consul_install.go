@@ -20,6 +20,7 @@ func InstallConsulCommand() *cobra.Command {
 	var sshPort int
 	var local bool
 	var show bool
+	var binary string
 
 	var version string
 	var datacenter string
@@ -48,6 +49,7 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().IntVar(&sshPort, "ssh-port", 22, "The port on which to connect for ssh")
 	command.Flags().BoolVar(&local, "local", false, "Running the installation locally, without ssh")
 	command.Flags().BoolVar(&show, "show", false, "Just show the generated config instead of deploying Consul")
+	command.Flags().StringVar(&binary, "package", "", "Upload and use this Consul package instead of downloading")
 
 	command.Flags().StringVar(&version, "version", "", "Version of Consul to install, default to latest available")
 	command.Flags().BoolVar(&server, "server", false, "Consul: switches agent to server mode. (see Consul documentation for more info)")
@@ -87,7 +89,7 @@ func InstallConsulCommand() *cobra.Command {
 			return nil
 		}
 
-		if len(version) == 0 {
+		if len(binary) == 0 && len(version) == 0 {
 			updateParams := &checkpoint.CheckParams{
 				Product: "consul",
 				Version: "0.0.0",
@@ -113,6 +115,15 @@ func InstallConsulCommand() *cobra.Command {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
 
+			if len(binary) != 0 {
+				fmt.Println("Uploading Consul package...")
+				err = op.UploadFile(binary, dir+"/consul.zip", "0640")
+				if err != nil {
+					return fmt.Errorf("error received during upload Consul package: %s", err)
+				}
+			}
+
+			fmt.Println("Uploading Consul configuration and certificates...")
 			if enableTLS {
 				err = op.UploadFile(caFile, dir+"/consul-agent-ca.pem", "0640")
 				if err != nil {
@@ -153,6 +164,7 @@ func InstallConsulCommand() *cobra.Command {
 				serviceType = "exec"
 			}
 
+			fmt.Println("Installing Consul...")
 			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' SERVICE_TYPE='%s' CONSUL_VERSION='%s' sh -\n", dir, dir, serviceType, version))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)

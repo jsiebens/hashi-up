@@ -73,27 +73,34 @@ has_apt_get() {
 }
 
 install_dependencies() {
-  if ! [ -x "$(command -v unzip)" ] || ! [ -x "$(command -v curl)" ]; then
-    if $(has_apt_get); then
-      $SUDO apt-get update -y
-      $SUDO apt-get install -y curl unzip
-    elif $(has_yum); then
-      $SUDO yum update -y
-      $SUDO yum install -y curl unzip
-    else
-      fatal "Could not find apt-get or yum. Cannot install dependencies on this OS."
-      exit 1
+  if [ ! -x "${TMP_DIR}/nomad" ]; then
+    if ! [ -x "$(command -v unzip)" ] || ! [ -x "$(command -v curl)" ]; then
+      if $(has_apt_get); then
+        $SUDO apt-get update -y
+        $SUDO apt-get install -y curl unzip
+      elif $(has_yum); then
+        $SUDO yum update -y
+        $SUDO yum install -y curl unzip
+      else
+        fatal "Could not find apt-get or yum. Cannot install dependencies on this OS."
+        exit 1
+      fi
     fi
   fi
 }
 
 download_and_install() {
-  if [ -x "${BIN_DIR}/nomad" ] && [ "$(${BIN_DIR}/nomad version | grep Nomad | cut -d' ' -f2)" = "v${NOMAD_VERSION}" ]; then
-    info "Nomad binary already installed in ${BIN_DIR}, skipping downloading and installing binary"
-  else
-    info "Downloading and unpacking nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip"
-    curl -o "$TMP_DIR/nomad.zip" -sfL "https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip"
+  if [ -f "${TMP_DIR}/nomad.zip" ]; then
+    info "Installing uploaded Nomad package"
     $SUDO unzip -qq -o "$TMP_DIR/nomad.zip" -d $BIN_DIR
+  else
+    if [ -x "${BIN_DIR}/nomad" ] && [ "$(${BIN_DIR}/nomad version | grep Nomad | cut -d' ' -f2)" = "v${NOMAD_VERSION}" ]; then
+      info "Nomad binary already installed in ${BIN_DIR}, skipping downloading and installing binary"
+    else
+      info "Downloading and unpacking nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip"
+      curl -o "$TMP_DIR/nomad.zip" -sfL "https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip"
+      $SUDO unzip -qq -o "$TMP_DIR/nomad.zip" -d $BIN_DIR
+    fi
   fi
 }
 

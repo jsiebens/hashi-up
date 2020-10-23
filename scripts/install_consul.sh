@@ -73,27 +73,34 @@ has_apt_get() {
 }
 
 install_dependencies() {
-  if ! [ -x "$(command -v unzip)" ] || ! [ -x "$(command -v curl)" ]; then
-    if $(has_apt_get); then
-      $SUDO apt-get update -y
-      $SUDO apt-get install -y curl unzip
-    elif $(has_yum); then
-      $SUDO yum update -y
-      $SUDO yum install -y curl unzip
-    else
-      fatal "Could not find apt-get or yum. Cannot install dependencies on this OS."
-      exit 1
+  if [ ! -x "${TMP_DIR}/consul" ]; then
+    if ! [ -x "$(command -v unzip)" ] || ! [ -x "$(command -v curl)" ]; then
+      if $(has_apt_get); then
+        $SUDO apt-get update -y
+        $SUDO apt-get install -y curl unzip
+      elif $(has_yum); then
+        $SUDO yum update -y
+        $SUDO yum install -y curl unzip
+      else
+        fatal "Could not find apt-get or yum. Cannot install dependencies on this OS."
+        exit 1
+      fi
     fi
   fi
 }
 
 download_and_install() {
-  if [ -x "${BIN_DIR}/consul" ] && [ "$(${BIN_DIR}/consul version | grep Consul | cut -d' ' -f2)" = "v${CONSUL_VERSION}" ]; then
-    info "Consul binary already installed in ${BIN_DIR}, skipping downloading and installing binary"
-  else
-    info "Downloading and unpacking consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"
-    curl -o "$TMP_DIR/consul.zip" -sfL "https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"
+  if [ -f "${TMP_DIR}/consul.zip" ]; then
+    info "Installing uploaded Consul package"
     $SUDO unzip -qq -o "$TMP_DIR/consul.zip" -d $BIN_DIR
+  else
+    if [ -x "${BIN_DIR}/consul" ] && [ "$(${BIN_DIR}/consul version | grep Consul | cut -d' ' -f2)" = "v${CONSUL_VERSION}" ]; then
+      info "Consul binary already installed in ${BIN_DIR}, skipping downloading and installing binary"
+    else
+      info "Downloading and unpacking consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"
+      curl -o "$TMP_DIR/consul.zip" -sfL "https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"
+      $SUDO unzip -qq -o "$TMP_DIR/consul.zip" -d $BIN_DIR
+    fi
   fi
 }
 

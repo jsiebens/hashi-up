@@ -18,6 +18,8 @@ func InstallVaultCommand() *cobra.Command {
 	var sshPort int
 	var local bool
 	var show bool
+	var binary string
+
 	var certFile string
 	var keyFile string
 	var address []string
@@ -44,6 +46,7 @@ func InstallVaultCommand() *cobra.Command {
 	command.Flags().IntVar(&sshPort, "ssh-port", 22, "The port on which to connect for ssh")
 	command.Flags().BoolVar(&local, "local", false, "Running the installation locally, without ssh")
 	command.Flags().BoolVar(&show, "show", false, "Just show the generated config instead of deploying Vault")
+	command.Flags().StringVar(&binary, "package", "", "Upload and use this Vault package instead of downloading")
 
 	command.Flags().StringVar(&version, "version", "", "Version of Vault to install")
 	command.Flags().StringVar(&certFile, "cert-file", "", "Vault: the certificate for TLS. (see Vault documentation for more info)")
@@ -83,7 +86,7 @@ func InstallVaultCommand() *cobra.Command {
 			return nil
 		}
 
-		if len(version) == 0 {
+		if len(binary) == 0 && len(version) == 0 {
 			return fmt.Errorf("unable to get latest version number, define a version manually with the --version flag")
 		}
 
@@ -97,6 +100,15 @@ func InstallVaultCommand() *cobra.Command {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
 
+			if len(binary) != 0 {
+				fmt.Println("Uploading Vault package...")
+				err = op.UploadFile(binary, dir+"/vault.zip", "0644")
+				if err != nil {
+					return fmt.Errorf("error received during upload Vault package: %s", err)
+				}
+			}
+
+			fmt.Println("Uploading Vault configuration and certificates...")
 			if enableTLS {
 				err = op.UploadFile(certFile, dir+"/vault-cert.pem", "0640")
 				if err != nil {
@@ -108,6 +120,7 @@ func InstallVaultCommand() *cobra.Command {
 					return fmt.Errorf("error received during upload vault key file: %s", err)
 				}
 			}
+
 			if enableConsulTLS {
 				err = op.UploadFile(consulCaFile, dir+"/consul-ca.pem", "0640")
 				if err != nil {
@@ -141,6 +154,7 @@ func InstallVaultCommand() *cobra.Command {
 				return fmt.Errorf("error received during upload install script: %s", err)
 			}
 
+			fmt.Println("Installing Vault...")
 			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' VAULT_VERSION='%s' sh -\n", dir, dir, version))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
