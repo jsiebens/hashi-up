@@ -3,6 +3,7 @@ package operator
 import (
 	"bytes"
 	"github.com/bramvdbogaerde/go-scp"
+	"github.com/markbates/pkger"
 	"io"
 	"os"
 	"strings"
@@ -49,6 +50,34 @@ func (s SSHOperator) Upload(content string, remotePath string, mode string) erro
 	}
 
 	err = client.CopyFile(strings.NewReader(content), remotePath, mode)
+
+	return err
+}
+
+func (s SSHOperator) UploadEmbeddedFile(path string, remotePath string, mode string) error {
+	file, err := pkger.Open(path)
+
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	sess, err := s.conn.NewSession()
+	if err != nil {
+		return err
+	}
+
+	defer sess.Close()
+
+	client := scp.Client{
+		Session:      sess,
+		Conn:         s.conn,
+		Timeout:      time.Minute,
+		RemoteBinary: "scp",
+	}
+
+	err = client.CopyFile(file, remotePath, mode)
 
 	return err
 }

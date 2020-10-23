@@ -24,6 +24,8 @@ type CommandOperator interface {
 	Upload(content string, remotePath string, mode string) error
 
 	UploadFile(path string, remotePath string, mode string) error
+
+	UploadEmbeddedFile(path string, remotePath string, mode string) error
 }
 
 type Callback func(CommandOperator) error
