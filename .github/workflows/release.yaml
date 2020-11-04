@@ -1,0 +1,25 @@
+name: release
+
+on:
+  release:
+    types: [ created ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ^1.13
+
+      - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 1
+
+      - run: make dist hash
+
+      - uses: skx/github-action-publish-binaries@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: "./dist/*"
