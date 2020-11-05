@@ -28,11 +28,20 @@ func main() {
 		},
 	}
 
+	var vault = &cobra.Command{
+		Use: "vault",
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
+		},
+	}
+
 	nomad.AddCommand(cmd.InstallNomadCommand())
 	consul.AddCommand(cmd.InstallConsulCommand())
+	vault.AddCommand(cmd.InstallVaultCommand())
 
 	rootCmd.AddCommand(nomad)
 	rootCmd.AddCommand(consul)
+	rootCmd.AddCommand(vault)
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)

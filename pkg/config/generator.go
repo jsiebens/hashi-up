@@ -160,6 +160,60 @@ func NewNomadConfiguration(
 	return string(f.Bytes())
 }
 
+func NewVaultConfiguration(
+	apiAddr string,
+	clusterAddr string,
+	address []string,
+	enableTLS bool,
+	consulAddr string,
+	consulPath string,
+	consulToken string,
+	enableConsulTLS bool) string {
+
+	f := hclwrite.NewEmptyFile()
+	rootBody := f.Body()
+
+	rootBody.SetAttributeValue("ui", cty.BoolVal(true))
+
+	storageBlock := rootBody.AppendNewBlock("storage", []string{"consul"})
+	storageBlock.Body().SetAttributeValue("address", cty.StringVal(consulAddr))
+	storageBlock.Body().SetAttributeValue("path", cty.StringVal(consulPath))
+
+	if len(consulToken) != 0 {
+		storageBlock.Body().SetAttributeValue("token", cty.StringVal(consulToken))
+	}
+
+	if enableConsulTLS {
+		storageBlock.Body().SetAttributeValue("scheme", cty.StringVal("https"))
+		storageBlock.Body().SetAttributeValue("tls_ca_file", cty.StringVal("/etc/vault.d/consul-ca.pem"))
+		storageBlock.Body().SetAttributeValue("tls_cert_file", cty.StringVal("/etc/vault.d/consul-cert.pem"))
+		storageBlock.Body().SetAttributeValue("tls_key_file", cty.StringVal("/etc/vault.d/consul-key.pem"))
+	}
+
+	if len(apiAddr) != 0 {
+		rootBody.SetAttributeValue("api_addr", cty.StringVal(apiAddr))
+	}
+
+	if len(clusterAddr) != 0 {
+		rootBody.SetAttributeValue("cluster_addr", cty.StringVal(clusterAddr))
+	}
+
+	for _, a := range address {
+		listenerBlock := rootBody.AppendNewBlock("listener", []string{"tcp"})
+		listenerBlock.Body().SetAttributeValue("address", cty.StringVal(a))
+
+		if enableTLS {
+			listenerBlock.Body().SetAttributeValue("tls_disable", cty.BoolVal(false))
+			listenerBlock.Body().SetAttributeValue("tls_cert_file", cty.StringVal("/etc/vault.d/vault-cert.pem"))
+			listenerBlock.Body().SetAttributeValue("tls_key_file", cty.StringVal("/etc/vault.d/vault-key.pem"))
+		} else {
+			listenerBlock.Body().SetAttributeValue("tls_disable", cty.BoolVal(true))
+		}
+	}
+
+	return string(f.Bytes())
+}
+
 func transform(vs []string) []cty.Value {
 	vsm := make([]cty.Value, len(vs))
 	for i, v := range vs {
