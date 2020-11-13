@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"github.com/hashicorp/go-checkpoint"
 	"github.com/jsiebens/hashi-up/pkg/config"
-	"github.com/jsiebens/hashi-up/pkg/operator"
+	"github.com/jsiebens/operator"
+	"github.com/markbates/pkger"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/thanhpk/randstr"
-	"net"
+	"strings"
 )
 
 func InstallNomadCommand() *cobra.Command {
 
-	var ip net.IP
+	var ip string
 	var user string
 	var sshKey string
 	var sshPort int
@@ -39,9 +40,9 @@ func InstallNomadCommand() *cobra.Command {
 		SilenceUsage: true,
 	}
 
-	command.Flags().IPVar(&ip, "ip", net.ParseIP("127.0.0.1"), "Public IP of node")
+	command.Flags().StringVar(&ip, "ip", "127.0.0.1", "Public IP of node")
 	command.Flags().StringVar(&user, "user", "root", "Username for SSH login")
-	command.Flags().StringVar(&sshKey, "ssh-key", "~/.ssh/id_rsa", "The ssh key to use for remote login")
+	command.Flags().StringVar(&sshKey, "ssh-key", "", "The ssh key to use for remote login")
 	command.Flags().IntVar(&sshPort, "ssh-port", 22, "The port on which to connect for ssh")
 	command.Flags().BoolVar(&local, "local", false, "Running the installation locally, without ssh")
 	command.Flags().BoolVar(&show, "show", false, "Just show the generated config instead of deploying Consul")
@@ -125,12 +126,20 @@ func InstallNomadCommand() *cobra.Command {
 				}
 			}
 
-			err = op.Upload(nomadConfig, dir+"/nomad.hcl", "0640")
+			err = op.Upload(strings.NewReader(nomadConfig), dir+"/nomad.hcl", "0640")
 			if err != nil {
 				return fmt.Errorf("error received during upload nomad configuration: %s", err)
 			}
 
-			err = op.UploadEmbeddedFile("/scripts/install_nomad.sh", dir+"/install.sh", "0755")
+			installScript, err := pkger.Open("/scripts/install_nomad.sh")
+
+			if err != nil {
+				return err
+			}
+
+			defer installScript.Close()
+
+			err = op.Upload(installScript, dir+"/install.sh", "0755")
 			if err != nil {
 				return fmt.Errorf("error received during upload install script: %s", err)
 			}
@@ -146,7 +155,11 @@ func InstallNomadCommand() *cobra.Command {
 		if local {
 			return operator.ExecuteLocal(callback)
 		} else {
-			return operator.ExecuteRemote(ip, user, sshKey, sshPort, callback)
+			if sshKey == "" {
+				return operator.ExecuteRemote(ip, sshPort, user, callback)
+			} else {
+				return operator.ExecuteRemoteWithPrivateKey(ip, sshPort, user, sshKey, callback)
+			}
 		}
 	}
 
