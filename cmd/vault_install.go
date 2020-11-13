@@ -12,7 +12,7 @@ import (
 
 func InstallVaultCommand() *cobra.Command {
 
-	var ip string
+	var host string
 	var user string
 	var sshKey string
 	var sshPort int
@@ -38,7 +38,7 @@ func InstallVaultCommand() *cobra.Command {
 		SilenceUsage: true,
 	}
 
-	command.Flags().StringVar(&ip, "ip", "127.0.0.1", "Public IP of node")
+	command.Flags().StringVar(&host, "host", "", "Remote target host")
 	command.Flags().StringVar(&user, "user", "root", "Username for SSH login")
 	command.Flags().StringVar(&sshKey, "ssh-key", "", "The ssh key to use for remote login")
 	command.Flags().IntVar(&sshPort, "ssh-port", 22, "The port on which to connect for ssh")
@@ -61,6 +61,10 @@ func InstallVaultCommand() *cobra.Command {
 	command.Flags().StringVar(&consulKeyFile, "consul-tls-key-file", "", "Vault: the path to the private key for Consul communication. (see Vault documentation for more info)")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
+		if !show && !local && len(host) == 0 {
+			return fmt.Errorf("required host flag is missing")
+		}
+
 		var enableTLS = false
 		var enableConsulTLS = false
 
@@ -149,9 +153,9 @@ func InstallVaultCommand() *cobra.Command {
 			return operator.ExecuteLocal(callback)
 		} else {
 			if sshKey == "" {
-				return operator.ExecuteRemote(ip, sshPort, user, callback)
+				return operator.ExecuteRemote(host, sshPort, user, callback)
 			} else {
-				return operator.ExecuteRemoteWithPrivateKey(ip, sshPort, user, sshKey, callback)
+				return operator.ExecuteRemoteWithPrivateKey(host, sshPort, user, sshKey, callback)
 			}
 		}
 	}
