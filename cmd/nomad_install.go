@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/go-checkpoint"
 	"github.com/jsiebens/hashi-up/pkg/config"
-	"github.com/jsiebens/operator"
+	"github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/markbates/pkger"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -159,11 +159,7 @@ func InstallNomadCommand() *cobra.Command {
 		if local {
 			return operator.ExecuteLocal(callback)
 		} else {
-			if sshKey == "" {
-				return operator.ExecuteRemote(host, sshPort, user, callback)
-			} else {
-				return operator.ExecuteRemoteWithPrivateKey(host, sshPort, user, sshKey, callback)
-			}
+			return operator.ExecuteRemote(host, sshPort, user, sshKey, callback)
 		}
 	}
 
