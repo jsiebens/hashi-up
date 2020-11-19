@@ -14,11 +14,6 @@ import (
 
 func InstallConsulCommand() *cobra.Command {
 
-	var host string
-	var user string
-	var sshKey string
-	var sshPort int
-	var local bool
 	var show bool
 	var binary string
 
@@ -43,11 +38,6 @@ func InstallConsulCommand() *cobra.Command {
 		SilenceUsage: true,
 	}
 
-	command.Flags().StringVar(&host, "host", "", "Remote target host")
-	command.Flags().StringVar(&user, "user", "root", "Username for SSH login")
-	command.Flags().StringVar(&sshKey, "ssh-key", "", "The ssh key to use for remote login")
-	command.Flags().IntVar(&sshPort, "ssh-port", 22, "The port on which to connect for ssh")
-	command.Flags().BoolVar(&local, "local", false, "Running the installation locally, without ssh")
 	command.Flags().BoolVar(&show, "show", false, "Just show the generated config instead of deploying Consul")
 	command.Flags().StringVar(&binary, "package", "", "Upload and use this Consul package instead of downloading")
 
@@ -68,8 +58,8 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().StringVar(&agentToken, "agent-token", "", "Consul: the token that the agent will use for internal agent operations.. (see Consul documentation for more info)")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
-		if !show && !local && len(host) == 0 {
-			return fmt.Errorf("required host flag is missing")
+		if !show && !runLocal && len(sshTargetAddr) == 0 {
+			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}
 
 		var enableTLS = false
@@ -173,10 +163,10 @@ func InstallConsulCommand() *cobra.Command {
 			return nil
 		}
 
-		if local {
+		if runLocal {
 			return operator.ExecuteLocal(callback)
 		} else {
-			return operator.ExecuteRemote(host, sshPort, user, sshKey, callback)
+			return operator.ExecuteRemote(sshTargetAddr, sshTargetUser, sshTargetKey, callback)
 		}
 	}
 

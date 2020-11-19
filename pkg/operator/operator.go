@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	"strings"
 )
 
 type CommandRes struct {
@@ -31,7 +32,7 @@ func ExecuteLocal(callback Callback) error {
 	return callback(NewLocalOperator())
 }
 
-func ExecuteRemote(host string, port int, user string, privateKey string, callback Callback) error {
+func ExecuteRemote(host string, user string, privateKey string, callback Callback) error {
 	var method ssh.AuthMethod
 
 	if privateKey == "" {
@@ -79,7 +80,7 @@ func ExecuteRemote(host string, port int, user string, privateKey string, callba
 		}
 	}
 
-	return executeRemote(host, port, user, method, callback)
+	return executeRemote(host, user, method, callback)
 }
 
 func privateKeyUsingSSHAgent(publicKeyPath string) (ssh.AuthMethod, func() error) {
@@ -111,7 +112,18 @@ func privateKeyUsingSSHAgent(publicKeyPath string) (ssh.AuthMethod, func() error
 	return nil, func() error { return nil }
 }
 
-func executeRemote(host string, port int, user string, authMethod ssh.AuthMethod, callback Callback) error {
+func executeRemote(address string, user string, authMethod ssh.AuthMethod, callback Callback) error {
+
+	host, port, err := net.SplitHostPort(address)
+	if err != nil {
+		if strings.Contains(err.Error(), "missing port") {
+			host = address
+			port = "22"
+		} else {
+			return fmt.Errorf("error splitting host/port: %w", err)
+		}
+	}
+
 	config := &ssh.ClientConfig{
 		User: user,
 		Auth: []ssh.AuthMethod{
@@ -119,8 +131,7 @@ func executeRemote(host string, port int, user string, authMethod ssh.AuthMethod
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
-	address := fmt.Sprintf("%s:%d", host, port)
-	operator, err := NewSSHOperator(address, config)
+	operator, err := NewSSHOperator(net.JoinHostPort(host, port), config)
 
 	if err != nil {
 		return errors.Wrapf(err, "unable to connect to %s over ssh", address)

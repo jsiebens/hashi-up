@@ -12,11 +12,6 @@ import (
 
 func InstallVaultCommand() *cobra.Command {
 
-	var host string
-	var user string
-	var sshKey string
-	var sshPort int
-	var local bool
 	var show bool
 	var binary string
 
@@ -40,11 +35,6 @@ func InstallVaultCommand() *cobra.Command {
 		SilenceUsage: true,
 	}
 
-	command.Flags().StringVar(&host, "host", "", "Remote target host")
-	command.Flags().StringVar(&user, "user", "root", "Username for SSH login")
-	command.Flags().StringVar(&sshKey, "ssh-key", "", "The ssh key to use for remote login")
-	command.Flags().IntVar(&sshPort, "ssh-port", 22, "The port on which to connect for ssh")
-	command.Flags().BoolVar(&local, "local", false, "Running the installation locally, without ssh")
 	command.Flags().BoolVar(&show, "show", false, "Just show the generated config instead of deploying Vault")
 	command.Flags().StringVar(&binary, "package", "", "Upload and use this Vault package instead of downloading")
 
@@ -64,8 +54,8 @@ func InstallVaultCommand() *cobra.Command {
 	command.Flags().StringVar(&consulKeyFile, "consul-tls-key-file", "", "Vault: the path to the private key for Consul communication. (see Vault documentation for more info)")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
-		if !show && !local && len(host) == 0 {
-			return fmt.Errorf("required host flag is missing")
+		if !show && !runLocal && len(sshTargetAddr) == 0 {
+			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}
 
 		var enableTLS = false
@@ -163,10 +153,10 @@ func InstallVaultCommand() *cobra.Command {
 			return nil
 		}
 
-		if local {
+		if runLocal {
 			return operator.ExecuteLocal(callback)
 		} else {
-			return operator.ExecuteRemote(host, sshPort, user, sshKey, callback)
+			return operator.ExecuteRemote(sshTargetAddr, sshTargetUser, sshTargetKey, callback)
 		}
 	}
 
