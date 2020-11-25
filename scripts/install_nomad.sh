@@ -22,7 +22,7 @@ setup_env() {
     SUDO=
   fi
 
-  NOMAD_DATA_DIR=/opt/nomad
+  NOMAD_DATA_DIR=/var/lib/nomad
   NOMAD_CONFIG_DIR=/etc/nomad.d
   NOMAD_CONFIG_FILE=/etc/nomad.d/nomad.hcl
   NOMAD_SERVICE_FILE=/etc/systemd/system/nomad.service

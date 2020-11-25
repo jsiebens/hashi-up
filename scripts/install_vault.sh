@@ -22,7 +22,7 @@ setup_env() {
     SUDO=
   fi
 
-  VAULT_DATA_DIR=/opt/vault
+  VAULT_DATA_DIR=/var/lib/vault
   VAULT_CONFIG_DIR=/etc/vault.d
   VAULT_CONFIG_FILE=/etc/vault.d/vault.hcl
   VAULT_SERVICE_FILE=/etc/systemd/system/vault.service
@@ -135,8 +135,8 @@ create_user_and_config() {
     $SUDO cp "${TMP_DIR}/consul-key.pem" /etc/vault.d/consul-key.pem
   fi
 
-  $SUDO chown --recursive vault:vault /opt/vault
-  $SUDO chown --recursive vault:vault /etc/vault.d
+  $SUDO chown --recursive vault:vault ${VAULT_DATA_DIR}
+  $SUDO chown --recursive vault:vault ${VAULT_CONFIG_DIR}
 }
 
 # --- write systemd service file ---
