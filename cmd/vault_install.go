@@ -21,6 +21,8 @@ func InstallVaultCommand() *cobra.Command {
 	var apiAddr string
 	var clusterAddr string
 
+	var storage string
+
 	var consulAddr string
 	var consulPath string
 	var consulToken string
@@ -44,6 +46,8 @@ func InstallVaultCommand() *cobra.Command {
 	command.Flags().StringArrayVar(&address, "address", []string{"0.0.0.0:8200"}, "Vault: the address to bind to for listening. (see Vault documentation for more info)")
 	command.Flags().StringVar(&apiAddr, "api-addr", "", "Vault: the address (full URL) to advertise to other Vault servers in the cluster for client redirection. (see Vault documentation for more info)")
 	command.Flags().StringVar(&clusterAddr, "cluster-addr", "", "Vault: the address to advertise to other Vault servers in the cluster for request forwarding. (see Vault documentation for more info)")
+
+	command.Flags().StringVar(&storage, "storage", "file", "Vault: the type of storage backend. Currently only \"file\" of \"consul\" is supported. (see Vault documentation for more info)")
 
 	command.Flags().StringVar(&consulAddr, "consul-addr", "127.0.0.1:8500", "Vault: the address of the Consul agent to communicate with. (see Vault documentation for more info)")
 	command.Flags().StringVar(&consulPath, "consul-path", "vault/", "Vault: the path in Consul's key-value store where Vault data will be stored. (see Vault documentation for more info)")
@@ -69,7 +73,7 @@ func InstallVaultCommand() *cobra.Command {
 			enableConsulTLS = true
 		}
 
-		vaultConfig := config.NewVaultConfiguration(apiAddr, clusterAddr, address, enableTLS, consulAddr, consulPath, consulToken, enableConsulTLS)
+		vaultConfig := config.NewVaultConfiguration(apiAddr, clusterAddr, address, enableTLS, storage, consulAddr, consulPath, consulToken, enableConsulTLS)
 
 		if show {
 			fmt.Println(vaultConfig)

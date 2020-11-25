@@ -165,6 +165,7 @@ func NewVaultConfiguration(
 	clusterAddr string,
 	address []string,
 	enableTLS bool,
+	storage string,
 	consulAddr string,
 	consulPath string,
 	consulToken string,
@@ -175,19 +176,26 @@ func NewVaultConfiguration(
 
 	rootBody.SetAttributeValue("ui", cty.BoolVal(true))
 
-	storageBlock := rootBody.AppendNewBlock("storage", []string{"consul"})
-	storageBlock.Body().SetAttributeValue("address", cty.StringVal(consulAddr))
-	storageBlock.Body().SetAttributeValue("path", cty.StringVal(consulPath))
+	storageBlock := rootBody.AppendNewBlock("storage", []string{storage})
 
-	if len(consulToken) != 0 {
-		storageBlock.Body().SetAttributeValue("token", cty.StringVal(consulToken))
+	if storage == "file" {
+		storageBlock.Body().SetAttributeValue("path", cty.StringVal("/var/lib/vault"))
 	}
 
-	if enableConsulTLS {
-		storageBlock.Body().SetAttributeValue("scheme", cty.StringVal("https"))
-		storageBlock.Body().SetAttributeValue("tls_ca_file", cty.StringVal("/etc/vault.d/consul-ca.pem"))
-		storageBlock.Body().SetAttributeValue("tls_cert_file", cty.StringVal("/etc/vault.d/consul-cert.pem"))
-		storageBlock.Body().SetAttributeValue("tls_key_file", cty.StringVal("/etc/vault.d/consul-key.pem"))
+	if storage == "consul" {
+		storageBlock.Body().SetAttributeValue("address", cty.StringVal(consulAddr))
+		storageBlock.Body().SetAttributeValue("path", cty.StringVal(consulPath))
+
+		if len(consulToken) != 0 {
+			storageBlock.Body().SetAttributeValue("token", cty.StringVal(consulToken))
+		}
+
+		if enableConsulTLS {
+			storageBlock.Body().SetAttributeValue("scheme", cty.StringVal("https"))
+			storageBlock.Body().SetAttributeValue("tls_ca_file", cty.StringVal("/etc/vault.d/consul-ca.pem"))
+			storageBlock.Body().SetAttributeValue("tls_cert_file", cty.StringVal("/etc/vault.d/consul-cert.pem"))
+			storageBlock.Body().SetAttributeValue("tls_key_file", cty.StringVal("/etc/vault.d/consul-key.pem"))
+		}
 	}
 
 	if len(apiAddr) != 0 {
