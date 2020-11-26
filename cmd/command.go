@@ -17,6 +17,13 @@ func Execute() error {
 		},
 	}
 
+	var certificate = &cobra.Command{
+		Use: "cert",
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
+		},
+	}
+
 	var consul = &cobra.Command{
 		Use: "consul",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -38,10 +45,12 @@ func Execute() error {
 		},
 	}
 
+	certificate.AddCommand(CreateCertificateCommand())
 	nomad.AddCommand(InstallNomadCommand())
 	consul.AddCommand(InstallConsulCommand())
 	vault.AddCommand(InstallVaultCommand())
 
+	rootCmd.AddCommand(certificate)
 	rootCmd.AddCommand(nomad)
 	rootCmd.AddCommand(consul)
 	rootCmd.AddCommand(vault)
