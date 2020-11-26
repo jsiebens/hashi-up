@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"net"
 )
 
 var sshTargetAddr string
@@ -52,10 +51,10 @@ func Execute() error {
 	rootCmd.PersistentFlags().StringVar(&sshTargetKey, "ssh-target-key", "", "The ssh key to use for SSH login")
 	rootCmd.PersistentFlags().BoolVar(&runLocal, "local", false, "Running the installation locally, without ssh")
 
-	rootCmd.PersistentFlags().IP("ip", net.ParseIP("127.0.0.1"), "Public IP of node")
-	rootCmd.PersistentFlags().String("user", "root", "Username for SSH login")
-	rootCmd.PersistentFlags().String("ssh-key", "~/.ssh/id_rsa", "The ssh key to use for remote login")
-	rootCmd.PersistentFlags().Int("ssh-port", 22, "The port on which to connect for ssh")
+	rootCmd.PersistentFlags().String("ip", "", "Public IP of node")
+	rootCmd.PersistentFlags().String("user", "", "Username for SSH login")
+	rootCmd.PersistentFlags().String("ssh-key", "", "The ssh key to use for remote login")
+	rootCmd.PersistentFlags().String("ssh-port", "", "The port on which to connect for ssh")
 
 	rootCmd.PersistentFlags().MarkDeprecated("ip", "use the new flag ssh-target-addr")
 	rootCmd.PersistentFlags().MarkDeprecated("user", "use the new flag ssh-target-user")
