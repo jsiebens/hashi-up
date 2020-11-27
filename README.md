@@ -28,7 +28,7 @@ Imagine the IP was `192.168.0.100` and the username was `ubuntu`, then you would
 
 ```sh
 export IP=192.168.0.100
-hashi-up consul install --ip $IP --user ubuntu --server --client 0.0.0.0
+hashi-up consul install --ssh-target-addr $IP --ssh-target-user ubuntu --server --client 0.0.0.0
 ```
 
 When the command finishes, try to access Consul using the UI at http://192.168.100:8500 or with the cli:
@@ -58,8 +58,8 @@ export SERVER_IP=192.168.0.100
 export AGENT_1_IP=192.168.0.105
 export AGENT_2_IP=192.168.0.106
 
-hashi-up consul install --ip $AGENT_1_IP --user ubuntu --client 0.0.0.0 --retry-join $SERVER_IP
-hashi-up consul install --ip $AGENT_2_IP --user ubuntu --client 0.0.0.0 --retry-join $SERVER_IP
+hashi-up consul install --ssh-target-addr $AGENT_1_IP --ssh-target-user ubuntu --client 0.0.0.0 --retry-join $SERVER_IP
+hashi-up consul install --ssh-target-addr $AGENT_2_IP --ssh-target-user ubuntu --client 0.0.0.0 --retry-join $SERVER_IP
 ```
 
 #### Create a multi-server (HA) setup
@@ -77,9 +77,9 @@ export SERVER_1_IP=192.168.0.100
 export SERVER_2_IP=192.168.0.101
 export SERVER_3_IP=192.168.0.102
 
-hashi-up consul install --ip $SERVER_1_IP --user ubuntu --server --client 0.0.0.0 --bootstrap-expect 3 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
-hashi-up consul install --ip $SERVER_2_IP --user ubuntu --server --client 0.0.0.0 --bootstrap-expect 3 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
-hashi-up consul install --ip $SERVER_3_IP --user ubuntu --server --client 0.0.0.0 --bootstrap-expect 3 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
+hashi-up consul install --ssh-target-addr $SERVER_1_IP --ssh-target-user ubuntu --server --client 0.0.0.0 --bootstrap-expect 3 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
+hashi-up consul install --ssh-target-addr $SERVER_2_IP --ssh-target-user ubuntu --server --client 0.0.0.0 --bootstrap-expect 3 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
+hashi-up consul install --ssh-target-addr $SERVER_3_IP --ssh-target-user ubuntu --server --client 0.0.0.0 --bootstrap-expect 3 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
 ```
 
 And of course, joining client agents is the same as above:
@@ -91,8 +91,8 @@ export SERVER_3_IP=192.168.0.102
 export AGENT_1_IP=192.168.0.105
 export AGENT_2_IP=192.168.0.106
 
-hashi-up consul install --ip $AGENT_1_IP --user ubuntu --client 0.0.0.0 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
-hashi-up consul install --ip $AGENT_2_IP --user ubuntu --client 0.0.0.0 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
+hashi-up consul install --ssh-target-addr $AGENT_1_IP --ssh-target-user ubuntu --client 0.0.0.0 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
+hashi-up consul install --ssh-target-addr $AGENT_2_IP --ssh-target-user ubuntu --client 0.0.0.0 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
 ```
 
 ### Nomad
@@ -107,7 +107,7 @@ Imagine the IP was `192.168.0.100` and the username was `ubuntu`, then you would
 
 ```sh
 export IP=192.168.0.100
-hashi-up nomad install --ip $IP --user ubuntu --server
+hashi-up nomad install --ssh-target-addr $IP --ssh-target-user ubuntu --server
 ```
 
 When the command finishes, try to access Nomad using the UI at http://192.168.100:4646 or with the cli:
@@ -136,8 +136,8 @@ export SERVER_IP=192.168.0.100
 export AGENT_1_IP=192.168.0.105
 export AGENT_2_IP=192.168.0.106
 
-hashi-up nomad install --ip $AGENT_1_IP --user ubuntu --client --retry-join $SERVER_IP
-hashi-up nomad install --ip $AGENT_2_IP --user ubuntu --client --retry-join $SERVER_IP
+hashi-up nomad install --ssh-target-addr $AGENT_1_IP --ssh-target-user ubuntu --client --retry-join $SERVER_IP
+hashi-up nomad install --ssh-target-addr $AGENT_2_IP --ssh-target-user ubuntu --client --retry-join $SERVER_IP
 ```
 
 #### Create a multi-server (HA) setup
@@ -155,9 +155,9 @@ export SERVER_1_IP=192.168.0.100
 export SERVER_2_IP=192.168.0.101
 export SERVER_3_IP=192.168.0.102
 
-hashi-up nomad install --ip $SERVER_1_IP --user ubuntu --server --bootstrap-expect 3 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
-hashi-up nomad install --ip $SERVER_2_IP --user ubuntu --server --bootstrap-expect 3 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
-hashi-up nomad install --ip $SERVER_3_IP --user ubuntu --server --bootstrap-expect 3 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
+hashi-up nomad install --ssh-target-addr $SERVER_1_IP --ssh-target-user ubuntu --server --bootstrap-expect 3 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
+hashi-up nomad install --ssh-target-addr $SERVER_2_IP --ssh-target-user ubuntu --server --bootstrap-expect 3 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
+hashi-up nomad install --ssh-target-addr $SERVER_3_IP --ssh-target-user ubuntu --server --bootstrap-expect 3 --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
 ```
 
 And of course, joining client agents is the same as above:
@@ -169,8 +169,8 @@ export SERVER_3_IP=192.168.0.102
 export AGENT_1_IP=192.168.0.105
 export AGENT_2_IP=192.168.0.106
 
-hashi-up nomad install --ip $AGENT_1_IP --user ubuntu --client --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
-hashi-up nomad install --ip $AGENT_2_IP --user ubuntu --client --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
+hashi-up nomad install --ssh-target-addr $AGENT_1_IP --ssh-target-user ubuntu --client --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
+hashi-up nomad install --ssh-target-addr $AGENT_2_IP --ssh-target-user ubuntu --client --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
 ```
 
 #### Create a multi-server (HA) setup with Consul
@@ -185,11 +185,11 @@ export SERVER_3_IP=192.168.0.102
 export AGENT_1_IP=192.168.0.105
 export AGENT_2_IP=192.168.0.106
 
-hashi-up nomad install --ip $SERVER_1_IP --user ubuntu --server --bootstrap-expect 3 
-hashi-up nomad install --ip $SERVER_2_IP --user ubuntu --server --bootstrap-expect 3 
-hashi-up nomad install --ip $SERVER_3_IP --user ubuntu --server --bootstrap-expect 3 
-hashi-up nomad install --ip $AGENT_1_IP --user ubuntu --client
-hashi-up nomad install --ip $AGENT_2_IP --user ubuntu --client 
+hashi-up nomad install --ssh-target-addr $SERVER_1_IP --ssh-target-user ubuntu --server --bootstrap-expect 3 
+hashi-up nomad install --ssh-target-addr $SERVER_2_IP --ssh-target-user ubuntu --server --bootstrap-expect 3 
+hashi-up nomad install --ssh-target-addr $SERVER_3_IP --ssh-target-user ubuntu --server --bootstrap-expect 3 
+hashi-up nomad install --ssh-target-addr $AGENT_1_IP --ssh-target-user ubuntu --client
+hashi-up nomad install --ssh-target-addr $AGENT_2_IP --ssh-target-user ubuntu --client 
 ```
 
 ## If your ssh-key is password-protected
