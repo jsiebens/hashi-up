@@ -23,7 +23,7 @@ func NewConsulConfiguration(
 	rootBody := f.Body()
 
 	rootBody.SetAttributeValue("datacenter", cty.StringVal(datacenter))
-	rootBody.SetAttributeValue("data_dir", cty.StringVal("/var/lib/consul"))
+	rootBody.SetAttributeValue("data_dir", cty.StringVal("/opt/consul"))
 
 	if len(bindAddr) != 0 {
 		rootBody.SetAttributeValue("bind_addr", cty.StringVal(bindAddr))
@@ -102,7 +102,7 @@ func NewNomadConfiguration(
 	rootBody := f.Body()
 
 	rootBody.SetAttributeValue("datacenter", cty.StringVal(datacenter))
-	rootBody.SetAttributeValue("data_dir", cty.StringVal("/var/lib/nomad"))
+	rootBody.SetAttributeValue("data_dir", cty.StringVal("/opt/nomad"))
 
 	if len(bindAddr) != 0 {
 		addressesBlock := rootBody.AppendNewBlock("addresses", []string{})

@@ -22,7 +22,7 @@ setup_env() {
     SUDO=
   fi
 
-  CONSUL_DATA_DIR=/var/lib/consul
+  CONSUL_DATA_DIR=/opt/consul
   CONSUL_CONFIG_DIR=/etc/consul.d
   CONSUL_CONFIG_FILE=/etc/consul.d/consul.hcl
   CONSUL_SERVICE_FILE=/etc/systemd/system/consul.service
@@ -126,8 +126,8 @@ create_user_and_config() {
     $SUDO cp "${TMP_DIR}/consul-agent-key.pem" /etc/consul.d/consul-agent-key.pem
   fi
 
-  $SUDO chown --recursive consul:consul ${CONSUL_DATA_DIR}
-  $SUDO chown --recursive consul:consul ${CONSUL_CONFIG_DIR}
+  $SUDO chown --recursive consul:consul /opt/consul
+  $SUDO chown --recursive consul:consul /etc/consul.d
 }
 
 # --- write systemd service file ---
