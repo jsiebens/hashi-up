@@ -6,8 +6,8 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"fmt"
 	"github.com/spf13/cobra"
-	"log"
 	"math/big"
 	"net"
 	"os"
@@ -81,7 +81,7 @@ func CreateCertificateCommand() *cobra.Command {
 		if err := certOut.Close(); err != nil {
 			return err
 		}
-		log.Print("wrote server.pem\n")
+		fmt.Println("wrote server.pem")
 
 		keyOut, err := os.OpenFile("server-key.pem", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 		if err != nil {
@@ -98,7 +98,7 @@ func CreateCertificateCommand() *cobra.Command {
 			return err
 		}
 
-		log.Print("wrote server-key.pem\n")
+		fmt.Println("wrote server-key.pem")
 
 		return nil
 	}
