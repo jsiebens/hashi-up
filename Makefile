@@ -1,10 +1,13 @@
 SHELL := bash
-LDFLAGS := "-s -w"
+Version := $(shell git describe --tags --dirty)
+# Version := "dev"
+GitCommit := $(shell git rev-parse HEAD)
+LDFLAGS := "-s -w -X github.com/jsiebens/hashi-up/cmd.Version=$(Version) -X github.com/jsiebens/hashi-up/cmd.GitCommit=$(GitCommit)"
 .PHONY: all
 
 .PHONY: build
 build: generate
-	go build
+	go build -ldflags $(LDFLAGS)
 
 .PHONY: dist
 dist: generate

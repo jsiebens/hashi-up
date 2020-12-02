@@ -50,6 +50,7 @@ func Execute() error {
 	consul.AddCommand(InstallConsulCommand())
 	vault.AddCommand(InstallVaultCommand())
 
+	rootCmd.AddCommand(VersionCommand())
 	rootCmd.AddCommand(certificate)
 	rootCmd.AddCommand(nomad)
 	rootCmd.AddCommand(consul)
