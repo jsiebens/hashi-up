@@ -43,7 +43,7 @@ func (e LocalOperator) UploadFile(path string, remotePath string, mode string) e
 }
 
 func (e LocalOperator) Upload(source io.Reader, remotePath string, mode string) error {
-	permissions, err := strconv.ParseInt(mode, 10, 32)
+	permissions, err := strconv.ParseInt(mode, 8, 32)
 	if err != nil {
 		return err
 	}
