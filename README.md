@@ -12,6 +12,14 @@ This tool uses `ssh` to install HashiCorp `Consul` or `Nomad` to a remote Linux 
 
 hashi-up was developed to automate what can be a very manual and confusing process for many developers, who are already short on time. Once you've provisioned a VM with your favourite tooling, `hashi-up` means you are only 60 seconds away from running `nomad status` on your own computer.
 
+## Resources
+
+[Deploying a highly-available Nomad cluster with hashi-up!](https://johansiebens.dev/posts/2020/07/deploying-a-highly-available-nomad-cluster-with-hashi-up/)
+
+[Building a Nomad cluster on Raspberry Pi running Ubuntu server](https://johansiebens.dev/posts/2020/08/building-a-nomad-cluster-on-raspberry-pi-running-ubuntu-server/)
+
+[Installing HashiCorp Vault on DigitalOcean with hashi-up](https://johansiebens.dev/posts/2020/12/installing-hashicorp-vault-on-digitalocean-with-hashi-up/)
+
 ## Usage
 
 The `hashi-up` tool is a client application which you can run on your own computer. It uses SSH to connect to remote servers when installing HashiCorp Consul or Nomad. Binaries are provided for MacOS, Windows, and Linux (including ARM).
