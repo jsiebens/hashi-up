@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/hashicorp/go-checkpoint"
 	"github.com/jsiebens/hashi-up/pkg/config"
 	"github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/markbates/pkger"
@@ -84,19 +83,13 @@ func InstallNomadCommand() *cobra.Command {
 		}
 
 		if len(binary) == 0 && len(version) == 0 {
-			updateParams := &checkpoint.CheckParams{
-				Product: "nomad",
-				Version: "0.0.0",
-				Force:   true,
-			}
-
-			check, err := checkpoint.Check(updateParams)
+			versions, err := config.GetVersion()
 
 			if err != nil {
 				return errors.Wrapf(err, "unable to get latest version number, define a version manually with the --version flag")
 			}
 
-			version = check.CurrentVersion
+			version = versions.Nomad
 		}
 
 		callback := func(op operator.CommandOperator) error {
