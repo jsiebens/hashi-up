@@ -159,9 +159,13 @@ EOF
 
 # --- startup systemd service ---
 systemd_enable_and_start() {
+  [ "${SKIP_ENABLE}" = true ] && return
+
   info "Enabling consul unit"
   $SUDO systemctl enable ${CONSUL_SERVICE_FILE} >/dev/null
   $SUDO systemctl daemon-reload >/dev/null
+
+  [ "${SKIP_START}" = true ] && return
 
   POST_INSTALL_HASHES=$(get_installed_hashes)
   if [ "${PRE_INSTALL_HASHES}" = "${POST_INSTALL_HASHES}" ]; then

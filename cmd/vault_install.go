@@ -13,6 +13,8 @@ import (
 func InstallVaultCommand() *cobra.Command {
 
 	var show bool
+	var skipEnable bool
+	var skipStart bool
 	var binary string
 
 	var certFile string
@@ -39,6 +41,8 @@ func InstallVaultCommand() *cobra.Command {
 
 	command.Flags().BoolVar(&show, "show", false, "Just show the generated config instead of deploying Vault")
 	command.Flags().StringVar(&binary, "package", "", "Upload and use this Vault package instead of downloading")
+	command.Flags().BoolVar(&skipEnable, "skip-enable", false, "If set to true will not enable or start Vault service")
+	command.Flags().BoolVar(&skipStart, "skip-start", false, "If set to true will not start Vault service")
 
 	command.Flags().StringVar(&version, "version", "", "Version of Vault to install")
 	command.Flags().StringVar(&certFile, "cert-file", "", "Vault: the certificate for TLS. (see Vault documentation for more info)")
@@ -149,7 +153,7 @@ func InstallVaultCommand() *cobra.Command {
 			}
 
 			fmt.Println("Installing Vault...")
-			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' VAULT_VERSION='%s' sh -\n", dir, dir, version))
+			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' VAULT_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, dir, version, skipEnable, skipStart))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}

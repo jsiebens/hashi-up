@@ -15,6 +15,8 @@ import (
 func InstallNomadCommand() *cobra.Command {
 
 	var show bool
+	var skipEnable bool
+	var skipStart bool
 	var binary string
 
 	var version string
@@ -38,6 +40,8 @@ func InstallNomadCommand() *cobra.Command {
 
 	command.Flags().BoolVar(&show, "show", false, "Just show the generated config instead of deploying Nomad")
 	command.Flags().StringVar(&binary, "package", "", "Upload and use this Nomad package instead of downloading")
+	command.Flags().BoolVar(&skipEnable, "skip-enable", false, "If set to true will not enable or start Nomad service")
+	command.Flags().BoolVar(&skipStart, "skip-start", false, "If set to true will not start Nomad service")
 
 	command.Flags().StringVar(&version, "version", "", "Version of Nomad to install, default to latest available")
 	command.Flags().BoolVar(&server, "server", false, "Nomad: enables the server mode of the agent. (see Nomad documentation for more info)")
@@ -150,7 +154,7 @@ func InstallNomadCommand() *cobra.Command {
 			}
 
 			fmt.Println("Installing Nomad...")
-			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' NOMAD_VERSION='%s' sh -\n", dir, dir, version))
+			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' NOMAD_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, dir, version, skipEnable, skipStart))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}

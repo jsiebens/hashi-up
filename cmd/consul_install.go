@@ -15,6 +15,8 @@ import (
 func InstallConsulCommand() *cobra.Command {
 
 	var show bool
+	var skipEnable bool
+	var skipStart bool
 	var binary string
 
 	var version string
@@ -40,6 +42,8 @@ func InstallConsulCommand() *cobra.Command {
 
 	command.Flags().BoolVar(&show, "show", false, "Just show the generated config instead of deploying Consul")
 	command.Flags().StringVar(&binary, "package", "", "Upload and use this Consul package instead of downloading")
+	command.Flags().BoolVar(&skipEnable, "skip-enable", false, "If set to true will not enable or start Consul service")
+	command.Flags().BoolVar(&skipStart, "skip-start", false, "If set to true will not start Consul service")
 
 	command.Flags().StringVar(&version, "version", "", "Version of Consul to install, default to latest available")
 	command.Flags().BoolVar(&server, "server", false, "Consul: switches agent to server mode. (see Consul documentation for more info)")
@@ -155,7 +159,7 @@ func InstallConsulCommand() *cobra.Command {
 			}
 
 			fmt.Println("Installing Consul...")
-			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' SERVICE_TYPE='%s' CONSUL_VERSION='%s' sh -\n", dir, dir, serviceType, version))
+			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' SERVICE_TYPE='%s' CONSUL_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, dir, serviceType, version, skipEnable, skipStart))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
