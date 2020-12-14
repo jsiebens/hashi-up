@@ -5,6 +5,7 @@ import (
 	"github.com/jsiebens/hashi-up/pkg/config"
 	"github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/markbates/pkger"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/thanhpk/randstr"
 	"strings"
@@ -85,7 +86,13 @@ func InstallVaultCommand() *cobra.Command {
 		}
 
 		if len(binary) == 0 && len(version) == 0 {
-			return fmt.Errorf("unable to get latest version number, define a version manually with the --version flag")
+			versions, err := config.GetVersion()
+
+			if err != nil {
+				return errors.Wrapf(err, "unable to get latest version number, define a version manually with the --version flag")
+			}
+
+			version = versions.Vault
 		}
 
 		callback := func(op operator.CommandOperator) error {
