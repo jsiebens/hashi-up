@@ -15,7 +15,7 @@ type Versions struct {
 }
 
 func GetVersion() (*Versions, error) {
-	url := "https://raw.githubusercontent.com/jsiebens/hashi-up/master/versions.hcl"
+	url := "https://hashi-up.dev/versions.hcl"
 
 	client := http.Client{
 		Timeout: time.Second * 2,
