@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 )
 
@@ -72,4 +73,9 @@ func Execute() error {
 	rootCmd.PersistentFlags().MarkDeprecated("ssh-port", "use the new flag ssh-target-addr")
 
 	return rootCmd.Execute()
+}
+
+func expandPath(path string) string {
+	res, _ := homedir.Expand(path)
+	return res
 }

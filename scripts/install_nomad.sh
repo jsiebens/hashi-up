@@ -24,7 +24,6 @@ setup_env() {
 
   NOMAD_DATA_DIR=/opt/nomad
   NOMAD_CONFIG_DIR=/etc/nomad.d
-  NOMAD_CONFIG_FILE=/etc/nomad.d/nomad.hcl
   NOMAD_SERVICE_FILE=/etc/systemd/system/nomad.service
 
   BIN_DIR=/usr/local/bin
@@ -61,7 +60,7 @@ setup_verify_arch() {
 
 # --- get hashes of the current nomad bin and service files
 get_installed_hashes() {
-  $SUDO sha256sum ${BIN_DIR}/nomad /etc/nomad.d/nomad.hcl /etc/nomad.d/nomad-agent-ca.pem /etc/nomad.d/nomad-agent-cert.pem /etc/nomad.d/nomad-agent-key.pem ${FILE_CONSUL_SERVICE} 2>&1 || true
+  $SUDO sha256sum ${BIN_DIR}/nomad ${NOMAD_CONFIG_DIR}/* ${NOMAD_SERVICE_FILE} 2>&1 || true
 }
 
 has_yum() {
@@ -108,16 +107,7 @@ create_user_and_config() {
   $SUDO mkdir --parents ${NOMAD_DATA_DIR}
   $SUDO mkdir --parents ${NOMAD_CONFIG_DIR}
 
-  $SUDO cp "${TMP_DIR}/nomad.hcl" ${NOMAD_CONFIG_FILE}
-  if [ -f "${TMP_DIR}/nomad-agent-ca.pem" ]; then
-    $SUDO cp "${TMP_DIR}/nomad-agent-ca.pem" /etc/nomad.d/nomad-agent-ca.pem
-  fi
-  if [ -f "${TMP_DIR}/nomad-agent-cert.pem" ]; then
-    $SUDO cp "${TMP_DIR}/nomad-agent-cert.pem" /etc/nomad.d/nomad-agent-cert.pem
-  fi
-  if [ -f "${TMP_DIR}/nomad-agent-key.pem" ]; then
-    $SUDO cp "${TMP_DIR}/nomad-agent-key.pem" /etc/nomad.d/nomad-agent-key.pem
-  fi
+  $SUDO cp ${TMP_DIR}/config/* ${NOMAD_CONFIG_DIR}
 }
 
 # --- write systemd service file ---

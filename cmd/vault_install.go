@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/thanhpk/randstr"
+	"path/filepath"
 	"strings"
 )
 
@@ -34,6 +35,8 @@ func InstallVaultCommand() *cobra.Command {
 	var consulKeyFile string
 
 	var version string
+	var configFile string
+	var additionalConfigFiles []string
 
 	var command = &cobra.Command{
 		Use:          "install",
@@ -62,6 +65,9 @@ func InstallVaultCommand() *cobra.Command {
 	command.Flags().StringVar(&consulCertFile, "consul-tls-cert-file", "", "Vault: the path to the certificate for Consul communication. (see Vault documentation for more info)")
 	command.Flags().StringVar(&consulKeyFile, "consul-tls-key-file", "", "Vault: the path to the private key for Consul communication. (see Vault documentation for more info)")
 
+	command.Flags().StringVar(&configFile, "config-file", "vault.hcl", "Name of the generated config file")
+	command.Flags().StringArrayVar(&additionalConfigFiles, "additional-config-file", []string{}, "Additional configuration file to upload")
+
 	command.RunE = func(command *cobra.Command, args []string) error {
 		if !show && !runLocal && len(sshTargetAddr) == 0 {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
@@ -85,6 +91,14 @@ func InstallVaultCommand() *cobra.Command {
 			return nil
 		}
 
+		if len(configFile) == 0 {
+			return fmt.Errorf("config-file cannot be empty")
+		}
+
+		if !strings.HasSuffix(configFile, ".hcl") {
+			configFile = configFile + ".hcl"
+		}
+
 		if len(binary) == 0 && len(version) == 0 {
 			versions, err := config.GetVersion()
 
@@ -100,7 +114,7 @@ func InstallVaultCommand() *cobra.Command {
 
 			defer op.Execute("rm -rf " + dir)
 
-			_, err := op.Execute("mkdir " + dir)
+			_, err := op.Execute("mkdir -p " + dir + "/config")
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
@@ -115,35 +129,43 @@ func InstallVaultCommand() *cobra.Command {
 
 			fmt.Println("Uploading Vault configuration and certificates...")
 			if enableTLS {
-				err = op.UploadFile(certFile, dir+"/vault-cert.pem", "0640")
+				err = op.UploadFile(certFile, dir+"/config/vault-cert.pem", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload vault cert file: %s", err)
 				}
 
-				err = op.UploadFile(keyFile, dir+"/vault-key.pem", "0640")
+				err = op.UploadFile(keyFile, dir+"/config/vault-key.pem", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload vault key file: %s", err)
 				}
 			}
 
 			if enableConsulTLS {
-				err = op.UploadFile(consulCaFile, dir+"/consul-ca.pem", "0640")
+				err = op.UploadFile(consulCaFile, dir+"/config/consul-ca.pem", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload consul ca file: %s", err)
 				}
-				err = op.UploadFile(consulCertFile, dir+"/consul-cert.pem", "0640")
+				err = op.UploadFile(consulCertFile, dir+"/config/consul-cert.pem", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload consul cert file: %s", err)
 				}
-				err = op.UploadFile(consulKeyFile, dir+"/consul-key.pem", "0640")
+				err = op.UploadFile(consulKeyFile, dir+"/config/consul-key.pem", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload consul key file: %s", err)
 				}
 			}
 
-			err = op.Upload(strings.NewReader(vaultConfig), dir+"/vault.hcl", "0640")
+			err = op.Upload(strings.NewReader(vaultConfig), dir+"/config/"+configFile, "0640")
 			if err != nil {
 				return fmt.Errorf("error received during upload vault configuration: %s", err)
+			}
+
+			for _, s := range additionalConfigFiles {
+				_, filename := filepath.Split(expandPath(s))
+				err = op.UploadFile(expandPath(s), dir+"/config/"+filename, "0640")
+				if err != nil {
+					return fmt.Errorf("error received during upload nomad config file: %s", err)
+				}
 			}
 
 			installScript, err := pkger.Open("/scripts/install_vault.sh")

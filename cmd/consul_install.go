@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/thanhpk/randstr"
+	"path/filepath"
 	"strings"
 )
 
@@ -33,6 +34,9 @@ func InstallConsulCommand() *cobra.Command {
 	var enableConnect bool
 	var enableACL bool
 	var agentToken string
+
+	var configFile string
+	var additionalConfigFiles []string
 
 	var command = &cobra.Command{
 		Use:          "install",
@@ -60,6 +64,9 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().BoolVar(&enableACL, "acl", false, "Consul: enables Consul ACL system. (see Consul documentation for more info)")
 	command.Flags().StringVar(&agentToken, "agent-token", "", "Consul: the token that the agent will use for internal agent operations.. (see Consul documentation for more info)")
 
+	command.Flags().StringVar(&configFile, "config-file", "consul.hcl", "Name of the generated config file")
+	command.Flags().StringArrayVar(&additionalConfigFiles, "additional-config-file", []string{}, "Additional configuration file to upload")
+
 	command.RunE = func(command *cobra.Command, args []string) error {
 		if !show && !runLocal && len(sshTargetAddr) == 0 {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
@@ -82,6 +89,14 @@ func InstallConsulCommand() *cobra.Command {
 			return nil
 		}
 
+		if len(configFile) == 0 {
+			return fmt.Errorf("config-file cannot be empty")
+		}
+
+		if !strings.HasSuffix(configFile, ".hcl") {
+			configFile = configFile + ".hcl"
+		}
+
 		if len(binary) == 0 && len(version) == 0 {
 			versions, err := config.GetVersion()
 
@@ -95,9 +110,9 @@ func InstallConsulCommand() *cobra.Command {
 		callback := func(op operator.CommandOperator) error {
 			dir := "/tmp/consul-installation." + randstr.String(6)
 
-			defer op.Execute("rm -rf " + dir)
+			//defer op.Execute("rm -rf " + dir)
 
-			_, err := op.Execute("mkdir " + dir)
+			_, err := op.Execute("mkdir -p " + dir + "/config")
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
@@ -112,25 +127,33 @@ func InstallConsulCommand() *cobra.Command {
 
 			fmt.Println("Uploading Consul configuration and certificates...")
 			if enableTLS {
-				err = op.UploadFile(caFile, dir+"/consul-agent-ca.pem", "0640")
+				err = op.UploadFile(caFile, dir+"/config/consul-agent-ca.pem", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload consul ca file: %s", err)
 				}
 
-				err = op.UploadFile(certFile, dir+"/consul-agent-cert.pem", "0640")
+				err = op.UploadFile(certFile, dir+"/config/consul-agent-cert.pem", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload consul cert file: %s", err)
 				}
 
-				err = op.UploadFile(keyFile, dir+"/consul-agent-key.pem", "0640")
+				err = op.UploadFile(keyFile, dir+"/config/consul-agent-key.pem", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload consul key file: %s", err)
 				}
 			}
 
-			err = op.Upload(strings.NewReader(consulConfig), dir+"/consul.hcl", "0640")
+			err = op.Upload(strings.NewReader(consulConfig), dir+"/config/"+configFile, "0640")
 			if err != nil {
 				return fmt.Errorf("error received during upload consul configuration: %s", err)
+			}
+
+			for _, s := range additionalConfigFiles {
+				_, filename := filepath.Split(expandPath(s))
+				err = op.UploadFile(expandPath(s), dir+"/config/"+filename, "0640")
+				if err != nil {
+					return fmt.Errorf("error received during upload consul ca file: %s", err)
+				}
 			}
 
 			installScript, err := pkger.Open("/scripts/install_consul.sh")

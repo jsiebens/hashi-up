@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/thanhpk/randstr"
+	"path/filepath"
 	"strings"
 )
 
@@ -32,6 +33,9 @@ func InstallNomadCommand() *cobra.Command {
 	var keyFile string
 	var enableACL bool
 
+	var configFile string
+	var additionalConfigFiles []string
+
 	var command = &cobra.Command{
 		Use:          "install",
 		SilenceUsage: true,
@@ -55,6 +59,9 @@ func InstallNomadCommand() *cobra.Command {
 	command.Flags().StringVar(&certFile, "cert-file", "", "Nomad: the certificate to verify the agent's authenticity. (see Nomad documentation for more info)")
 	command.Flags().StringVar(&keyFile, "key-file", "", "Nomad: the key used with the certificate to verify the agent's authenticity. (see Nomad documentation for more info)")
 	command.Flags().BoolVar(&enableACL, "acl", false, "Nomad: enables Nomad ACL system. (see Nomad documentation for more info)")
+
+	command.Flags().StringVar(&configFile, "config-file", "nomad.hcl", "Name of the generated config file")
+	command.Flags().StringArrayVar(&additionalConfigFiles, "additional-config-file", []string{}, "Additional configuration file to upload")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
 		if !show && !runLocal && len(sshTargetAddr) == 0 {
@@ -82,6 +89,14 @@ func InstallNomadCommand() *cobra.Command {
 			return nil
 		}
 
+		if len(configFile) == 0 {
+			return fmt.Errorf("config-file cannot be empty")
+		}
+
+		if !strings.HasSuffix(configFile, ".hcl") {
+			configFile = configFile + ".hcl"
+		}
+
 		if len(binary) == 0 && len(version) == 0 {
 			versions, err := config.GetVersion()
 
@@ -97,7 +112,7 @@ func InstallNomadCommand() *cobra.Command {
 
 			defer op.Execute("rm -rf " + dir)
 
-			_, err := op.Execute("mkdir " + dir)
+			_, err := op.Execute("mkdir -p " + dir + "/config")
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
@@ -112,25 +127,33 @@ func InstallNomadCommand() *cobra.Command {
 
 			fmt.Println("Uploading Nomad configuration and certificates...")
 			if enableTLS {
-				err = op.UploadFile(caFile, dir+"/nomad-agent-ca.pem", "0640")
+				err = op.UploadFile(caFile, dir+"/config/nomad-agent-ca.pem", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload nomad ca file: %s", err)
 				}
 
-				err = op.UploadFile(certFile, dir+"/nomad-agent-cert.pem", "0640")
+				err = op.UploadFile(certFile, dir+"/config/nomad-agent-cert.pem", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload nomad cert file: %s", err)
 				}
 
-				err = op.UploadFile(keyFile, dir+"/nomad-agent-key.pem", "0640")
+				err = op.UploadFile(keyFile, dir+"/config/nomad-agent-key.pem", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload nomad key file: %s", err)
 				}
 			}
 
-			err = op.Upload(strings.NewReader(nomadConfig), dir+"/nomad.hcl", "0640")
+			err = op.Upload(strings.NewReader(nomadConfig), dir+"/config/"+configFile, "0640")
 			if err != nil {
 				return fmt.Errorf("error received during upload nomad configuration: %s", err)
+			}
+
+			for _, s := range additionalConfigFiles {
+				_, filename := filepath.Split(expandPath(s))
+				err = op.UploadFile(expandPath(s), dir+"/config/"+filename, "0640")
+				if err != nil {
+					return fmt.Errorf("error received during upload nomad config file: %s", err)
+				}
 			}
 
 			installScript, err := pkger.Open("/scripts/install_nomad.sh")

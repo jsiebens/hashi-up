@@ -24,7 +24,6 @@ setup_env() {
 
   VAULT_DATA_DIR=/opt/vault
   VAULT_CONFIG_DIR=/etc/vault.d
-  VAULT_CONFIG_FILE=/etc/vault.d/vault.hcl
   VAULT_SERVICE_FILE=/etc/systemd/system/vault.service
 
   BIN_DIR=/usr/local/bin
@@ -61,7 +60,7 @@ setup_verify_arch() {
 
 # --- get hashes of the current vault bin and service files
 get_installed_hashes() {
-  $SUDO sha256sum ${BIN_DIR}/vault /etc/vault.d/vault.hcl /etc/vault.d/vault-cert.pem /etc/vault.d/vault-key.pem /etc/vault.d/consul-ca.pem /etc/vault.d/consul-cert.pem /etc/vault.d/consul-key.pem ${FILE_VAULT_SERVICE} 2>&1 || true
+  $SUDO sha256sum ${BIN_DIR}/vault ${VAULT_CONFIG_DIR}/* ${VAULT_SERVICE_FILE} 2>&1 || true
 }
 
 has_yum() {
@@ -117,23 +116,7 @@ create_user_and_config() {
   $SUDO mkdir --parents ${VAULT_DATA_DIR}
   $SUDO mkdir --parents ${VAULT_CONFIG_DIR}
 
-  $SUDO cp "${TMP_DIR}/vault.hcl" ${VAULT_CONFIG_FILE}
-  if [ -f "${TMP_DIR}/vault-cert.pem" ]; then
-    $SUDO cp "${TMP_DIR}/vault-cert.pem" /etc/vault.d/vault-cert.pem
-  fi
-  if [ -f "${TMP_DIR}/vault-key.pem" ]; then
-    $SUDO cp "${TMP_DIR}/vault-key.pem" /etc/vault.d/vault-key.pem
-  fi
-
-  if [ -f "${TMP_DIR}/consul-ca.pem" ]; then
-    $SUDO cp "${TMP_DIR}/consul-ca.pem" /etc/vault.d/consul-ca.pem
-  fi
-  if [ -f "${TMP_DIR}/consul-cert.pem" ]; then
-    $SUDO cp "${TMP_DIR}/consul-cert.pem" /etc/vault.d/consul-cert.pem
-  fi
-  if [ -f "${TMP_DIR}/consul-key.pem" ]; then
-    $SUDO cp "${TMP_DIR}/consul-key.pem" /etc/vault.d/consul-key.pem
-  fi
+  $SUDO cp ${TMP_DIR}/config/* ${VAULT_CONFIG_DIR}
 
   $SUDO chown --recursive vault:vault /opt/vault
   $SUDO chown --recursive vault:vault /etc/vault.d
@@ -148,7 +131,6 @@ Description="HashiCorp Vault - A tool for managing secrets"
 Documentation=https://www.vaultproject.io/docs/
 Requires=network-online.target
 After=network-online.target
-ConditionFileNotEmpty=/etc/vault.d/vault.hcl
 StartLimitIntervalSec=60
 StartLimitBurst=3
 [Service]
@@ -163,7 +145,7 @@ AmbientCapabilities=CAP_IPC_LOCK
 Capabilities=CAP_IPC_LOCK+ep
 CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
 NoNewPrivileges=yes
-ExecStart=/usr/local/bin/vault server -config=/etc/vault.d/vault.hcl
+ExecStart=/usr/local/bin/vault server -config=/etc/vault.d/
 ExecReload=/bin/kill --signal HUP $MAINPID
 KillMode=process
 KillSignal=SIGINT

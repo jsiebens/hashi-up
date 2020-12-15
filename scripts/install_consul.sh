@@ -24,7 +24,6 @@ setup_env() {
 
   CONSUL_DATA_DIR=/opt/consul
   CONSUL_CONFIG_DIR=/etc/consul.d
-  CONSUL_CONFIG_FILE=/etc/consul.d/consul.hcl
   CONSUL_SERVICE_FILE=/etc/systemd/system/consul.service
 
   BIN_DIR=/usr/local/bin
@@ -61,7 +60,7 @@ setup_verify_arch() {
 
 # --- get hashes of the current consul bin and service files
 get_installed_hashes() {
-  $SUDO sha256sum ${BIN_DIR}/consul /etc/consul.d/consul.hcl /etc/consul.d/consul-agent-ca.pem /etc/consul.d/consul-agent-cert.pem /etc/consul.d/consul-agent-key.pem ${FILE_CONSUL_SERVICE} 2>&1 || true
+  $SUDO sha256sum ${BIN_DIR}/consul ${CONSUL_CONFIG_DIR}/* ${FILE_CONSUL_SERVICE} 2>&1 || true
 }
 
 has_yum() {
@@ -115,17 +114,7 @@ create_user_and_config() {
   $SUDO mkdir --parents ${CONSUL_DATA_DIR}
   $SUDO mkdir --parents ${CONSUL_CONFIG_DIR}
 
-  $SUDO cp "${TMP_DIR}/consul.hcl" ${CONSUL_CONFIG_FILE}
-  if [ -f "${TMP_DIR}/consul-agent-ca.pem" ]; then
-    $SUDO cp "${TMP_DIR}/consul-agent-ca.pem" /etc/consul.d/consul-agent-ca.pem
-  fi
-  if [ -f "${TMP_DIR}/consul-agent-cert.pem" ]; then
-    $SUDO cp "${TMP_DIR}/consul-agent-cert.pem" /etc/consul.d/consul-agent-cert.pem
-  fi
-  if [ -f "${TMP_DIR}/consul-agent-key.pem" ]; then
-    $SUDO cp "${TMP_DIR}/consul-agent-key.pem" /etc/consul.d/consul-agent-key.pem
-  fi
-
+  $SUDO cp ${TMP_DIR}/config/* ${CONSUL_CONFIG_DIR}
   $SUDO chown --recursive consul:consul /opt/consul
   $SUDO chown --recursive consul:consul /etc/consul.d
 }
@@ -139,7 +128,6 @@ Description="HashiCorp Consul - A service mesh solution"
 Documentation=https://www.consul.io/
 Requires=network-online.target
 After=network-online.target
-ConditionFileNotEmpty=/etc/consul.d/consul.hcl
 
 [Service]
 Type=${SERVICE_TYPE}
