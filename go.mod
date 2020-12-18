@@ -3,6 +3,7 @@ module github.com/jsiebens/hashi-up
 go 1.13
 
 require (
+	github.com/Masterminds/semver v1.5.0
 	github.com/alexellis/go-execute v0.0.0-20200124154445-8697e4e28c5e
 	github.com/bramvdbogaerde/go-scp v0.0.0-20200820121624-ded9ee94aef5
 	github.com/hashicorp/hcl/v2 v2.8.0

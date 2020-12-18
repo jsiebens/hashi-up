@@ -98,13 +98,13 @@ func InstallNomadCommand() *cobra.Command {
 		}
 
 		if len(binary) == 0 && len(version) == 0 {
-			versions, err := config.GetVersion()
+			latest, err := config.GetLatestVersion("nomad")
 
 			if err != nil {
 				return errors.Wrapf(err, "unable to get latest version number, define a version manually with the --version flag")
 			}
 
-			version = versions.Nomad
+			version = latest
 		}
 
 		callback := func(op operator.CommandOperator) error {
