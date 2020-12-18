@@ -1,21 +1,22 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/hcl/v2/hclsimple"
+	"github.com/Masterminds/semver"
 	"io/ioutil"
 	"net/http"
+	"sort"
 	"time"
 )
 
 type Versions struct {
-	Nomad  string `hcl:"nomad"`
-	Consul string `hcl:"consul"`
-	Vault  string `hcl:"vault"`
+	Name     string                 `json:"vault"`
+	Versions map[string]interface{} `json:"versions"`
 }
 
-func GetVersion() (*Versions, error) {
-	url := "https://hashi-up.dev/versions.hcl"
+func GetLatestVersion(product string) (string, error) {
+	url := fmt.Sprintf("https://releases.hashicorp.com/%s/index.json", product)
 
 	client := http.Client{
 		Timeout: time.Second * 2,
@@ -23,16 +24,16 @@ func GetVersion() (*Versions, error) {
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if res.StatusCode != 200 {
-		return nil, fmt.Errorf("invalid response code %d", res.StatusCode)
+		return "", fmt.Errorf("invalid response code %d", res.StatusCode)
 	}
 
 	if res.Body != nil {
@@ -41,14 +42,28 @@ func GetVersion() (*Versions, error) {
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	result := Versions{}
 
-	err = hclsimple.Decode("versions.hcl", body, nil, &result)
+	err = json.Unmarshal(body, &result)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &result, nil
+	vs := make([]*semver.Version, 0)
+	for i := range result.Versions {
+		v, err := semver.NewVersion(i)
+		if err == nil && len(v.Metadata()) == 0 && len(v.Prerelease()) == 0 {
+			vs = append(vs, v)
+		}
+	}
+
+	if len(vs) == 0 {
+		return "", fmt.Errorf("unable to find default version of %s", product)
+	}
+
+	sort.Sort(sort.Reverse(semver.Collection(vs)))
+
+	return vs[0].String(), nil
 }
