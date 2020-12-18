@@ -120,14 +120,14 @@ func InstallVaultCommand() *cobra.Command {
 			}
 
 			if len(binary) != 0 {
-				fmt.Println("Uploading Vault package...")
+				info("Uploading Vault package...")
 				err = op.UploadFile(binary, dir+"/vault.zip", "0644")
 				if err != nil {
 					return fmt.Errorf("error received during upload Vault package: %s", err)
 				}
 			}
 
-			fmt.Println("Uploading Vault configuration and certificates...")
+			info("Uploading Vault configuration and certificates...")
 			if enableTLS {
 				err = op.UploadFile(certFile, dir+"/config/vault-cert.pem", "0640")
 				if err != nil {
@@ -181,7 +181,7 @@ func InstallVaultCommand() *cobra.Command {
 				return fmt.Errorf("error received during upload install script: %s", err)
 			}
 
-			fmt.Println("Installing Vault...")
+			info("Installing Vault...")
 			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' VAULT_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, dir, version, skipEnable, skipStart))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)

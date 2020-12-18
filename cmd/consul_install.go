@@ -118,14 +118,14 @@ func InstallConsulCommand() *cobra.Command {
 			}
 
 			if len(binary) != 0 {
-				fmt.Println("Uploading Consul package...")
+				info("Uploading Consul package...")
 				err = op.UploadFile(binary, dir+"/consul.zip", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload Consul package: %s", err)
 				}
 			}
 
-			fmt.Println("Uploading Consul configuration and certificates...")
+			info("Uploading Consul configuration and certificates...")
 			if enableTLS {
 				err = op.UploadFile(caFile, dir+"/config/consul-agent-ca.pem", "0640")
 				if err != nil {
@@ -174,7 +174,7 @@ func InstallConsulCommand() *cobra.Command {
 				serviceType = "exec"
 			}
 
-			fmt.Println("Installing Consul...")
+			info("Installing Consul...")
 			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' SERVICE_TYPE='%s' CONSUL_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, dir, serviceType, version, skipEnable, skipStart))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)

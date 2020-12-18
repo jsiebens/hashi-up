@@ -118,14 +118,14 @@ func InstallNomadCommand() *cobra.Command {
 			}
 
 			if len(binary) != 0 {
-				fmt.Println("Uploading Nomad package...")
+				info("Uploading Nomad package...")
 				err = op.UploadFile(binary, dir+"/nomad.zip", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload nomad package: %s", err)
 				}
 			}
 
-			fmt.Println("Uploading Nomad configuration and certificates...")
+			info("Uploading Nomad configuration and certificates...")
 			if enableTLS {
 				err = op.UploadFile(caFile, dir+"/config/nomad-agent-ca.pem", "0640")
 				if err != nil {
@@ -169,7 +169,7 @@ func InstallNomadCommand() *cobra.Command {
 				return fmt.Errorf("error received during upload install script: %s", err)
 			}
 
-			fmt.Println("Installing Nomad...")
+			info("Installing Nomad...")
 			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' NOMAD_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, dir, version, skipEnable, skipStart))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)

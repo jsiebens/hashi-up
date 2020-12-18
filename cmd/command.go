@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 )
@@ -78,4 +79,8 @@ func Execute() error {
 func expandPath(path string) string {
 	res, _ := homedir.Expand(path)
 	return res
+}
+
+func info(message string) {
+	fmt.Println("[INFO]  " + message)
 }
