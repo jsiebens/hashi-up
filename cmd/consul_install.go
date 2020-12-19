@@ -110,7 +110,7 @@ func InstallConsulCommand() *cobra.Command {
 		callback := func(op operator.CommandOperator) error {
 			dir := "/tmp/consul-installation." + randstr.String(6)
 
-			//defer op.Execute("rm -rf " + dir)
+			defer op.Execute("rm -rf " + dir)
 
 			_, err := op.Execute("mkdir -p " + dir + "/config")
 			if err != nil {
