@@ -14,87 +14,56 @@ import (
 
 func InstallNomadCommand() *cobra.Command {
 
-	var show bool
+	var ignoreConfigFlags bool
 	var skipEnable bool
 	var skipStart bool
 	var binary string
-
 	var version string
-	var datacenter string
-	var address string
-	var advertise string
-	var server bool
-	var client bool
-	var bootstrapExpect int64
-	var retryJoin []string
-	var encrypt string
-	var caFile string
-	var certFile string
-	var keyFile string
-	var enableACL bool
 
-	var configFile string
-	var additionalConfigFiles []string
+	var generatedConfigFile string
+	var configFiles []string
+
+	var flags = config.NomadConfig{}
 
 	var command = &cobra.Command{
 		Use:          "install",
 		SilenceUsage: true,
 	}
 
-	command.Flags().BoolVar(&show, "show", false, "Just show the generated config instead of deploying Nomad")
-	command.Flags().StringVar(&binary, "package", "", "Upload and use this Nomad package instead of downloading")
+	command.Flags().BoolVarP(&ignoreConfigFlags, "ignore-config-flags", "i", false, "If set to false will generate a configuration file based on CLI flags, otherwise the flags are ignored")
 	command.Flags().BoolVar(&skipEnable, "skip-enable", false, "If set to true will not enable or start Nomad service")
 	command.Flags().BoolVar(&skipStart, "skip-start", false, "If set to true will not start Nomad service")
+	command.Flags().StringVarP(&binary, "package", "p", "", "Upload and use this Nomad package instead of downloading")
+	command.Flags().StringVarP(&version, "version", "v", "", "Version of Nomad to install")
 
-	command.Flags().StringVar(&version, "version", "", "Version of Nomad to install, default to latest available")
-	command.Flags().BoolVar(&server, "server", false, "Nomad: enables the server mode of the agent. (see Nomad documentation for more info)")
-	command.Flags().BoolVar(&client, "client", false, "Nomad: enables the client mode of the agent. (see Nomad documentation for more info)")
-	command.Flags().StringVar(&datacenter, "datacenter", "dc1", "Nomad: specifies the data center of the local agent. (see Nomad documentation for more info)")
-	command.Flags().StringVar(&address, "address", "", "Nomad: the address the agent will bind to for all of its various network services. (see Nomad documentation for more info)")
-	command.Flags().StringVar(&advertise, "advertise", "", "Nomad: the address the agent will advertise to for all of its various network services. (see Nomad documentation for more info)")
-	command.Flags().Int64Var(&bootstrapExpect, "bootstrap-expect", 1, "Nomad: sets server to expect bootstrap mode. (see Nomad documentation for more info)")
-	command.Flags().StringArrayVar(&retryJoin, "retry-join", []string{}, "Nomad: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Nomad documentation for more info)")
-	command.Flags().StringVar(&encrypt, "encrypt", "", "Nomad: Provides the gossip encryption key. (see Nomad documentation for more info)")
-	command.Flags().StringVar(&caFile, "ca-file", "", "Nomad: the certificate authority used to check the authenticity of client and server connections. (see Nomad documentation for more info)")
-	command.Flags().StringVar(&certFile, "cert-file", "", "Nomad: the certificate to verify the agent's authenticity. (see Nomad documentation for more info)")
-	command.Flags().StringVar(&keyFile, "key-file", "", "Nomad: the key used with the certificate to verify the agent's authenticity. (see Nomad documentation for more info)")
-	command.Flags().BoolVar(&enableACL, "acl", false, "Nomad: enables Nomad ACL system. (see Nomad documentation for more info)")
+	command.Flags().StringVarP(&generatedConfigFile, "generated-config-file", "c", "nomad.hcl", "Name of the generated config file")
+	command.Flags().StringArrayVarP(&configFiles, "file", "f", []string{}, "Additional configuration file to upload")
 
-	command.Flags().StringVar(&configFile, "config-file", "nomad.hcl", "Name of the generated config file")
-	command.Flags().StringArrayVar(&additionalConfigFiles, "additional-config-file", []string{}, "Additional configuration file to upload")
+	command.Flags().BoolVar(&flags.Server, "server", false, "Nomad: enables the server mode of the agent. (see Nomad documentation for more info)")
+	command.Flags().BoolVar(&flags.Client, "client", false, "Nomad: enables the client mode of the agent. (see Nomad documentation for more info)")
+	command.Flags().StringVar(&flags.Datacenter, "datacenter", "dc1", "Nomad: specifies the data center of the local agent. (see Nomad documentation for more info)")
+	command.Flags().StringVar(&flags.BindAddr, "address", "", "Nomad: the address the agent will bind to for all of its various network services. (see Nomad documentation for more info)")
+	command.Flags().StringVar(&flags.AdvertiseAddr, "advertise", "", "Nomad: the address the agent will advertise to for all of its various network services. (see Nomad documentation for more info)")
+	command.Flags().Int64Var(&flags.BootstrapExpect, "bootstrap-expect", 1, "Nomad: sets server to expect bootstrap mode. (see Nomad documentation for more info)")
+	command.Flags().StringArrayVar(&flags.RetryJoin, "retry-join", []string{}, "Nomad: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Nomad documentation for more info)")
+	command.Flags().StringVar(&flags.Encrypt, "encrypt", "", "Nomad: Provides the gossip encryption key. (see Nomad documentation for more info)")
+	command.Flags().StringVar(&flags.CaFile, "ca-file", "", "Nomad: the certificate authority used to check the authenticity of client and server connections. (see Nomad documentation for more info)")
+	command.Flags().StringVar(&flags.CertFile, "cert-file", "", "Nomad: the certificate to verify the agent's authenticity. (see Nomad documentation for more info)")
+	command.Flags().StringVar(&flags.KeyFile, "key-file", "", "Nomad: the key used with the certificate to verify the agent's authenticity. (see Nomad documentation for more info)")
+	command.Flags().BoolVar(&flags.EnableACL, "acl", false, "Nomad: enables Nomad ACL system. (see Nomad documentation for more info)")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
-		if !show && !runLocal && len(sshTargetAddr) == 0 {
+		if !runLocal && len(sshTargetAddr) == 0 {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}
 
-		if !(server || client) {
-			return fmt.Errorf("either server or client mode should be enabled")
-		}
+		var generatedConfig string
 
-		var enableTLS = false
-
-		if len(caFile) != 0 && len(certFile) != 0 && len(keyFile) != 0 {
-			enableTLS = true
-		}
-
-		if !enableTLS && (len(caFile) != 0 || len(certFile) != 0 || len(keyFile) != 0) {
-			return fmt.Errorf("ca-file, cert-file and key-file are all required when enabling tls, at least on of them is missing")
-		}
-
-		nomadConfig := config.NewNomadConfiguration(datacenter, address, advertise, server, client, bootstrapExpect, retryJoin, encrypt, enableTLS, enableACL)
-
-		if show {
-			fmt.Println(nomadConfig)
-			return nil
-		}
-
-		if len(configFile) == 0 {
-			return fmt.Errorf("config-file cannot be empty")
-		}
-
-		if !strings.HasSuffix(configFile, ".hcl") {
-			configFile = configFile + ".hcl"
+		if !ignoreConfigFlags {
+			generatedConfig = flags.GenerateConfigFile()
+			if !strings.HasSuffix(generatedConfigFile, ".hcl") {
+				generatedConfigFile = generatedConfigFile + ".hcl"
+			}
 		}
 
 		if len(binary) == 0 && len(version) == 0 {
@@ -125,34 +94,24 @@ func InstallNomadCommand() *cobra.Command {
 				}
 			}
 
-			info("Uploading Nomad configuration and certificates...")
-			if enableTLS {
-				err = op.UploadFile(caFile, dir+"/config/nomad-agent-ca.pem", "0640")
+			if !ignoreConfigFlags {
+				info("Uploading generated Nomad configuration...")
+				err = op.Upload(strings.NewReader(generatedConfig), dir+"/config/"+generatedConfigFile, "0640")
 				if err != nil {
-					return fmt.Errorf("error received during upload nomad ca file: %s", err)
+					return fmt.Errorf("error received during upload consul configuration: %s", err)
 				}
 
-				err = op.UploadFile(certFile, dir+"/config/nomad-agent-cert.pem", "0640")
-				if err != nil {
-					return fmt.Errorf("error received during upload nomad cert file: %s", err)
-				}
-
-				err = op.UploadFile(keyFile, dir+"/config/nomad-agent-key.pem", "0640")
-				if err != nil {
-					return fmt.Errorf("error received during upload nomad key file: %s", err)
+				if flags.EnableTLS() {
+					configFiles = append([]string{flags.CaFile, flags.KeyFile, flags.CertFile}, configFiles...)
 				}
 			}
 
-			err = op.Upload(strings.NewReader(nomadConfig), dir+"/config/"+configFile, "0640")
-			if err != nil {
-				return fmt.Errorf("error received during upload nomad configuration: %s", err)
-			}
-
-			for _, s := range additionalConfigFiles {
+			for _, s := range configFiles {
+				info(fmt.Sprintf("Uploading %s...", s))
 				_, filename := filepath.Split(expandPath(s))
 				err = op.UploadFile(expandPath(s), dir+"/config/"+filename, "0640")
 				if err != nil {
-					return fmt.Errorf("error received during upload nomad config file: %s", err)
+					return fmt.Errorf("error received during upload consul ca file: %s", err)
 				}
 			}
 

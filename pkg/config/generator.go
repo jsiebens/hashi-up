@@ -2,83 +2,94 @@ package config
 
 import (
 	"github.com/hashicorp/hcl/v2/hclwrite"
+	"github.com/mitchellh/go-homedir"
 	"github.com/zclconf/go-cty/cty"
+	"path/filepath"
 )
 
-func NewConsulConfiguration(
-	datacenter string,
-	bindAddr string,
-	advertiseAddr string,
-	clientAddr string,
-	server bool,
-	bootstrapExpect int64,
-	retryJoin []string,
-	encrypt string,
-	enableTLS bool,
-	enableACL bool,
-	agentToken string,
-	enableConnect bool) string {
+type ConsulConfig struct {
+	Datacenter      string
+	BindAddr        string
+	AdvertiseAddr   string
+	ClientAddr      string
+	Server          bool
+	BootstrapExpect int64
+	RetryJoin       []string
+	Encrypt         string
+	CaFile          string
+	CertFile        string
+	KeyFile         string
+	EnableACL       bool
+	AgentToken      string
+	EnableConnect   bool
+}
+
+func (c ConsulConfig) EnableTLS() bool {
+	return len(c.CaFile) != 0 && len(c.CertFile) != 0 && len(c.KeyFile) != 0
+}
+
+func (c ConsulConfig) GenerateConfigFile() string {
 
 	f := hclwrite.NewEmptyFile()
 	rootBody := f.Body()
 
-	rootBody.SetAttributeValue("datacenter", cty.StringVal(datacenter))
+	rootBody.SetAttributeValue("datacenter", cty.StringVal(c.Datacenter))
 	rootBody.SetAttributeValue("data_dir", cty.StringVal("/opt/consul"))
 
-	if len(bindAddr) != 0 {
-		rootBody.SetAttributeValue("bind_addr", cty.StringVal(bindAddr))
+	if len(c.BindAddr) != 0 {
+		rootBody.SetAttributeValue("bind_addr", cty.StringVal(c.BindAddr))
 	}
 
-	if len(advertiseAddr) != 0 {
-		rootBody.SetAttributeValue("advertise_addr", cty.StringVal(advertiseAddr))
+	if len(c.AdvertiseAddr) != 0 {
+		rootBody.SetAttributeValue("advertise_addr", cty.StringVal(c.AdvertiseAddr))
 	}
 
-	if len(clientAddr) != 0 {
-		rootBody.SetAttributeValue("client_addr", cty.StringVal(clientAddr))
+	if len(c.ClientAddr) != 0 {
+		rootBody.SetAttributeValue("client_addr", cty.StringVal(c.ClientAddr))
 	}
 
-	if len(retryJoin) != 0 {
-		rootBody.SetAttributeValue("retry_join", cty.ListVal(transform(retryJoin)))
+	if len(c.RetryJoin) != 0 {
+		rootBody.SetAttributeValue("retry_join", cty.ListVal(transform(c.RetryJoin)))
 	}
 
-	if enableConnect {
+	if c.EnableConnect {
 		portsBlock := rootBody.AppendNewBlock("ports", []string{})
 		portsBlock.Body().SetAttributeValue("grpc", cty.NumberUIntVal(8502))
 	}
 
-	if server {
+	if c.Server {
 		rootBody.SetAttributeValue("ui", cty.BoolVal(true))
 		rootBody.SetAttributeValue("server", cty.BoolVal(true))
-		rootBody.SetAttributeValue("bootstrap_expect", cty.NumberIntVal(bootstrapExpect))
+		rootBody.SetAttributeValue("bootstrap_expect", cty.NumberIntVal(c.BootstrapExpect))
 	}
 
-	if len(encrypt) != 0 {
-		rootBody.SetAttributeValue("encrypt", cty.StringVal(encrypt))
+	if len(c.Encrypt) != 0 {
+		rootBody.SetAttributeValue("encrypt", cty.StringVal(c.Encrypt))
 	}
 
-	if enableTLS {
-		rootBody.SetAttributeValue("ca_file", cty.StringVal("/etc/consul.d/consul-agent-ca.pem"))
-		rootBody.SetAttributeValue("cert_file", cty.StringVal("/etc/consul.d/consul-agent-cert.pem"))
-		rootBody.SetAttributeValue("key_file", cty.StringVal("/etc/consul.d/consul-agent-key.pem"))
+	if c.EnableTLS() {
+		rootBody.SetAttributeValue("ca_file", cty.StringVal(makeAbsolute(c.CaFile, "/etc/consul.d")))
+		rootBody.SetAttributeValue("cert_file", cty.StringVal(makeAbsolute(c.CertFile, "/etc/consul.d")))
+		rootBody.SetAttributeValue("key_file", cty.StringVal(makeAbsolute(c.KeyFile, "/etc/consul.d")))
 		rootBody.SetAttributeValue("verify_incoming", cty.BoolVal(true))
 		rootBody.SetAttributeValue("verify_outgoing", cty.BoolVal(true))
 		rootBody.SetAttributeValue("verify_server_hostname", cty.BoolVal(true))
 	}
 
-	if enableACL {
+	if c.EnableACL {
 		aclBlock := rootBody.AppendNewBlock("acl", []string{})
 		aclBlock.Body().SetAttributeValue("enabled", cty.BoolVal(true))
 		aclBlock.Body().SetAttributeValue("default_policy", cty.StringVal("deny"))
 		aclBlock.Body().SetAttributeValue("down_policy", cty.StringVal("extend-cache"))
 		aclBlock.Body().SetAttributeValue("enable_token_persistence", cty.BoolVal(true))
 
-		if len(agentToken) != 0 {
+		if len(c.AgentToken) != 0 {
 			tokensBlock := aclBlock.Body().AppendNewBlock("tokens", []string{})
-			tokensBlock.Body().SetAttributeValue("agent", cty.StringVal(agentToken))
+			tokensBlock.Body().SetAttributeValue("agent", cty.StringVal(c.AgentToken))
 		}
 	}
 
-	if enableConnect {
+	if c.EnableConnect {
 		connectBlock := rootBody.AppendNewBlock("connect", []string{})
 		connectBlock.Body().SetAttributeValue("enabled", cty.BoolVal(true))
 	}
@@ -86,73 +97,82 @@ func NewConsulConfiguration(
 	return string(f.Bytes())
 }
 
-func NewNomadConfiguration(
-	datacenter string,
-	bindAddr string,
-	advertiseAddr string,
-	server bool,
-	client bool,
-	bootstrapExpect int64,
-	retryJoin []string,
-	encrypt string,
-	enableTLS bool,
-	enableACL bool) string {
+type NomadConfig struct {
+	Datacenter      string
+	BindAddr        string
+	AdvertiseAddr   string
+	Server          bool
+	Client          bool
+	BootstrapExpect int64
+	RetryJoin       []string
+	Encrypt         string
+	CaFile          string
+	CertFile        string
+	KeyFile         string
+	EnableACL       bool
+}
+
+func (c NomadConfig) EnableTLS() bool {
+	return len(c.CaFile) != 0 && len(c.CertFile) != 0 && len(c.KeyFile) != 0
+}
+
+func (c NomadConfig) GenerateConfigFile() string {
 
 	f := hclwrite.NewEmptyFile()
 	rootBody := f.Body()
 
-	rootBody.SetAttributeValue("datacenter", cty.StringVal(datacenter))
+	rootBody.SetAttributeValue("datacenter", cty.StringVal(c.Datacenter))
 	rootBody.SetAttributeValue("data_dir", cty.StringVal("/opt/nomad"))
 
-	if len(bindAddr) != 0 {
+	if len(c.BindAddr) != 0 {
 		addressesBlock := rootBody.AppendNewBlock("addresses", []string{})
-		addressesBlock.Body().SetAttributeValue("http", cty.StringVal(bindAddr))
-		addressesBlock.Body().SetAttributeValue("rpc", cty.StringVal(bindAddr))
-		addressesBlock.Body().SetAttributeValue("serf", cty.StringVal(bindAddr))
+		addressesBlock.Body().SetAttributeValue("http", cty.StringVal(c.BindAddr))
+		addressesBlock.Body().SetAttributeValue("rpc", cty.StringVal(c.BindAddr))
+		addressesBlock.Body().SetAttributeValue("serf", cty.StringVal(c.BindAddr))
 	}
 
-	if len(advertiseAddr) != 0 {
+	if len(c.AdvertiseAddr) != 0 {
 		addressesBlock := rootBody.AppendNewBlock("advertise", []string{})
-		addressesBlock.Body().SetAttributeValue("http", cty.StringVal(advertiseAddr))
-		addressesBlock.Body().SetAttributeValue("rpc", cty.StringVal(advertiseAddr))
-		addressesBlock.Body().SetAttributeValue("serf", cty.StringVal(advertiseAddr))
+		addressesBlock.Body().SetAttributeValue("http", cty.StringVal(c.AdvertiseAddr))
+		addressesBlock.Body().SetAttributeValue("rpc", cty.StringVal(c.AdvertiseAddr))
+		addressesBlock.Body().SetAttributeValue("serf", cty.StringVal(c.AdvertiseAddr))
 	}
 
-	if server {
+	if c.Server {
 		serverBlock := rootBody.AppendNewBlock("server", []string{})
 		serverBlock.Body().SetAttributeValue("enabled", cty.BoolVal(true))
-		serverBlock.Body().SetAttributeValue("bootstrap_expect", cty.NumberIntVal(bootstrapExpect))
+		serverBlock.Body().SetAttributeValue("bootstrap_expect", cty.NumberIntVal(c.BootstrapExpect))
 
-		if len(retryJoin) != 0 {
+		if len(c.RetryJoin) != 0 {
 			serverJoinBlock := serverBlock.Body().AppendNewBlock("server_join", []string{})
-			serverJoinBlock.Body().SetAttributeValue("retry_join", cty.ListVal(transform(retryJoin)))
+			serverJoinBlock.Body().SetAttributeValue("retry_join", cty.ListVal(transform(c.RetryJoin)))
 		}
 
-		if len(encrypt) != 0 {
-			serverBlock.Body().SetAttributeValue("encrypt", cty.StringVal(encrypt))
+		if len(c.Encrypt) != 0 {
+			serverBlock.Body().SetAttributeValue("encrypt", cty.StringVal(c.Encrypt))
 		}
 	}
 
-	if client {
+	if c.Client {
 		clientBlock := rootBody.AppendNewBlock("client", []string{})
 		clientBlock.Body().SetAttributeValue("enabled", cty.BoolVal(true))
 
-		if len(retryJoin) != 0 {
+		if len(c.RetryJoin) != 0 {
 			serverJoinBlock := clientBlock.Body().AppendNewBlock("server_join", []string{})
-			serverJoinBlock.Body().SetAttributeValue("retry_join", cty.ListVal(transform(retryJoin)))
+			serverJoinBlock.Body().SetAttributeValue("retry_join", cty.ListVal(transform(c.RetryJoin)))
 		}
 	}
 
-	if enableTLS {
+	if c.EnableTLS() {
 		tlsBlock := rootBody.AppendNewBlock("tls", []string{})
 		tlsBlock.Body().SetAttributeValue("http", cty.BoolVal(true))
 		tlsBlock.Body().SetAttributeValue("rpc", cty.BoolVal(true))
-		tlsBlock.Body().SetAttributeValue("ca_file", cty.StringVal("/etc/nomad.d/nomad-agent-ca.pem"))
-		tlsBlock.Body().SetAttributeValue("cert_file", cty.StringVal("/etc/nomad.d/nomad-agent-cert.pem"))
-		tlsBlock.Body().SetAttributeValue("key_file", cty.StringVal("/etc/nomad.d/nomad-agent-key.pem"))
+		tlsBlock.Body().SetAttributeValue("ca_file", cty.StringVal(makeAbsolute(c.CaFile, "/etc/nomad.d")))
+		tlsBlock.Body().SetAttributeValue("cert_file", cty.StringVal(makeAbsolute(c.CertFile, "/etc/nomad.d")))
+		tlsBlock.Body().SetAttributeValue("key_file", cty.StringVal(makeAbsolute(c.KeyFile, "/etc/nomad.d")))
 	}
 
-	if enableACL {
+	if c.EnableACL {
 		aclBlock := rootBody.AppendNewBlock("acl", []string{})
 		aclBlock.Body().SetAttributeValue("enabled", cty.BoolVal(true))
 	}
@@ -160,60 +180,73 @@ func NewNomadConfiguration(
 	return string(f.Bytes())
 }
 
-func NewVaultConfiguration(
-	apiAddr string,
-	clusterAddr string,
-	address []string,
-	enableTLS bool,
-	storage string,
-	consulAddr string,
-	consulPath string,
-	consulToken string,
-	enableConsulTLS bool) string {
+type VaultConfig struct {
+	ApiAddr        string
+	ClusterAddr    string
+	Address        []string
+	CertFile       string
+	KeyFile        string
+	Storage        string
+	ConsulAddr     string
+	ConsulPath     string
+	ConsulToken    string
+	ConsulCaFile   string
+	ConsulCertFile string
+	ConsulKeyFile  string
+}
 
+func (c VaultConfig) EnableTLS() bool {
+	return len(c.CertFile) != 0 && len(c.KeyFile) != 0
+}
+
+func (c VaultConfig) EnableConsulTLS() bool {
+	return len(c.ConsulCaFile) != 0 && len(c.ConsulCertFile) != 0 && len(c.ConsulKeyFile) != 0
+}
+
+func (c VaultConfig) GenerateConfigFile() string {
 	f := hclwrite.NewEmptyFile()
 	rootBody := f.Body()
 
 	rootBody.SetAttributeValue("ui", cty.BoolVal(true))
 
-	storageBlock := rootBody.AppendNewBlock("storage", []string{storage})
+	storageBlock := rootBody.AppendNewBlock("storage", []string{c.Storage})
 
-	if storage == "file" {
-		storageBlock.Body().SetAttributeValue("path", cty.StringVal("/var/lib/vault"))
+	if c.Storage == "file" {
+		storageBlock.Body().SetAttributeValue("path", cty.StringVal("/opt/vault"))
 	}
 
-	if storage == "consul" {
-		storageBlock.Body().SetAttributeValue("address", cty.StringVal(consulAddr))
-		storageBlock.Body().SetAttributeValue("path", cty.StringVal(consulPath))
+	if c.Storage == "consul" {
+		storageBlock.Body().SetAttributeValue("address", cty.StringVal(c.ConsulAddr))
+		storageBlock.Body().SetAttributeValue("path", cty.StringVal(c.ConsulPath))
 
-		if len(consulToken) != 0 {
-			storageBlock.Body().SetAttributeValue("token", cty.StringVal(consulToken))
+		if len(c.ConsulToken) != 0 {
+			storageBlock.Body().SetAttributeValue("token", cty.StringVal(c.ConsulToken))
 		}
 
-		if enableConsulTLS {
+		if c.EnableConsulTLS() {
 			storageBlock.Body().SetAttributeValue("scheme", cty.StringVal("https"))
-			storageBlock.Body().SetAttributeValue("tls_ca_file", cty.StringVal("/etc/vault.d/consul-ca.pem"))
-			storageBlock.Body().SetAttributeValue("tls_cert_file", cty.StringVal("/etc/vault.d/consul-cert.pem"))
-			storageBlock.Body().SetAttributeValue("tls_key_file", cty.StringVal("/etc/vault.d/consul-key.pem"))
+			storageBlock.Body().SetAttributeValue("tls_ca_file", cty.StringVal(makeAbsolute(c.ConsulCaFile, "/etc/vault.d")))
+			storageBlock.Body().SetAttributeValue("tls_cert_file", cty.StringVal(makeAbsolute(c.ConsulCertFile, "/etc/vault.d")))
+			storageBlock.Body().SetAttributeValue("tls_key_file", cty.StringVal(makeAbsolute(c.ConsulKeyFile, "/etc/vault.d")))
 		}
 	}
 
-	if len(apiAddr) != 0 {
-		rootBody.SetAttributeValue("api_addr", cty.StringVal(apiAddr))
+	if len(c.ApiAddr) != 0 {
+		rootBody.SetAttributeValue("api_addr", cty.StringVal(c.ApiAddr))
 	}
 
-	if len(clusterAddr) != 0 {
-		rootBody.SetAttributeValue("cluster_addr", cty.StringVal(clusterAddr))
+	if len(c.ClusterAddr) != 0 {
+		rootBody.SetAttributeValue("cluster_addr", cty.StringVal(c.ConsulAddr))
 	}
 
-	for _, a := range address {
+	for _, a := range c.Address {
 		listenerBlock := rootBody.AppendNewBlock("listener", []string{"tcp"})
 		listenerBlock.Body().SetAttributeValue("address", cty.StringVal(a))
 
-		if enableTLS {
+		if c.EnableTLS() {
 			listenerBlock.Body().SetAttributeValue("tls_disable", cty.BoolVal(false))
-			listenerBlock.Body().SetAttributeValue("tls_cert_file", cty.StringVal("/etc/vault.d/vault-cert.pem"))
-			listenerBlock.Body().SetAttributeValue("tls_key_file", cty.StringVal("/etc/vault.d/vault-key.pem"))
+			listenerBlock.Body().SetAttributeValue("tls_cert_file", cty.StringVal(makeAbsolute(c.CertFile, "/etc/vault.d")))
+			listenerBlock.Body().SetAttributeValue("tls_key_file", cty.StringVal(makeAbsolute(c.KeyFile, "/etc/vault.d")))
 		} else {
 			listenerBlock.Body().SetAttributeValue("tls_disable", cty.BoolVal(true))
 		}
@@ -228,4 +261,14 @@ func transform(vs []string) []cty.Value {
 		vsm[i] = cty.StringVal(v)
 	}
 	return vsm
+}
+
+func makeAbsolute(path string, base string) string {
+	_, filename := filepath.Split(expandPath(path))
+	return base + "/" + filename
+}
+
+func expandPath(path string) string {
+	res, _ := homedir.Expand(path)
+	return res
 }
