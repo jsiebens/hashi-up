@@ -14,14 +14,13 @@ import (
 
 func InstallVaultCommand() *cobra.Command {
 
-	var ignoreConfigFlags bool
 	var skipEnable bool
 	var skipStart bool
 	var binary string
 	var version string
 
-	var generatedConfigFile string
-	var configFiles []string
+	var configFile string
+	var files []string
 
 	var flags = config.VaultConfig{}
 
@@ -30,14 +29,13 @@ func InstallVaultCommand() *cobra.Command {
 		SilenceUsage: true,
 	}
 
-	command.Flags().BoolVarP(&ignoreConfigFlags, "ignore-config-flags", "i", false, "If set to false will generate a configuration file based on CLI flags, otherwise the flags are ignored")
 	command.Flags().BoolVar(&skipEnable, "skip-enable", false, "If set to true will not enable or start Vault service")
 	command.Flags().BoolVar(&skipStart, "skip-start", false, "If set to true will not start Vault service")
 	command.Flags().StringVarP(&binary, "package", "p", "", "Upload and use this Vault package instead of downloading")
 	command.Flags().StringVarP(&version, "version", "v", "", "Version of Vault to install")
 
-	command.Flags().StringVarP(&generatedConfigFile, "generated-config-file", "c", "vault.hcl", "Name of the generated config file")
-	command.Flags().StringArrayVarP(&configFiles, "file", "f", []string{}, "Additional configuration file to upload")
+	command.Flags().StringVarP(&configFile, "config-file", "c", "", "Custom Vault configuration file to upload")
+	command.Flags().StringArrayVarP(&files, "file", "f", []string{}, "Additional files, e.g. certificates, to upload")
 
 	command.Flags().StringVar(&flags.CertFile, "cert-file", "", "Vault: the certificate for TLS. (see Vault documentation for more info)")
 	command.Flags().StringVar(&flags.KeyFile, "key-file", "", "Vault: the private key for the certificate. (see Vault documentation for more info)")
@@ -57,13 +55,12 @@ func InstallVaultCommand() *cobra.Command {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}
 
+		ignoreConfigFlags := len(configFile) != 0
+
 		var generatedConfig string
 
 		if !ignoreConfigFlags {
 			generatedConfig = flags.GenerateConfigFile()
-			if !strings.HasSuffix(generatedConfigFile, ".hcl") {
-				generatedConfigFile = generatedConfigFile + ".hcl"
-			}
 		}
 
 		if len(binary) == 0 && len(version) == 0 {
@@ -96,21 +93,29 @@ func InstallVaultCommand() *cobra.Command {
 
 			if !ignoreConfigFlags {
 				info("Uploading generated Vault configuration...")
-				err = op.Upload(strings.NewReader(generatedConfig), dir+"/config/"+generatedConfigFile, "0640")
+				err = op.Upload(strings.NewReader(generatedConfig), dir+"/config/vault.hcl", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload consul configuration: %s", err)
 				}
 
+				files = []string{}
+
 				if flags.EnableTLS() {
-					configFiles = append([]string{flags.KeyFile, flags.CertFile}, configFiles...)
+					files = append(files, flags.KeyFile, flags.CertFile)
 				}
 
 				if flags.EnableConsulTLS() {
-					configFiles = append([]string{flags.ConsulCaFile, flags.ConsulCertFile, flags.ConsulKeyFile}, configFiles...)
+					files = append(files, flags.ConsulCaFile, flags.ConsulCertFile, flags.ConsulKeyFile)
+				}
+			} else {
+				info(fmt.Sprintf("Uploading %s as vault.hcl...", configFile))
+				err = op.UploadFile(expandPath(configFile), dir+"/config/vault.hcl", "0640")
+				if err != nil {
+					return fmt.Errorf("error received during upload nomad configuration: %s", err)
 				}
 			}
 
-			for _, s := range configFiles {
+			for _, s := range files {
 				info(fmt.Sprintf("Uploading %s...", s))
 				_, filename := filepath.Split(expandPath(s))
 				err = op.UploadFile(expandPath(s), dir+"/config/"+filename, "0640")

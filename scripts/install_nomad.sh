@@ -103,7 +103,7 @@ download_and_install() {
 
 create_user_and_config() {
   $SUDO mkdir --parents ${NOMAD_DATA_DIR}
-  $SUDO mkdir --parents ${NOMAD_CONFIG_DIR}
+  $SUDO mkdir --parents ${NOMAD_CONFIG_DIR}/config
 
   $SUDO cp ${TMP_DIR}/config/* ${NOMAD_CONFIG_DIR}
 }
@@ -120,7 +120,7 @@ After=network-online.target
 
 [Service]
 ExecReload=/bin/kill -HUP $MAINPID
-ExecStart=${BIN_DIR}/nomad agent -config ${NOMAD_CONFIG_DIR}
+ExecStart=${BIN_DIR}/nomad agent -config ${NOMAD_CONFIG_DIR}/nomad.hcl
 KillMode=process
 KillSignal=SIGINT
 LimitNOFILE=infinity

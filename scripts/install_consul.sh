@@ -110,7 +110,7 @@ create_user_and_config() {
   fi
 
   $SUDO mkdir --parents ${CONSUL_DATA_DIR}
-  $SUDO mkdir --parents ${CONSUL_CONFIG_DIR}
+  $SUDO mkdir --parents ${CONSUL_CONFIG_DIR}/config
 
   $SUDO cp ${TMP_DIR}/config/* ${CONSUL_CONFIG_DIR}
   $SUDO chown --recursive consul:consul /opt/consul
@@ -131,7 +131,7 @@ After=network-online.target
 Type=${SERVICE_TYPE}
 User=consul
 Group=consul
-ExecStart=${BIN_DIR}/consul agent -config-dir=${CONSUL_CONFIG_DIR}
+ExecStart=${BIN_DIR}/consul agent -config-file=${CONSUL_CONFIG_DIR}/consul.hcl -config-dir=${CONSUL_CONFIG_DIR}/config
 ExecReload=${BIN_DIR}/consul reload
 ExecStop=${BIN_DIR}/consul leave
 KillMode=process
