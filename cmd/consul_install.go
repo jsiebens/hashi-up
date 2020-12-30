@@ -95,7 +95,7 @@ func InstallConsulCommand() *cobra.Command {
 
 			if !ignoreConfigFlags {
 				info("Uploading generated Consul configuration...")
-				err = op.Upload(strings.NewReader(generatedConfig), dir+"/config/"+configFile, "0640")
+				err = op.Upload(strings.NewReader(generatedConfig), dir+"/config/consul.hcl", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload consul configuration: %s", err)
 				}
