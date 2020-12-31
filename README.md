@@ -1,6 +1,6 @@
 # hashi-up
 
-hashi-up is a lightweight utility to install HashiCorp [Consul](https://www.consul.io/) and [Nomad](https://www.nomadproject.io)  on any remote Linux host. All you need is `ssh` access and the binary `hashi-up` to build a Consul and/or Nomad cluster.
+hashi-up is a lightweight utility to install HashiCorp [Consul](https://www.consul.io/), [Vault](https://www.vaultproject.io/) and [Nomad](https://www.nomadproject.io)  on any remote Linux host. All you need is `ssh` access and the binary `hashi-up` to build a Consul, Vault and/or Nomad cluster.
 
 The tool is written in Go and is cross-compiled for Linux, Windows, MacOS and even on Raspberry Pi.
 
