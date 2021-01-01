@@ -34,7 +34,7 @@ func InstallNomadCommand() *cobra.Command {
 	command.Flags().StringVarP(&binary, "package", "p", "", "Upload and use this Nomad package instead of downloading")
 	command.Flags().StringVarP(&version, "version", "v", "", "Version of Nomad to install")
 
-	command.Flags().StringVarP(&configFile, "config-file", "c", "", "Custom Nomad configuration file to upload")
+	command.Flags().StringVarP(&configFile, "config-file", "c", "", "Custom Nomad configuration file to upload, setting this will disable config file generation meaning the other flags are ignored")
 	command.Flags().StringArrayVarP(&files, "file", "f", []string{}, "Additional files, e.g. certificates, to upload")
 
 	command.Flags().BoolVar(&flags.Server, "server", false, "Nomad: enables the server mode of the agent. (see Nomad documentation for more info)")

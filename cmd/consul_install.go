@@ -34,7 +34,7 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().StringVarP(&binary, "package", "p", "", "Upload and use this Consul package instead of downloading")
 	command.Flags().StringVarP(&version, "version", "v", "", "Version of Consul to install")
 
-	command.Flags().StringVarP(&configFile, "config-file", "c", "", "Custom Consul configuration file to upload")
+	command.Flags().StringVarP(&configFile, "config-file", "c", "", "Custom Consul configuration file to upload, setting this will disable config file generation meaning the other flags are ignored")
 	command.Flags().StringArrayVarP(&files, "file", "f", []string{}, "Additional files, e.g. certificates, to upload")
 
 	command.Flags().BoolVar(&flags.Server, "server", false, "Consul: switches agent to server mode. (see Consul documentation for more info)")
