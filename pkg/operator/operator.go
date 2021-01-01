@@ -94,8 +94,8 @@ func privateKeyUsingSSHAgent(publicKeyPath string) (ssh.AuthMethod, func() error
 	if sshAgentConn, err := net.Dial("unix", os.Getenv("SSH_AUTH_SOCK")); err == nil {
 		sshAgent := agent.NewClient(sshAgentConn)
 
-		keys, _ := sshAgent.List()
-		if len(keys) == 0 {
+		signers, err := sshAgent.Signers()
+		if err != nil || len(signers) == 0 {
 			return nil, sshAgentConn.Close
 		}
 
@@ -110,9 +110,9 @@ func privateKeyUsingSSHAgent(publicKeyPath string) (ssh.AuthMethod, func() error
 		}
 		parsedkey := authkey.Marshal()
 
-		for _, key := range keys {
-			if bytes.Equal(key.Blob, parsedkey) {
-				return ssh.PublicKeysCallback(sshAgent.Signers), sshAgentConn.Close
+		for _, signer := range signers {
+			if bytes.Equal(signer.PublicKey().Marshal(), parsedkey) {
+				return ssh.PublicKeys(signer), sshAgentConn.Close
 			}
 		}
 	}
