@@ -17,6 +17,7 @@ func Execute() error {
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Help()
 		},
+		SilenceErrors: true,
 	}
 
 	var certificate = &cobra.Command{

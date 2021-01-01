@@ -36,16 +36,23 @@ func ExecuteRemote(host string, user string, privateKey string, callback Callbac
 	var method ssh.AuthMethod
 
 	if privateKey == "" {
-		sshAgent, err := net.Dial("unix", os.Getenv("SSH_AUTH_SOCK"))
+		sshAgentConn, err := net.Dial("unix", os.Getenv("SSH_AUTH_SOCK"))
 
 		if err != nil {
-			return errors.Wrapf(err, "unable to reach SSH Agent")
+			return SshAgentError
 		}
 
-		method = ssh.PublicKeysCallback(agent.NewClient(sshAgent).Signers)
-		defer sshAgent.Close()
-	} else {
+		defer sshAgentConn.Close()
 
+		client := agent.NewClient(sshAgentConn)
+		list, err := client.List()
+
+		if err != nil || len(list) == 0 {
+			return SshAgentError
+		}
+
+		method = ssh.PublicKeysCallback(client.Signers)
+	} else {
 		buffer, err := ioutil.ReadFile(expandPath(privateKey))
 		if err != nil {
 			return errors.Wrapf(err, "unable to parse private key: %s", privateKey)
@@ -134,7 +141,7 @@ func executeRemote(address string, user string, authMethod ssh.AuthMethod, callb
 	operator, err := NewSSHOperator(net.JoinHostPort(host, port), config)
 
 	if err != nil {
-		return errors.Wrapf(err, "unable to connect to %s over ssh", address)
+		return TargetConnectError
 	}
 
 	defer operator.Close()
