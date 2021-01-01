@@ -1,24 +1,32 @@
 # hashi-up
 
-hashi-up is a lightweight utility to install HashiCorp [Consul](https://www.consul.io/), [Vault](https://www.vaultproject.io/) and [Nomad](https://www.nomadproject.io)  on any remote Linux host. All you need is `ssh` access and the binary `hashi-up` to build a Consul, Vault and/or Nomad cluster.
+hashi-up is a lightweight utility to install HashiCorp [Consul](https://www.consul.io/), [Nomad](https://www.nomadproject.io) or [Vault](https://www.vaultproject.io/) on any remote Linux host. All you need is `ssh` access and the binary `hashi-up` to build a Consul, Nomad or Vault cluster.
 
 The tool is written in Go and is cross-compiled for Linux, Windows, MacOS and even on Raspberry Pi.
 
 This project is heavily inspired on the work of [Alex Ellis](https://www.alexellis.io/) who created [k3sup](https://k3sup.dev/), a tool to to get from zero to KUBECONFIG with [k3s](https://k3s.io/)
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/jsiebens/hashi-up)](https://goreportcard.com/report/github.com/jsiebens/hashi-up)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![GitHub All Releases](https://img.shields.io/github/downloads/jsiebens/hashi-up/total)
+
 ## What's this for?
 
-This tool uses `ssh` to install HashiCorp `Consul` or `Nomad` to a remote Linux host. You can also use it to join existing Linux hosts into a Consul or Nomad cluster. First, `Consul` or `Nomad` is installed using a utility script, along with a minimal configuration to run the agent as server or client.
+This tool uses `ssh` to install HashiCorp Consul, Nomad or Vault to a remote Linux host. You can also use it to join existing Linux hosts into a Consul, Nomad or Vault cluster. First, Consul, Nomad or Vault is installed using a utility script, along with a minimal configuration to run the agent as server or client.
 
-hashi-up was developed to automate what can be a very manual and confusing process for many developers, who are already short on time. Once you've provisioned a VM with your favourite tooling, `hashi-up` means you are only 60 seconds away from running `nomad status` on your own computer.
+`hashi-up` was developed to automate what can be a very manual and confusing process for many developers, who are already short on time. Once you've provisioned a VM with your favourite tooling, `hashi-up` means you are only 60 seconds away from running `nomad status` on your own computer.
 
-## Resources
+## Installing
 
-[Deploying a highly-available Nomad cluster with hashi-up!](https://johansiebens.dev/posts/2020/07/deploying-a-highly-available-nomad-cluster-with-hashi-up/)
+`hashi-up` is distributed as a static Go binary. 
+You can use the installer on MacOS and Linux, or visit the Releases page to download the executable for Windows.
 
-[Building a Nomad cluster on Raspberry Pi running Ubuntu server](https://johansiebens.dev/posts/2020/08/building-a-nomad-cluster-on-raspberry-pi-running-ubuntu-server/)
+``` shell
+curl -sLS https://get.hashi-up.dev | sh
+sudo install hashi-up /usr/local/bin/
 
-[Installing HashiCorp Vault on DigitalOcean with hashi-up](https://johansiebens.dev/posts/2020/12/installing-hashicorp-vault-on-digitalocean-with-hashi-up/)
+hashi-up version
+```
 
 ## Usage
 
@@ -215,3 +223,11 @@ ssh-add ~/.ssh/id_rsa
 ```
 
 You can now just run hashi-up as usual. No special parameters are necessary. 
+
+## Resources
+
+[Deploying a highly-available Nomad cluster with hashi-up!](https://johansiebens.dev/posts/2020/07/deploying-a-highly-available-nomad-cluster-with-hashi-up/)
+
+[Building a Nomad cluster on Raspberry Pi running Ubuntu server](https://johansiebens.dev/posts/2020/08/building-a-nomad-cluster-on-raspberry-pi-running-ubuntu-server/)
+
+[Installing HashiCorp Vault on DigitalOcean with hashi-up](https://johansiebens.dev/posts/2020/12/installing-hashicorp-vault-on-digitalocean-with-hashi-up/)
