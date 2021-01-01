@@ -34,8 +34,8 @@ The `hashi-up` tool is a client application which you can run on your own comput
 
 ### SSH credentials
 
-By default, `hashi-up` uses a Unix domain socket to talk to the agent via the SSH agent protocol, this saves you from typing a passphrase for an encrypted private key every time you connect to a server.
-The `ssh-agent` that comes with OpenSSH is commonly used, but other agents, like gpg-agent or yubikey-agent are supported by setting the `SSH_AUTH_SOCK` to the Unix domain socket of the agent.
+By default, `hashi-up` talks to an SSH agent on your host via the SSH agent protocol. This saves you from typing a passphrase for an encrypted private key every time you connect to a server.
+The `ssh-agent` that comes with OpenSSH is commonly used, but other agents, like gpg-agent or yubikey-agent are supported by setting the `SSH_AUTH_SOCK` environment variable to the Unix domain socket of the agent.
 
 The `--ssh-target-key` flag can be used when no agent is available or when a specific private key is preferred.
 
@@ -52,7 +52,7 @@ Provision a new VM running a compatible operating system such as Ubuntu, Debian,
 
 Imagine the IP was `192.168.0.100` and the username was `ubuntu`, then you would run this:
 
-```sh
+``` sh
 export IP=192.168.0.100
 hashi-up consul install --ssh-target-addr $IP --ssh-target-user ubuntu --server --client 0.0.0.0
 ```
