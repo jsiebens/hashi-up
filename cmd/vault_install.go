@@ -116,11 +116,13 @@ func InstallVaultCommand() *cobra.Command {
 			}
 
 			for _, s := range files {
-				info(fmt.Sprintf("Uploading %s...", s))
-				_, filename := filepath.Split(expandPath(s))
-				err = op.UploadFile(expandPath(s), dir+"/config/"+filename, "0640")
-				if err != nil {
-					return fmt.Errorf("error received during upload file: %s", err)
+				if len(s) != 0 {
+					info(fmt.Sprintf("Uploading %s...", s))
+					_, filename := filepath.Split(expandPath(s))
+					err = op.UploadFile(expandPath(s), dir+"/config/"+filename, "0640")
+					if err != nil {
+						return fmt.Errorf("error received during upload file: %s", err)
+					}
 				}
 			}
 

@@ -19,13 +19,14 @@ type ConsulConfig struct {
 	CaFile          string
 	CertFile        string
 	KeyFile         string
+	AutoEncrypt     bool
 	EnableACL       bool
 	AgentToken      string
 	EnableConnect   bool
 }
 
 func (c ConsulConfig) EnableTLS() bool {
-	return len(c.CaFile) != 0 && len(c.CertFile) != 0 && len(c.KeyFile) != 0
+	return c.AutoEncrypt || (len(c.CaFile) != 0 && len(c.CertFile) != 0 && len(c.KeyFile) != 0)
 }
 
 func (c ConsulConfig) GenerateConfigFile() string {
@@ -69,11 +70,25 @@ func (c ConsulConfig) GenerateConfigFile() string {
 
 	if c.EnableTLS() {
 		rootBody.SetAttributeValue("ca_file", cty.StringVal(makeAbsolute(c.CaFile, "/etc/consul.d")))
-		rootBody.SetAttributeValue("cert_file", cty.StringVal(makeAbsolute(c.CertFile, "/etc/consul.d")))
-		rootBody.SetAttributeValue("key_file", cty.StringVal(makeAbsolute(c.KeyFile, "/etc/consul.d")))
+
+		if c.Server || !c.AutoEncrypt {
+			rootBody.SetAttributeValue("cert_file", cty.StringVal(makeAbsolute(c.CertFile, "/etc/consul.d")))
+			rootBody.SetAttributeValue("key_file", cty.StringVal(makeAbsolute(c.KeyFile, "/etc/consul.d")))
+		}
+
 		rootBody.SetAttributeValue("verify_incoming", cty.BoolVal(true))
 		rootBody.SetAttributeValue("verify_outgoing", cty.BoolVal(true))
 		rootBody.SetAttributeValue("verify_server_hostname", cty.BoolVal(true))
+
+		if c.AutoEncrypt {
+			autoTLSBlock := rootBody.AppendNewBlock("auto_encrypt", []string{})
+
+			if c.Server {
+				autoTLSBlock.Body().SetAttributeValue("allow_tls", cty.BoolVal(true))
+			} else {
+				autoTLSBlock.Body().SetAttributeValue("tls", cty.BoolVal(true))
+			}
+		}
 	}
 
 	if c.EnableACL {
