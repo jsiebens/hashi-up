@@ -23,6 +23,7 @@ type ConsulConfig struct {
 	EnableACL       bool
 	AgentToken      string
 	EnableConnect   bool
+	HttpsOnly       bool
 }
 
 func (c ConsulConfig) EnableTLS() bool {
@@ -53,9 +54,17 @@ func (c ConsulConfig) GenerateConfigFile() string {
 		rootBody.SetAttributeValue("retry_join", cty.ListVal(transform(c.RetryJoin)))
 	}
 
+	portsBlock := rootBody.AppendNewBlock("ports", []string{})
+
 	if c.EnableConnect {
-		portsBlock := rootBody.AppendNewBlock("ports", []string{})
 		portsBlock.Body().SetAttributeValue("grpc", cty.NumberUIntVal(8502))
+	}
+
+	if c.EnableTLS() {
+		portsBlock.Body().SetAttributeValue("https", cty.NumberUIntVal(8501))
+		if c.HttpsOnly {
+			portsBlock.Body().SetAttributeValue("http", cty.NumberIntVal(-1))
+		}
 	}
 
 	if c.Server {
@@ -76,7 +85,7 @@ func (c ConsulConfig) GenerateConfigFile() string {
 			rootBody.SetAttributeValue("key_file", cty.StringVal(makeAbsolute(c.KeyFile, "/etc/consul.d")))
 		}
 
-		rootBody.SetAttributeValue("verify_incoming", cty.BoolVal(true))
+		rootBody.SetAttributeValue("verify_incoming_rpc", cty.BoolVal(true))
 		rootBody.SetAttributeValue("verify_outgoing", cty.BoolVal(true))
 		rootBody.SetAttributeValue("verify_server_hostname", cty.BoolVal(true))
 
@@ -86,6 +95,7 @@ func (c ConsulConfig) GenerateConfigFile() string {
 			if c.Server {
 				autoTLSBlock.Body().SetAttributeValue("allow_tls", cty.BoolVal(true))
 			} else {
+				rootBody.SetAttributeValue("verify_incoming_rpc", cty.BoolVal(false))
 				autoTLSBlock.Body().SetAttributeValue("tls", cty.BoolVal(true))
 			}
 		}

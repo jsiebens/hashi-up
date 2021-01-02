@@ -49,6 +49,7 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().StringVar(&flags.CertFile, "cert-file", "", "Consul: the certificate to verify the agent's authenticity. (see Consul documentation for more info)")
 	command.Flags().StringVar(&flags.KeyFile, "key-file", "", "Consul: the key used with the certificate to verify the agent's authenticity. (see Consul documentation for more info)")
 	command.Flags().BoolVar(&flags.AutoEncrypt, "auto-encrypt", false, "Consul: this option enables auto_encrypt and allows servers to automatically distribute certificates from the Connect CA to the clients. (see Consul documentation for more info)")
+	command.Flags().BoolVar(&flags.HttpsOnly, "https-only", true, "Consul: if true, HTTP port is disabled on both clients and servers and to only accept HTTPS connections when TLS enabled.")
 	command.Flags().BoolVar(&flags.EnableConnect, "connect", false, "Consul: enables the Connect feature on the agent. (see Consul documentation for more info)")
 	command.Flags().BoolVar(&flags.EnableACL, "acl", false, "Consul: enables Consul ACL system. (see Consul documentation for more info)")
 	command.Flags().StringVar(&flags.AgentToken, "agent-token", "", "Consul: the token that the agent will use for internal agent operations.. (see Consul documentation for more info)")
