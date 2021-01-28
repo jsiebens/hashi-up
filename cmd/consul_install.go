@@ -39,9 +39,15 @@ func InstallConsulCommand() *cobra.Command {
 
 	command.Flags().BoolVar(&flags.Server, "server", false, "Consul: switches agent to server mode. (see Consul documentation for more info)")
 	command.Flags().StringVar(&flags.Datacenter, "datacenter", "dc1", "Consul: specifies the data center of the local agent. (see Consul documentation for more info)")
-	command.Flags().StringVar(&flags.BindAddr, "bind", "", "Consul: sets the bind address for cluster communication. (see Consul documentation for more info)")
-	command.Flags().StringVar(&flags.AdvertiseAddr, "advertise", "", "Consul: sets the advertise address to use. (see Consul documentation for more info)")
-	command.Flags().StringVar(&flags.ClientAddr, "client", "", "Consul: sets the address to bind for client access. (see Consul documentation for more info)")
+	command.Flags().StringVar(&flags.BindAddr, "bind-addr", "", "Consul: sets the bind address for cluster communication. (see Consul documentation for more info)")
+	command.Flags().StringVar(&flags.AdvertiseAddr, "advertise-addr", "", "Consul: sets the advertise address to use. (see Consul documentation for more info)")
+
+	command.Flags().StringVar(&flags.ClientAddr, "client-addr", "", "Consul: sets the address to bind for client access. (see Consul documentation for more info)")
+	command.Flags().StringVar(&flags.DnsAddr, "dns-addr", "", "Consul: sets the address for the DNS server. (see Consul documentation for more info)")
+	command.Flags().StringVar(&flags.HttpAddr, "http-addr", "", "Consul: sets the address for the HTTP API server. (see Consul documentation for more info)")
+	command.Flags().StringVar(&flags.HttpsAddr, "https-addr", "", "Consul: sets the address for the HTTPS API server. (see Consul documentation for more info)")
+	command.Flags().StringVar(&flags.GrpcAddr, "grpc-addr", "", "Consul: sets the address for the gRPC API server. (see Consul documentation for more info)")
+
 	command.Flags().Int64Var(&flags.BootstrapExpect, "bootstrap-expect", 1, "Consul: sets server to expect bootstrap mode. (see Consul documentation for more info)")
 	command.Flags().StringArrayVar(&flags.RetryJoin, "retry-join", []string{}, "Consul: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Consul documentation for more info)")
 	command.Flags().StringVar(&flags.Encrypt, "encrypt", "", "Consul: provides the gossip encryption key. (see Consul documentation for more info)")
@@ -53,6 +59,13 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().BoolVar(&flags.EnableConnect, "connect", false, "Consul: enables the Connect feature on the agent. (see Consul documentation for more info)")
 	command.Flags().BoolVar(&flags.EnableACL, "acl", false, "Consul: enables Consul ACL system. (see Consul documentation for more info)")
 	command.Flags().StringVar(&flags.AgentToken, "agent-token", "", "Consul: the token that the agent will use for internal agent operations.. (see Consul documentation for more info)")
+
+	command.Flags().StringVar(&flags.ClientAddr, "client", "", "")
+	command.Flags().StringVar(&flags.BindAddr, "bind", "", "")
+	command.Flags().StringVar(&flags.AdvertiseAddr, "advertise", "", "")
+	_ = command.Flags().MarkDeprecated("client", "use the new flag client-addr")
+	_ = command.Flags().MarkDeprecated("bind", "use the new flag bind-addr")
+	_ = command.Flags().MarkDeprecated("advertise", "use the new flag advertise-addr")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
 		if !runLocal && len(sshTargetAddr) == 0 {

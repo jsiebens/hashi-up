@@ -12,6 +12,10 @@ type ConsulConfig struct {
 	BindAddr        string
 	AdvertiseAddr   string
 	ClientAddr      string
+	DnsAddr         string
+	HttpAddr        string
+	HttpsAddr       string
+	GrpcAddr        string
 	Server          bool
 	BootstrapExpect int64
 	RetryJoin       []string
@@ -65,6 +69,20 @@ func (c ConsulConfig) GenerateConfigFile() string {
 		if c.HttpsOnly {
 			portsBlock.Body().SetAttributeValue("http", cty.NumberIntVal(-1))
 		}
+	}
+
+	addressesBlock := rootBody.AppendNewBlock("addresses", []string{})
+	if len(c.DnsAddr) != 0 {
+		addressesBlock.Body().SetAttributeValue("dns", cty.StringVal(c.DnsAddr))
+	}
+	if len(c.HttpAddr) != 0 {
+		addressesBlock.Body().SetAttributeValue("http", cty.StringVal(c.HttpAddr))
+	}
+	if len(c.HttpsAddr) != 0 {
+		addressesBlock.Body().SetAttributeValue("https", cty.StringVal(c.HttpsAddr))
+	}
+	if len(c.GrpcAddr) != 0 {
+		addressesBlock.Body().SetAttributeValue("grpc", cty.StringVal(c.GrpcAddr))
 	}
 
 	if c.Server {
