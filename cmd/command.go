@@ -50,8 +50,11 @@ func Execute() error {
 
 	certificate.AddCommand(CreateCertificateCommand())
 	nomad.AddCommand(InstallNomadCommand())
+	nomad.AddCommand(UninstallNomadCommand())
 	consul.AddCommand(InstallConsulCommand())
+	consul.AddCommand(UninstallConsulCommand())
 	vault.AddCommand(InstallVaultCommand())
+	vault.AddCommand(UninstallVaultCommand())
 
 	rootCmd.AddCommand(VersionCommand())
 	rootCmd.AddCommand(certificate)
@@ -83,5 +86,5 @@ func expandPath(path string) string {
 }
 
 func info(message string) {
-	fmt.Println("[INFO]  " + message)
+	fmt.Println("[INFO] " + message)
 }

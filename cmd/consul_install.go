@@ -91,7 +91,7 @@ func InstallConsulCommand() *cobra.Command {
 		}
 
 		callback := func(op operator.CommandOperator) error {
-			dir := "/tmp/consul-installation." + randstr.String(6)
+			dir := "/tmp/hashi-up." + randstr.String(6)
 
 			defer op.Execute("rm -rf " + dir)
 
@@ -101,7 +101,7 @@ func InstallConsulCommand() *cobra.Command {
 			}
 
 			if len(binary) != 0 {
-				info("Uploading Consul package...")
+				info("Uploading Consul package ...")
 				err = op.UploadFile(binary, dir+"/consul.zip", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload Consul package: %s", err)
@@ -109,7 +109,7 @@ func InstallConsulCommand() *cobra.Command {
 			}
 
 			if !ignoreConfigFlags {
-				info("Uploading generated Consul configuration...")
+				info("Uploading generated Consul configuration ...")
 				err = op.Upload(strings.NewReader(generatedConfig), dir+"/config/consul.hcl", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload consul configuration: %s", err)
@@ -157,11 +157,13 @@ func InstallConsulCommand() *cobra.Command {
 				serviceType = "exec"
 			}
 
-			info("Installing Consul...")
+			info("Installing Consul ...")
 			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' SERVICE_TYPE='%s' CONSUL_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, dir, serviceType, version, skipEnable, skipStart))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
+
+			info("Done.")
 
 			return nil
 		}

@@ -74,7 +74,7 @@ func InstallVaultCommand() *cobra.Command {
 		}
 
 		callback := func(op operator.CommandOperator) error {
-			dir := "/tmp/vault-installation." + randstr.String(6)
+			dir := "/tmp/hashi-up." + randstr.String(6)
 
 			defer op.Execute("rm -rf " + dir)
 
@@ -84,7 +84,7 @@ func InstallVaultCommand() *cobra.Command {
 			}
 
 			if len(binary) != 0 {
-				info("Uploading Vault package...")
+				info("Uploading Vault package ...")
 				err = op.UploadFile(binary, dir+"/vault.zip", "0644")
 				if err != nil {
 					return fmt.Errorf("error received during upload Vault package: %s", err)
@@ -92,7 +92,7 @@ func InstallVaultCommand() *cobra.Command {
 			}
 
 			if !ignoreConfigFlags {
-				info("Uploading generated Vault configuration...")
+				info("Uploading generated Vault configuration ...")
 				err = op.Upload(strings.NewReader(generatedConfig), dir+"/config/vault.hcl", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload consul configuration: %s", err)
@@ -139,11 +139,13 @@ func InstallVaultCommand() *cobra.Command {
 				return fmt.Errorf("error received during upload install script: %s", err)
 			}
 
-			info("Installing Vault...")
+			info("Installing Vault ...")
 			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' VAULT_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, dir, version, skipEnable, skipStart))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
+
+			info("Done.")
 
 			return nil
 		}

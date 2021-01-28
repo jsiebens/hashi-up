@@ -2,17 +2,17 @@
 set -e
 
 info() {
-  echo '[INFO] ' "$@"
+  echo '[INFO] ->' "$@"
 }
 
 fatal() {
-  echo '[ERROR] ' "$@"
+  echo '[ERROR] ->' "$@"
   exit 1
 }
 
 verify_system() {
   if ! [ -d /run/systemd ]; then
-    fatal 'Can not find systemd to use as a process supervisor for consul'
+    fatal 'Can not find systemd to use as a process supervisor for Consul'
   fi
 }
 
@@ -79,7 +79,7 @@ install_dependencies() {
       elif $(has_yum); then
         $SUDO yum install -y curl unzip
       else
-        fatal "Could not find apt-get or yum. Cannot install dependencies on this OS."
+        fatal "Could not find apt-get or yum. Cannot install dependencies on this OS"
         exit 1
       fi
     fi
@@ -103,9 +103,9 @@ download_and_install() {
 
 create_user_and_config() {
   if $(id consul >/dev/null 2>&1); then
-    info "User consul already exists. Will not create again."
+    info "User 'consul' already exists, will not create again"
   else
-    info "Creating user named consul"
+    info "Creating user named 'consul'"
     $SUDO useradd --system --home ${CONSUL_CONFIG_DIR} --shell /bin/false consul
   fi
 
@@ -119,7 +119,7 @@ create_user_and_config() {
 
 # --- write systemd service file ---
 create_systemd_service_file() {
-  info "Creating service file ${CONSUL_SERVICE_FILE}"
+  info "Adding systemd service file ${CONSUL_SERVICE_FILE}"
   $SUDO tee ${CONSUL_SERVICE_FILE} >/dev/null <<EOF
 [Unit]
 Description="HashiCorp Consul - A service mesh solution"
@@ -147,7 +147,7 @@ EOF
 systemd_enable_and_start() {
   [ "${SKIP_ENABLE}" = true ] && return
 
-  info "Enabling consul unit"
+  info "Enabling systemd service"
   $SUDO systemctl enable ${CONSUL_SERVICE_FILE} >/dev/null
   $SUDO systemctl daemon-reload >/dev/null
 
@@ -155,11 +155,11 @@ systemd_enable_and_start() {
 
   POST_INSTALL_HASHES=$(get_installed_hashes)
   if [ "${PRE_INSTALL_HASHES}" = "${POST_INSTALL_HASHES}" ]; then
-    info 'No change detected so skipping service start'
+    info "No change detected so skipping service start"
     return
   fi
 
-  info "Starting consul"
+  info "Starting systemd service"
   $SUDO systemctl restart consul
 
   return 0

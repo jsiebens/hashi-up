@@ -74,7 +74,7 @@ func InstallNomadCommand() *cobra.Command {
 		}
 
 		callback := func(op operator.CommandOperator) error {
-			dir := "/tmp/nomad-installation." + randstr.String(6)
+			dir := "/tmp/hashi-up." + randstr.String(6)
 
 			defer op.Execute("rm -rf " + dir)
 
@@ -84,7 +84,7 @@ func InstallNomadCommand() *cobra.Command {
 			}
 
 			if len(binary) != 0 {
-				info("Uploading Nomad package...")
+				info("Uploading Nomad package ...")
 				err = op.UploadFile(binary, dir+"/nomad.zip", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload nomad package: %s", err)
@@ -92,7 +92,7 @@ func InstallNomadCommand() *cobra.Command {
 			}
 
 			if !ignoreConfigFlags {
-				info("Uploading generated Nomad configuration...")
+				info("Uploading generated Nomad configuration ...")
 				err = op.Upload(strings.NewReader(generatedConfig), dir+"/config/nomad.hcl", "0640")
 				if err != nil {
 					return fmt.Errorf("error received during upload nomad configuration: %s", err)
@@ -135,11 +135,13 @@ func InstallNomadCommand() *cobra.Command {
 				return fmt.Errorf("error received during upload install script: %s", err)
 			}
 
-			info("Installing Nomad...")
+			info("Installing Nomad ...")
 			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' NOMAD_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, dir, version, skipEnable, skipStart))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
+
+			info("Done.")
 
 			return nil
 		}
