@@ -57,6 +57,7 @@ func Execute() error {
 	vault.AddCommand(UninstallVaultCommand())
 
 	rootCmd.AddCommand(VersionCommand())
+	rootCmd.AddCommand(CompletionCommand())
 	rootCmd.AddCommand(certificate)
 	rootCmd.AddCommand(nomad)
 	rootCmd.AddCommand(consul)
