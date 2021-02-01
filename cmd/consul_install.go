@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"fmt"
+	"path/filepath"
+	"strings"
+
 	"github.com/jsiebens/hashi-up/pkg/config"
 	"github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/markbates/pkger"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/thanhpk/randstr"
-	"path/filepath"
-	"strings"
 )
 
 func InstallConsulCommand() *cobra.Command {
@@ -28,6 +29,9 @@ func InstallConsulCommand() *cobra.Command {
 		Use:          "install",
 		SilenceUsage: true,
 	}
+
+	var target = Target{}
+	target.prepareCommand(command)
 
 	command.Flags().BoolVar(&skipEnable, "skip-enable", false, "If set to true will not enable or start Consul service")
 	command.Flags().BoolVar(&skipStart, "skip-start", false, "If set to true will not start Consul service")
@@ -68,7 +72,7 @@ func InstallConsulCommand() *cobra.Command {
 	_ = command.Flags().MarkDeprecated("advertise", "use the new flag advertise-addr")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
-		if !runLocal && len(sshTargetAddr) == 0 {
+		if !target.Local && len(target.Addr) == 0 {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}
 
@@ -168,10 +172,10 @@ func InstallConsulCommand() *cobra.Command {
 			return nil
 		}
 
-		if runLocal {
+		if target.Local {
 			return operator.ExecuteLocal(callback)
 		} else {
-			return operator.ExecuteRemote(sshTargetAddr, sshTargetUser, sshTargetKey, callback)
+			return operator.ExecuteRemote(target.Addr, target.User, target.Key, callback)
 		}
 	}
 

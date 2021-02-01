@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/markbates/pkger"
 	"github.com/spf13/cobra"
@@ -15,7 +16,14 @@ func UninstallConsulCommand() *cobra.Command {
 		SilenceUsage: true,
 	}
 
+	var target = Target{}
+	target.prepareCommand(command)
+
 	command.RunE = func(command *cobra.Command, args []string) error {
+		if !target.Local && len(target.Addr) == 0 {
+			return fmt.Errorf("required ssh-target-addr flag is missing")
+		}
+
 		callback := func(op operator.CommandOperator) error {
 			dir := "/tmp/hashi-up." + randstr.String(6)
 
@@ -50,10 +58,10 @@ func UninstallConsulCommand() *cobra.Command {
 			return nil
 		}
 
-		if runLocal {
+		if target.Local {
 			return operator.ExecuteLocal(callback)
 		} else {
-			return operator.ExecuteRemote(sshTargetAddr, sshTargetUser, sshTargetKey, callback)
+			return operator.ExecuteRemote(target.Addr, target.User, target.Key, callback)
 		}
 	}
 

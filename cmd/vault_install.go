@@ -29,6 +29,9 @@ func InstallVaultCommand() *cobra.Command {
 		SilenceUsage: true,
 	}
 
+	var target = Target{}
+	target.prepareCommand(command)
+
 	command.Flags().BoolVar(&skipEnable, "skip-enable", false, "If set to true will not enable or start Vault service")
 	command.Flags().BoolVar(&skipStart, "skip-start", false, "If set to true will not start Vault service")
 	command.Flags().StringVarP(&binary, "package", "p", "", "Upload and use this Vault package instead of downloading")
@@ -51,7 +54,7 @@ func InstallVaultCommand() *cobra.Command {
 	command.Flags().StringVar(&flags.ConsulKeyFile, "consul-tls-key-file", "", "Vault: the path to the private key for Consul communication. (see Vault documentation for more info)")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
-		if !runLocal && len(sshTargetAddr) == 0 {
+		if !target.Local && len(target.Addr) == 0 {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}
 
@@ -150,10 +153,10 @@ func InstallVaultCommand() *cobra.Command {
 			return nil
 		}
 
-		if runLocal {
+		if target.Local {
 			return operator.ExecuteLocal(callback)
 		} else {
-			return operator.ExecuteRemote(sshTargetAddr, sshTargetUser, sshTargetKey, callback)
+			return operator.ExecuteRemote(target.Addr, target.User, target.Key, callback)
 		}
 	}
 
