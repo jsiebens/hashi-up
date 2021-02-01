@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 )
@@ -49,12 +50,18 @@ func Execute() error {
 	}
 
 	certificate.AddCommand(CreateCertificateCommand())
+
 	nomad.AddCommand(InstallNomadCommand())
 	nomad.AddCommand(UninstallNomadCommand())
+	nomad.AddCommand(GetCommand("nomad"))
+
 	consul.AddCommand(InstallConsulCommand())
 	consul.AddCommand(UninstallConsulCommand())
+	consul.AddCommand(GetCommand("consul"))
+
 	vault.AddCommand(InstallVaultCommand())
 	vault.AddCommand(UninstallVaultCommand())
+	vault.AddCommand(GetCommand("vault"))
 
 	rootCmd.AddCommand(VersionCommand())
 	rootCmd.AddCommand(CompletionCommand())

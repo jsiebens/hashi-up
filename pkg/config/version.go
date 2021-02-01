@@ -6,6 +6,7 @@ import (
 	"github.com/Masterminds/semver"
 	"io/ioutil"
 	"net/http"
+	"runtime"
 	"sort"
 	"time"
 )
@@ -66,4 +67,8 @@ func GetLatestVersion(product string) (string, error) {
 	sort.Sort(sort.Reverse(semver.Collection(vs)))
 
 	return vs[0].String(), nil
+}
+
+func GetDownloadURL(product, version string) string {
+	return fmt.Sprintf("https://releases.hashicorp.com/%s/%s/%s_%s_%s_%s.zip", product, version, product, version, runtime.GOOS, runtime.GOARCH)
 }
