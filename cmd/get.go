@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/cheggaaa/pb/v3"
 	"github.com/jsiebens/hashi-up/pkg/archive"
@@ -24,8 +25,10 @@ func GetCommand(product string) *cobra.Command {
 		SilenceUsage: true,
 	}
 
-	command.Flags().StringVarP(&version, "version", "v", "", fmt.Sprintf("Version of %s to install", product))
-	command.Flags().StringVarP(&destination, "destination", "d", "~/bin", fmt.Sprintf("Version of %s to install", product))
+	title := strings.Title(product)
+
+	command.Flags().StringVarP(&version, "version", "v", "", fmt.Sprintf("Version of %s to install", title))
+	command.Flags().StringVarP(&destination, "dest", "d", "~/bin", "Target directory for the downloaded binary")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
 
@@ -42,11 +45,11 @@ func GetCommand(product string) *cobra.Command {
 		file, err := downloadFile(config.GetDownloadURL(product, version))
 
 		if err != nil {
-			return errors.Wrapf(err, "unable to download %s distribution", product)
+			return errors.Wrapf(err, "unable to download %s distribution", title)
 		}
 
 		if err := archive.Unzip(file, destination); err != nil {
-			return errors.Wrapf(err, "unable to install %s distribution", product)
+			return errors.Wrapf(err, "unable to install %s distribution", title)
 		}
 
 		return nil
@@ -67,7 +70,7 @@ func downloadFile(downloadURL string) (string, error) {
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("incorrect status for downloading tool: %d", res.StatusCode)
+		return "", fmt.Errorf("incorrect status for downloading %s: %d", downloadURL, res.StatusCode)
 	}
 
 	_, fileName := path.Split(downloadURL)
