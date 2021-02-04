@@ -45,7 +45,7 @@ func InstallNomadCommand() *cobra.Command {
 	command.Flags().StringVar(&flags.Datacenter, "datacenter", "dc1", "Nomad: specifies the data center of the local agent. (see Nomad documentation for more info)")
 	command.Flags().StringVar(&flags.BindAddr, "address", "", "Nomad: the address the agent will bind to for all of its various network services. (see Nomad documentation for more info)")
 	command.Flags().StringVar(&flags.AdvertiseAddr, "advertise", "", "Nomad: the address the agent will advertise to for all of its various network services. (see Nomad documentation for more info)")
-	command.Flags().Int64Var(&flags.BootstrapExpect, "bootstrap-expect", 1, "Nomad: sets server to expect bootstrap mode. (see Nomad documentation for more info)")
+	command.Flags().Int64Var(&flags.BootstrapExpect, "bootstrap-expect", 1, "Nomad: sets server to expect bootstrap mode. 0 are less disables bootstrap mode. (see Nomad documentation for more info)")
 	command.Flags().StringArrayVar(&flags.RetryJoin, "retry-join", []string{}, "Nomad: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Nomad documentation for more info)")
 	command.Flags().StringVar(&flags.Encrypt, "encrypt", "", "Nomad: Provides the gossip encryption key. (see Nomad documentation for more info)")
 	command.Flags().StringVar(&flags.CaFile, "ca-file", "", "Nomad: the certificate authority used to check the authenticity of client and server connections. (see Nomad documentation for more info)")

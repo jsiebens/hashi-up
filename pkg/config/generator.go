@@ -1,10 +1,11 @@
 package config
 
 import (
+	"path/filepath"
+
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/mitchellh/go-homedir"
 	"github.com/zclconf/go-cty/cty"
-	"path/filepath"
 )
 
 type ConsulConfig struct {
@@ -88,7 +89,9 @@ func (c ConsulConfig) GenerateConfigFile() string {
 	if c.Server {
 		rootBody.SetAttributeValue("ui", cty.BoolVal(true))
 		rootBody.SetAttributeValue("server", cty.BoolVal(true))
-		rootBody.SetAttributeValue("bootstrap_expect", cty.NumberIntVal(c.BootstrapExpect))
+		if c.BootstrapExpect > 0 {
+			rootBody.SetAttributeValue("bootstrap_expect", cty.NumberIntVal(c.BootstrapExpect))
+		}
 	}
 
 	if len(c.Encrypt) != 0 {
@@ -184,7 +187,9 @@ func (c NomadConfig) GenerateConfigFile() string {
 	if c.Server {
 		serverBlock := rootBody.AppendNewBlock("server", []string{})
 		serverBlock.Body().SetAttributeValue("enabled", cty.BoolVal(true))
-		serverBlock.Body().SetAttributeValue("bootstrap_expect", cty.NumberIntVal(c.BootstrapExpect))
+		if c.BootstrapExpect > 0 {
+			serverBlock.Body().SetAttributeValue("bootstrap_expect", cty.NumberIntVal(c.BootstrapExpect))
+		}
 
 		if len(c.RetryJoin) != 0 {
 			serverJoinBlock := serverBlock.Body().AppendNewBlock("server_join", []string{})
