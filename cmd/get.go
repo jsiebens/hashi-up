@@ -28,7 +28,7 @@ func GetCommand(product string) *cobra.Command {
 	title := strings.Title(product)
 
 	command.Flags().StringVarP(&version, "version", "v", "", fmt.Sprintf("Version of %s to install", title))
-	command.Flags().StringVarP(&destination, "dest", "d", "~/bin", "Target directory for the downloaded binary")
+	command.Flags().StringVarP(&destination, "dest", "d", expandPath("~/bin"), "Target directory for the downloaded binary")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
 
