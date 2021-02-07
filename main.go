@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/jsiebens/hashi-up/cmd"
 	"github.com/jsiebens/hashi-up/pkg/operator"
-	"os"
 )
 
 func main() {

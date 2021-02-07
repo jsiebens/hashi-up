@@ -1,10 +1,11 @@
 package operator
 
 import (
-	goexecute "github.com/alexellis/go-execute/pkg/v1"
 	"io"
 	"os"
 	"strconv"
+
+	goexecute "github.com/alexellis/go-execute/pkg/v1"
 )
 
 type LocalOperator struct {

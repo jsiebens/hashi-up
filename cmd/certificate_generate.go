@@ -7,11 +7,12 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
-	"github.com/spf13/cobra"
 	"math/big"
 	"net"
 	"os"
 	"time"
+
+	"github.com/spf13/cobra"
 )
 
 func CreateCertificateCommand() *cobra.Command {

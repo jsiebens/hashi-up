@@ -3,16 +3,17 @@ package operator
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/go-homedir"
-	"github.com/pkg/errors"
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/agent"
-	"golang.org/x/crypto/ssh/terminal"
 	"io"
 	"io/ioutil"
 	"net"
 	"os"
 	"strings"
+
+	"github.com/mitchellh/go-homedir"
+	"github.com/pkg/errors"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 type CommandRes struct {

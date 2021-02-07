@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"fmt"
+	"path/filepath"
+	"strings"
+
 	"github.com/jsiebens/hashi-up/pkg/config"
 	"github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/markbates/pkger"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/thanhpk/randstr"
-	"path/filepath"
-	"strings"
 )
 
 func InstallVaultCommand() *cobra.Command {

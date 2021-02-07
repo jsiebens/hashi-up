@@ -2,11 +2,12 @@ package operator
 
 import (
 	"bytes"
-	"github.com/bramvdbogaerde/go-scp"
 	"io"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/bramvdbogaerde/go-scp"
 
 	"golang.org/x/crypto/ssh"
 )

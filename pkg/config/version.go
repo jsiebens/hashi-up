@@ -3,12 +3,13 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Masterminds/semver"
 	"io/ioutil"
 	"net/http"
 	"runtime"
 	"sort"
 	"time"
+
+	"github.com/Masterminds/semver"
 )
 
 type Versions struct {
