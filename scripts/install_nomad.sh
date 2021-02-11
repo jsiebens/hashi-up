@@ -120,7 +120,7 @@ After=network-online.target
 
 [Service]
 ExecReload=/bin/kill -HUP $MAINPID
-ExecStart=${BIN_DIR}/nomad agent -config ${NOMAD_CONFIG_DIR}/nomad.hcl
+ExecStart=${BIN_DIR}/nomad agent -config ${NOMAD_CONFIG_DIR}/nomad.hcl -config=${NOMAD_CONFIG_DIR}/config
 KillMode=process
 KillSignal=SIGINT
 LimitNOFILE=infinity
