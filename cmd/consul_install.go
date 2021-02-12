@@ -172,11 +172,7 @@ func InstallConsulCommand() *cobra.Command {
 			return nil
 		}
 
-		if target.Local {
-			return operator.ExecuteLocal(callback)
-		} else {
-			return operator.ExecuteRemote(target.Addr, target.User, target.Key, callback)
-		}
+		return target.execute(callback)
 	}
 
 	return command
