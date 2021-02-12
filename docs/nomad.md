@@ -29,7 +29,7 @@ hashi-up nomad install \
 When the command finishes, try to access Nomad using the UI at http://192.168.100:4646 or with the cli:
 
 ```sh
-nomad agent-info -address==http://192.168.0.100:4646
+nomad agent-info -address=http://192.168.0.100:4646
 ```
 
 ### Join some agents to your Nomad server
