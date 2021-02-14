@@ -24,7 +24,7 @@ func CreateCertificateCommand() *cobra.Command {
 		SilenceUsage: true,
 	}
 
-	command.Flags().StringArrayVar(&hosts, "host", []string{}, "Hostnames and IPs to generate a certificate for")
+	command.Flags().StringSliceVar(&hosts, "host", []string{}, "Hostnames and IPs to generate a certificate for")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
 

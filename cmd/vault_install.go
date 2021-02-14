@@ -39,11 +39,11 @@ func InstallVaultCommand() *cobra.Command {
 	command.Flags().StringVarP(&version, "version", "v", "", "Version of Vault to install")
 
 	command.Flags().StringVarP(&configFile, "config-file", "c", "", "Custom Vault configuration file to upload, setting this will disable config file generation meaning the other flags are ignored")
-	command.Flags().StringArrayVarP(&files, "file", "f", []string{}, "Additional files, e.g. certificates, to upload")
+	command.Flags().StringSliceVarP(&files, "file", "f", []string{}, "Additional files, e.g. certificates, to upload")
 
 	command.Flags().StringVar(&flags.CertFile, "cert-file", "", "Vault: the certificate for TLS. (see Vault documentation for more info)")
 	command.Flags().StringVar(&flags.KeyFile, "key-file", "", "Vault: the private key for the certificate. (see Vault documentation for more info)")
-	command.Flags().StringArrayVar(&flags.Address, "address", []string{"0.0.0.0:8200"}, "Vault: the address to bind to for listening. (see Vault documentation for more info)")
+	command.Flags().StringSliceVar(&flags.Address, "address", []string{"0.0.0.0:8200"}, "Vault: the address to bind to for listening. (see Vault documentation for more info)")
 	command.Flags().StringVar(&flags.ApiAddr, "api-addr", "", "Vault: the address (full URL) to advertise to other Vault servers in the cluster for client redirection. (see Vault documentation for more info)")
 	command.Flags().StringVar(&flags.ClusterAddr, "cluster-addr", "", "Vault: the address to advertise to other Vault servers in the cluster for request forwarding. (see Vault documentation for more info)")
 	command.Flags().StringVar(&flags.Storage, "storage", "file", "Vault: the type of storage backend. Currently only \"file\" of \"consul\" is supported. (see Vault documentation for more info)")

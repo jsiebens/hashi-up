@@ -39,7 +39,7 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().StringVarP(&version, "version", "v", "", "Version of Consul to install")
 
 	command.Flags().StringVarP(&configFile, "config-file", "c", "", "Custom Consul configuration file to upload, setting this will disable config file generation meaning the other flags are ignored")
-	command.Flags().StringArrayVarP(&files, "file", "f", []string{}, "Additional files, e.g. certificates, to upload")
+	command.Flags().StringSliceVarP(&files, "file", "f", []string{}, "Additional files, e.g. certificates, to upload")
 
 	command.Flags().BoolVar(&flags.Server, "server", false, "Consul: switches agent to server mode. (see Consul documentation for more info)")
 	command.Flags().StringVar(&flags.Datacenter, "datacenter", "dc1", "Consul: specifies the data center of the local agent. (see Consul documentation for more info)")
@@ -53,7 +53,7 @@ func InstallConsulCommand() *cobra.Command {
 	command.Flags().StringVar(&flags.GrpcAddr, "grpc-addr", "", "Consul: sets the address for the gRPC API server. (see Consul documentation for more info)")
 
 	command.Flags().Int64Var(&flags.BootstrapExpect, "bootstrap-expect", 1, "Consul: sets server to expect bootstrap mode. 0 are less disables bootstrap mode. (see Consul documentation for more info)")
-	command.Flags().StringArrayVar(&flags.RetryJoin, "retry-join", []string{}, "Consul: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Consul documentation for more info)")
+	command.Flags().StringSliceVar(&flags.RetryJoin, "retry-join", []string{}, "Consul: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Consul documentation for more info)")
 	command.Flags().StringVar(&flags.Encrypt, "encrypt", "", "Consul: provides the gossip encryption key. (see Consul documentation for more info)")
 	command.Flags().StringVar(&flags.CaFile, "ca-file", "", "Consul: the certificate authority used to check the authenticity of client and server connections. (see Consul documentation for more info)")
 	command.Flags().StringVar(&flags.CertFile, "cert-file", "", "Consul: the certificate to verify the agent's authenticity. (see Consul documentation for more info)")

@@ -39,7 +39,7 @@ func InstallNomadCommand() *cobra.Command {
 	command.Flags().StringVarP(&version, "version", "v", "", "Version of Nomad to install")
 
 	command.Flags().StringVarP(&configFile, "config-file", "c", "", "Custom Nomad configuration file to upload, setting this will disable config file generation meaning the other flags are ignored")
-	command.Flags().StringArrayVarP(&files, "file", "f", []string{}, "Additional files, e.g. certificates, to upload")
+	command.Flags().StringSliceVarP(&files, "file", "f", []string{}, "Additional files, e.g. certificates, to upload")
 
 	command.Flags().BoolVar(&flags.Server, "server", false, "Nomad: enables the server mode of the agent. (see Nomad documentation for more info)")
 	command.Flags().BoolVar(&flags.Client, "client", false, "Nomad: enables the client mode of the agent. (see Nomad documentation for more info)")
@@ -47,7 +47,7 @@ func InstallNomadCommand() *cobra.Command {
 	command.Flags().StringVar(&flags.BindAddr, "address", "", "Nomad: the address the agent will bind to for all of its various network services. (see Nomad documentation for more info)")
 	command.Flags().StringVar(&flags.AdvertiseAddr, "advertise", "", "Nomad: the address the agent will advertise to for all of its various network services. (see Nomad documentation for more info)")
 	command.Flags().Int64Var(&flags.BootstrapExpect, "bootstrap-expect", 1, "Nomad: sets server to expect bootstrap mode. 0 are less disables bootstrap mode. (see Nomad documentation for more info)")
-	command.Flags().StringArrayVar(&flags.RetryJoin, "retry-join", []string{}, "Nomad: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Nomad documentation for more info)")
+	command.Flags().StringSliceVar(&flags.RetryJoin, "retry-join", []string{}, "Nomad: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Nomad documentation for more info)")
 	command.Flags().StringVar(&flags.Encrypt, "encrypt", "", "Nomad: Provides the gossip encryption key. (see Nomad documentation for more info)")
 	command.Flags().StringVar(&flags.CaFile, "ca-file", "", "Nomad: the certificate authority used to check the authenticity of client and server connections. (see Nomad documentation for more info)")
 	command.Flags().StringVar(&flags.CertFile, "cert-file", "", "Nomad: the certificate to verify the agent's authenticity. (see Nomad documentation for more info)")
