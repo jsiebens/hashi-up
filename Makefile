@@ -6,21 +6,17 @@ LDFLAGS := "-s -w -X github.com/jsiebens/hashi-up/cmd.Version=$(Version) -X gith
 .PHONY: all
 
 .PHONY: build
-build: generate
+build:
 	go build -ldflags $(LDFLAGS)
 
 .PHONY: dist
-dist: generate
+dist:
 	mkdir -p dist
 	GOOS=linux go build -ldflags $(LDFLAGS) -o dist/hashi-up
 	GOOS=darwin go build -ldflags $(LDFLAGS) -o dist/hashi-up-darwin
 	GOOS=linux GOARCH=arm GOARM=6 go build -ldflags $(LDFLAGS) -o dist/hashi-up-armhf
 	GOOS=linux GOARCH=arm64 go build -ldflags $(LDFLAGS) -o dist/hashi-up-arm64
 	GOOS=windows go build -ldflags $(LDFLAGS) -o dist/hashi-up.exe
-
-generate:
-	go get github.com/markbates/pkger/cmd/pkger
-	pkger -include /scripts
 
 .PHONY: hash
 hash:

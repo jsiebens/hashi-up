@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jsiebens/hashi-up/pkg/operator"
-	"github.com/markbates/pkger"
+	"github.com/jsiebens/hashi-up/scripts"
 	"github.com/spf13/cobra"
 	"github.com/thanhpk/randstr"
 )
@@ -34,7 +34,7 @@ func UninstallNomadCommand() *cobra.Command {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
 
-			installScript, err := pkger.Open("/scripts/uninstall_nomad.sh")
+			installScript, err := scripts.Open("uninstall_nomad.sh")
 
 			if err != nil {
 				return err

@@ -8,7 +8,6 @@ require (
 	github.com/bramvdbogaerde/go-scp v0.0.0-20200820121624-ded9ee94aef5
 	github.com/cheggaaa/pb/v3 v3.0.5
 	github.com/hashicorp/hcl/v2 v2.8.0
-	github.com/markbates/pkger v0.17.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.0.0
