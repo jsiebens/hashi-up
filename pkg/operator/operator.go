@@ -37,11 +37,7 @@ func ExecuteRemote(host string, user string, privateKey string, password string,
 	var method ssh.AuthMethod
 
 	if password != "" {
-		contents, err := pathOrContents(password)
-		if err != nil {
-			return errors.Wrapf(err, "unable to read password file")
-		}
-		method = ssh.Password(strings.TrimSpace(contents))
+		method = ssh.Password(password)
 	} else if privateKey == "" {
 		sshAgentConn, err := net.Dial("unix", os.Getenv("SSH_AUTH_SOCK"))
 
@@ -161,27 +157,4 @@ func expandPath(path string) string {
 	return res
 }
 
-func pathOrContents(poc string) (string, error) {
-	if len(poc) == 0 {
-		return poc, nil
-	}
 
-	path := poc
-	if path[0] == '~' {
-		var err error
-		path, err = homedir.Expand(path)
-		if err != nil {
-			return path, err
-		}
-	}
-
-	if _, err := os.Stat(path); err == nil {
-		contents, err := ioutil.ReadFile(path)
-		if err != nil {
-			return string(contents), err
-		}
-		return string(contents), nil
-	}
-
-	return poc, nil
-}

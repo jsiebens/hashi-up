@@ -48,7 +48,11 @@ func UninstallConsulCommand() *cobra.Command {
 			}
 
 			info("Uninstalling Consul ...")
-			_, err = op.Execute(fmt.Sprintf("cat %s/uninstall.sh | sh -\n", dir))
+			sudoPass, err := target.sudoPass()
+			if err != nil {
+				return fmt.Errorf("error received during installation: %s", err)
+			}
+			_, err = op.Execute(fmt.Sprintf("cat %s/uninstall.sh | SUDO_PASS=\"%s\" sh -\n", dir, sudoPass))
 			if err != nil {
 				return fmt.Errorf("error received during uninstallation: %s", err)
 			}

@@ -23,7 +23,7 @@ func UninstallVaultCommand() *cobra.Command {
 		if !target.Local && len(target.Addr) == 0 {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}
-		
+
 		callback := func(op operator.CommandOperator) error {
 			dir := "/tmp/hashi-up." + randstr.String(6)
 
@@ -48,7 +48,11 @@ func UninstallVaultCommand() *cobra.Command {
 			}
 
 			info("Uninstalling Vault ...")
-			_, err = op.Execute(fmt.Sprintf("cat %s/uninstall.sh | sh -\n", dir))
+			sudoPass, err := target.sudoPass()
+			if err != nil {
+				return fmt.Errorf("error received during installation: %s", err)
+			}
+			_, err = op.Execute(fmt.Sprintf("cat %s/uninstall.sh | SUDO_PASS=\"%s\" sh -\n", dir, sudoPass))
 			if err != nil {
 				return fmt.Errorf("error received during uninstallation: %s", err)
 			}
