@@ -20,6 +20,11 @@ setup_env() {
   SUDO=sudo
   if [ "$(id -u)" -eq 0 ]; then
     SUDO=
+  else
+    if [ ! -z "$SUDO_PASS" ]; then
+      echo $SUDO_PASS | sudo -S true
+      echo ""
+    fi
   fi
 
   NOMAD_DATA_DIR=/opt/nomad

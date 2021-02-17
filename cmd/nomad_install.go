@@ -35,7 +35,7 @@ func InstallNomadCommand() *cobra.Command {
 
 	command.Flags().BoolVar(&skipEnable, "skip-enable", false, "If set to true will not enable or start Nomad service")
 	command.Flags().BoolVar(&skipStart, "skip-start", false, "If set to true will not start Nomad service")
-	command.Flags().StringVarP(&binary, "package", "p", "", "Upload and use this Nomad package instead of downloading")
+	command.Flags().StringVar(&binary, "package", "", "Upload and use this Nomad package instead of downloading")
 	command.Flags().StringVarP(&version, "version", "v", "", "Version of Nomad to install")
 
 	command.Flags().StringVarP(&configFile, "config-file", "c", "", "Custom Nomad configuration file to upload, setting this will disable config file generation meaning the other flags are ignored")
@@ -141,7 +141,11 @@ func InstallNomadCommand() *cobra.Command {
 			}
 
 			info("Installing Nomad ...")
-			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' NOMAD_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, dir, version, skipEnable, skipStart))
+			sudoPass, err := target.sudoPass()
+			if err != nil {
+				return fmt.Errorf("error received during installation: %s", err)
+			}
+			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | SUDO_PASS=\"%s\" TMP_DIR='%s' NOMAD_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, sudoPass, dir, version, skipEnable, skipStart))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
