@@ -50,7 +50,7 @@ setup_verify_arch() {
     SUFFIX=arm64
     ;;
   arm*)
-    SUFFIX=armhfv6
+    SUFFIX=arm
     ;;
   *)
     fatal "Unsupported architecture $ARCH"
