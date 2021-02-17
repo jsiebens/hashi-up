@@ -95,9 +95,17 @@ download_and_install() {
     if [ -x "${BIN_DIR}/vault" ] && [ "$(${BIN_DIR}/vault version | grep Vault | cut -d' ' -f2)" = "v${VAULT_VERSION}" ]; then
       info "Vault binary already installed in ${BIN_DIR}, skipping downloading and installing binary"
     else
-      info "Downloading and unpacking vault_${VAULT_VERSION}_linux_${SUFFIX}.zip"
-      curl -o "$TMP_DIR/vault.zip" -sfL "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_${SUFFIX}.zip"
-      $SUDO unzip -qq -o "$TMP_DIR/vault.zip" -d $BIN_DIR
+      info "Downloading vault_${VAULT_VERSION}_linux_${SUFFIX}.zip"
+      curl -o "$TMP_DIR/vault_${VAULT_VERSION}_linux_${SUFFIX}.zip" -sfL "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_${SUFFIX}.zip"
+
+      info "Downloading vault_${VAULT_VERSION}_SHA256SUMS"
+      curl -o "$TMP_DIR/vault_${VAULT_VERSION}_SHA256SUMS" -sfL "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_SHA256SUMS"
+      info "Verifying downloaded vault_${VAULT_VERSION}_linux_${SUFFIX}.zip"
+      sed -ni '/linux_'"${SUFFIX}"'.zip/p' "$TMP_DIR/vault_${VAULT_VERSION}_SHA256SUMS"
+      shasum -a 256 -c "$TMP_DIR/vault_${VAULT_VERSION}_SHA256SUMS"
+
+      info "Unpacking vault_${VAULT_VERSION}_linux_${SUFFIX}.zip"
+      $SUDO unzip -qq -o "$TMP_DIR/vault_${VAULT_VERSION}_linux_${SUFFIX}.zip" -d $BIN_DIR
       $SUDO setcap cap_ipc_lock=+ep "${BIN_DIR}/vault"
     fi
   fi
@@ -181,6 +189,8 @@ systemd_enable_and_start() {
 
   return 0
 }
+
+cd $TMP_DIR
 
 setup_env
 setup_verify_arch

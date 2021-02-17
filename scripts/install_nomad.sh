@@ -94,9 +94,17 @@ download_and_install() {
     if [ -x "${BIN_DIR}/nomad" ] && [ "$(${BIN_DIR}/nomad version | grep Nomad | cut -d' ' -f2)" = "v${NOMAD_VERSION}" ]; then
       info "Nomad binary already installed in ${BIN_DIR}, skipping downloading and installing binary"
     else
-      info "Downloading and unpacking nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip"
-      curl -o "$TMP_DIR/nomad.zip" -sfL "https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip"
-      $SUDO unzip -qq -o "$TMP_DIR/nomad.zip" -d $BIN_DIR
+      info "Downloading nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip"
+      curl -o "$TMP_DIR/nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip" -sfL "https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip"
+
+      info "Downloading nomad_${NOMAD_VERSION}_SHA256SUMS"
+      curl -o "$TMP_DIR/nomad_${NOMAD_VERSION}_SHA256SUMS" -sfL "https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_SHA256SUMS"
+      info "Verifying downloaded nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip"
+      sed -ni '/linux_'"${SUFFIX}"'.zip/p' "$TMP_DIR/nomad_${NOMAD_VERSION}_SHA256SUMS"
+      shasum -a 256 -c "$TMP_DIR/nomad_${NOMAD_VERSION}_SHA256SUMS"
+
+      info "Unpacking nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip"
+      $SUDO unzip -qq -o "$TMP_DIR/nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip" -d $BIN_DIR
     fi
   fi
 }
@@ -157,6 +165,8 @@ systemd_enable_and_start() {
 
   return 0
 }
+
+cd $TMP_DIR
 
 setup_env
 setup_verify_arch

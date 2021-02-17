@@ -94,9 +94,17 @@ download_and_install() {
     if [ -x "${BIN_DIR}/consul" ] && [ "$(${BIN_DIR}/consul version | grep Consul | cut -d' ' -f2)" = "v${CONSUL_VERSION}" ]; then
       info "Consul binary already installed in ${BIN_DIR}, skipping downloading and installing binary"
     else
-      info "Downloading and unpacking consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"
-      curl -o "$TMP_DIR/consul.zip" -sfL "https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"
-      $SUDO unzip -qq -o "$TMP_DIR/consul.zip" -d $BIN_DIR
+      info "Downloading consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"
+      curl -o "$TMP_DIR/consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip" -sfL "https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"
+
+      info "Downloading consul_${CONSUL_VERSION}_SHA256SUMS"
+      curl -o "$TMP_DIR/consul_${CONSUL_VERSION}_SHA256SUMS" -sfL "https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_SHA256SUMS"
+      info "Verifying downloaded consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"
+      sed -ni '/linux_'"${SUFFIX}"'.zip/p' "$TMP_DIR/consul_${CONSUL_VERSION}_SHA256SUMS"
+      shasum -a 256 -c "$TMP_DIR/consul_${CONSUL_VERSION}_SHA256SUMS"
+
+      info "Unpacking consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"
+      $SUDO unzip -qq -o "$TMP_DIR/consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip" -d $BIN_DIR
     fi
   fi
 }
@@ -164,6 +172,8 @@ systemd_enable_and_start() {
 
   return 0
 }
+
+cd $TMP_DIR
 
 setup_env
 setup_verify_arch
