@@ -44,6 +44,20 @@ func Execute() error {
 		},
 	}
 
+	var terraform = &cobra.Command{
+		Use: "terraform",
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
+		},
+	}
+
+	var packer = &cobra.Command{
+		Use: "packer",
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
+		},
+	}
+
 	certificate.AddCommand(CreateCertificateCommand())
 
 	nomad.AddCommand(InstallNomadCommand())
@@ -58,12 +72,17 @@ func Execute() error {
 	vault.AddCommand(UninstallVaultCommand())
 	vault.AddCommand(GetCommand("vault"))
 
+	terraform.AddCommand(GetCommand("terraform"))
+	packer.AddCommand(GetCommand("packer"))
+
 	rootCmd.AddCommand(VersionCommand())
 	rootCmd.AddCommand(CompletionCommand())
 	rootCmd.AddCommand(certificate)
 	rootCmd.AddCommand(nomad)
 	rootCmd.AddCommand(consul)
 	rootCmd.AddCommand(vault)
+	rootCmd.AddCommand(terraform)
+	rootCmd.AddCommand(packer)
 
 	return rootCmd.Execute()
 }
