@@ -101,7 +101,7 @@ download_and_install() {
       curl -o "$TMP_DIR/nomad_${NOMAD_VERSION}_SHA256SUMS" -sfL "https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_SHA256SUMS"
       info "Verifying downloaded nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip"
       sed -ni '/linux_'"${SUFFIX}"'.zip/p' "$TMP_DIR/nomad_${NOMAD_VERSION}_SHA256SUMS"
-      shasum -a 256 -c "$TMP_DIR/nomad_${NOMAD_VERSION}_SHA256SUMS"
+      sha256sum -c "$TMP_DIR/nomad_${NOMAD_VERSION}_SHA256SUMS"
 
       info "Unpacking nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip"
       $SUDO unzip -qq -o "$TMP_DIR/nomad_${NOMAD_VERSION}_linux_${SUFFIX}.zip" -d $BIN_DIR

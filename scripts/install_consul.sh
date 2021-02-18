@@ -101,7 +101,7 @@ download_and_install() {
       curl -o "$TMP_DIR/consul_${CONSUL_VERSION}_SHA256SUMS" -sfL "https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_SHA256SUMS"
       info "Verifying downloaded consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"
       sed -ni '/linux_'"${SUFFIX}"'.zip/p' "$TMP_DIR/consul_${CONSUL_VERSION}_SHA256SUMS"
-      shasum -a 256 -c "$TMP_DIR/consul_${CONSUL_VERSION}_SHA256SUMS"
+      sha256sum -c "$TMP_DIR/consul_${CONSUL_VERSION}_SHA256SUMS"
 
       info "Unpacking consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip"
       $SUDO unzip -qq -o "$TMP_DIR/consul_${CONSUL_VERSION}_linux_${SUFFIX}.zip" -d $BIN_DIR
