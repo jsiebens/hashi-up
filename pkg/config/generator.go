@@ -149,6 +149,7 @@ type NomadConfig struct {
 	AdvertiseAddr   string
 	Server          bool
 	Client          bool
+	NodeClass		string
 	BootstrapExpect int64
 	RetryJoin       []string
 	Encrypt         string
@@ -204,6 +205,10 @@ func (c NomadConfig) GenerateConfigFile() string {
 	if c.Client {
 		clientBlock := rootBody.AppendNewBlock("client", []string{})
 		clientBlock.Body().SetAttributeValue("enabled", cty.BoolVal(true))
+
+		if len(c.NodeClass) != 0 {
+			clientBlock.Body().SetAttributeValue("node_class", cty.StringVal(c.NodeClass))
+		}
 
 		if len(c.RetryJoin) != 0 {
 			serverJoinBlock := clientBlock.Body().AppendNewBlock("server_join", []string{})
