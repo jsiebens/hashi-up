@@ -1,0 +1,18 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "hashicorp/bionic64"
+
+  config.vm.define "server" do |host|
+    host.vm.hostname = "hashi-server"
+    host.vm.provision "shell", path: "server.sh"
+    host.vm.network "private_network", ip: "10.100.0.10"
+  end
+
+  (1..3).each do |i|
+    config.vm.define "client-0#{i}" do |host|
+      host.vm.hostname = "hashi-client-0#{i}"
+      host.vm.provision "shell", path: "client.sh"
+      host.vm.network "private_network", ip: "10.100.0.1#{i}"
+    end
+  end
+
+end
