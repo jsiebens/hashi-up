@@ -71,5 +71,11 @@ func GetLatestVersion(product string) (string, error) {
 }
 
 func GetDownloadURL(product, version string) string {
-	return fmt.Sprintf("https://releases.hashicorp.com/%s/%s/%s_%s_%s_%s.zip", product, version, product, version, runtime.GOOS, runtime.GOARCH)
+	var arch = runtime.GOARCH
+
+	if arch == "arm" && product == "consul" {
+		arch = "armhfv6"
+	}
+
+	return fmt.Sprintf("https://releases.hashicorp.com/%s/%s/%s_%s_%s_%s.zip", product, version, product, version, runtime.GOOS, arch)
 }
