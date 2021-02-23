@@ -68,15 +68,15 @@ func Execute() error {
 	certificate.AddCommand(CreateCertificateCommand())
 
 	nomad.AddCommand(InstallNomadCommand())
-	nomad.AddCommand(UninstallNomadCommand())
+	nomad.AddCommand(UninstallCommand("nomad"))
 	nomad.AddCommand(GetCommand("nomad"))
 
 	consul.AddCommand(InstallConsulCommand())
-	consul.AddCommand(UninstallConsulCommand())
+	consul.AddCommand(UninstallCommand("consul"))
 	consul.AddCommand(GetCommand("consul"))
 
 	vault.AddCommand(InstallVaultCommand())
-	vault.AddCommand(UninstallVaultCommand())
+	vault.AddCommand(UninstallCommand("vault"))
 	vault.AddCommand(GetCommand("vault"))
 
 	terraform.AddCommand(GetCommand("terraform"))

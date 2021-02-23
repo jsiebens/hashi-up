@@ -12,7 +12,7 @@ fatal() {
 
 verify_system() {
   if ! [ -d /run/systemd ]; then
-    fatal 'Can not find systemd to use as a process supervisor for Consul'
+    fatal "Can not find systemd to use as a process supervisor"
   fi
 }
 
@@ -27,25 +27,25 @@ setup_env() {
     fi
   fi
 
-  CONSUL_DATA_DIR=/opt/consul
-  CONSUL_CONFIG_DIR=/etc/consul.d
-  CONSUL_SERVICE_FILE=/etc/systemd/system/consul.service
+  DATA_DIR="/opt/$SERVICE"
+  CONFIG_DIR="/etc/$SERVICE.d"
+  SERVICE_FILE="/etc/systemd/system/$SERVICE.service"
   BIN_DIR=/usr/local/bin
 }
 
 stop_and_disable_service() {
-  info "Stopping and disabling Consul systemd service"
-  $SUDO systemctl stop consul
-  $SUDO systemctl disable consul
+  info "Stopping and disabling systemd service"
+  $SUDO systemctl stop $SERVICE
+  $SUDO systemctl disable $SERVICE
   $SUDO systemctl daemon-reload
 }
 
 clean_up() {
-  info "Removing Consul installation"
-  $SUDO rm -rf $CONSUL_CONFIG_DIR
-  $SUDO rm -rf $CONSUL_DATA_DIR
-  $SUDO rm -rf $CONSUL_SERVICE_FILE
-  $SUDO rm -rf $BIN_DIR/consul
+  info "Removing installation"
+  $SUDO rm -rf $CONFIG_DIR
+  $SUDO rm -rf $DATA_DIR
+  $SUDO rm -rf $SERVICE_FILE
+  $SUDO rm -rf $BIN_DIR/$SERVICE
 }
 
 verify_system

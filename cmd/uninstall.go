@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/jsiebens/hashi-up/scripts"
@@ -9,7 +10,7 @@ import (
 	"github.com/thanhpk/randstr"
 )
 
-func UninstallVaultCommand() *cobra.Command {
+func UninstallCommand(product string) *cobra.Command {
 
 	var command = &cobra.Command{
 		Use:          "uninstall",
@@ -34,7 +35,7 @@ func UninstallVaultCommand() *cobra.Command {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
 
-			installScript, err := scripts.Open("uninstall_vault.sh")
+			installScript, err := scripts.Open("uninstall.sh")
 
 			if err != nil {
 				return err
@@ -42,17 +43,17 @@ func UninstallVaultCommand() *cobra.Command {
 
 			defer installScript.Close()
 
-			err = op.Upload(installScript, dir+"/uninstall.sh", "0755")
+			err = op.Upload(installScript, dir+"/run.sh", "0755")
 			if err != nil {
 				return fmt.Errorf("error received during upload install script: %s", err)
 			}
 
-			info("Uninstalling Vault ...")
+			info(fmt.Sprintf("Uninstalling %s ...", strings.Title(product)))
 			sudoPass, err := target.sudoPass()
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
-			_, err = op.Execute(fmt.Sprintf("cat %s/uninstall.sh | SUDO_PASS=\"%s\" sh -\n", dir, sudoPass))
+			_, err = op.Execute(fmt.Sprintf("cat %s/run.sh | SERVICE=%s SUDO_PASS=\"%s\" sh -\n", dir, product, sudoPass))
 			if err != nil {
 				return fmt.Errorf("error received during uninstallation: %s", err)
 			}
