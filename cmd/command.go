@@ -58,6 +58,13 @@ func Execute() error {
 		},
 	}
 
+	var vagrant = &cobra.Command{
+		Use: "vagrant",
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
+		},
+	}
+
 	certificate.AddCommand(CreateCertificateCommand())
 
 	nomad.AddCommand(InstallNomadCommand())
@@ -74,6 +81,7 @@ func Execute() error {
 
 	terraform.AddCommand(GetCommand("terraform"))
 	packer.AddCommand(GetCommand("packer"))
+	vagrant.AddCommand(GetCommand("vagrant"))
 
 	rootCmd.AddCommand(VersionCommand())
 	rootCmd.AddCommand(CompletionCommand())
@@ -83,6 +91,7 @@ func Execute() error {
 	rootCmd.AddCommand(vault)
 	rootCmd.AddCommand(terraform)
 	rootCmd.AddCommand(packer)
+	rootCmd.AddCommand(vagrant)
 
 	return rootCmd.Execute()
 }
