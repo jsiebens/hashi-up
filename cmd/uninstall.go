@@ -14,6 +14,8 @@ func UninstallCommand(product string) *cobra.Command {
 
 	var command = &cobra.Command{
 		Use:          "uninstall",
+		Short:        fmt.Sprintf("Uninstall %s on a server via SSH", strings.Title(product)),
+		Long:         fmt.Sprintf("Uninstall %s on a server via SSH", strings.Title(product)),
 		SilenceUsage: true,
 	}
 

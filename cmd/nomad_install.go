@@ -27,6 +27,8 @@ func InstallNomadCommand() *cobra.Command {
 
 	var command = &cobra.Command{
 		Use:          "install",
+		Short:        "Install Nomad on a server via SSH",
+		Long:         "Install Nomad on a server via SSH",
 		SilenceUsage: true,
 	}
 

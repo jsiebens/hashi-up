@@ -22,6 +22,8 @@ func GetCommand(product string) *cobra.Command {
 
 	var command = &cobra.Command{
 		Use:          "get",
+		Short:        fmt.Sprintf("Download %s on your local machine", strings.Title(product)),
+		Long:         fmt.Sprintf("Download %s on your local machine", strings.Title(product)),
 		SilenceUsage: true,
 	}
 

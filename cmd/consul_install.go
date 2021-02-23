@@ -27,6 +27,8 @@ func InstallConsulCommand() *cobra.Command {
 
 	var command = &cobra.Command{
 		Use:          "install",
+		Short:        "Install Consul on a server via SSH",
+		Long:         "Install Consul on a server via SSH",
 		SilenceUsage: true,
 	}
 

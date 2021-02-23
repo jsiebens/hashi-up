@@ -27,6 +27,8 @@ func InstallVaultCommand() *cobra.Command {
 
 	var command = &cobra.Command{
 		Use:          "install",
+		Short:        "Install Vault on a server via SSH",
+		Long:         "Install Vault on a server via SSH",
 		SilenceUsage: true,
 	}
 
