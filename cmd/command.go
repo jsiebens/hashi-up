@@ -37,6 +37,13 @@ func Execute() error {
 		},
 	}
 
+	var boundary = &cobra.Command{
+		Use: "boundary",
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
+		},
+	}
+
 	var terraform = &cobra.Command{
 		Use: "terraform",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -70,6 +77,10 @@ func Execute() error {
 	vault.AddCommand(UninstallCommand("vault"))
 	vault.AddCommand(GetCommand("vault"))
 
+	boundary.AddCommand(InstallBoundaryCommand())
+	boundary.AddCommand(UninstallBoundaryCommand())
+	boundary.AddCommand(GetCommand("boundary"))
+
 	terraform.AddCommand(GetCommand("terraform"))
 	packer.AddCommand(GetCommand("packer"))
 	vagrant.AddCommand(GetCommand("vagrant"))
@@ -79,6 +90,7 @@ func Execute() error {
 	rootCmd.AddCommand(nomad)
 	rootCmd.AddCommand(consul)
 	rootCmd.AddCommand(vault)
+	rootCmd.AddCommand(boundary)
 	rootCmd.AddCommand(terraform)
 	rootCmd.AddCommand(packer)
 	rootCmd.AddCommand(vagrant)
