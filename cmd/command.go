@@ -78,7 +78,7 @@ func Execute() error {
 	vault.AddCommand(GetCommand("vault"))
 
 	boundary.AddCommand(InstallBoundaryCommand())
-	boundary.AddCommand(UninstallBoundaryCommand())
+	boundary.AddCommand(UninstallCommand("boundary"))
 	boundary.AddCommand(GetCommand("boundary"))
 
 	terraform.AddCommand(GetCommand("terraform"))
