@@ -8,94 +8,39 @@ import (
 )
 
 func Execute() error {
-	var rootCmd = &cobra.Command{
-		Use: "hashi-up",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-		SilenceErrors: true,
-	}
 
-	var consul = &cobra.Command{
-		Use: "consul",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-	}
-
-	var nomad = &cobra.Command{
-		Use: "nomad",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-	}
-
-	var vault = &cobra.Command{
-		Use: "vault",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-	}
-
-	var boundary = &cobra.Command{
-		Use: "boundary",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-	}
-
-	var terraform = &cobra.Command{
-		Use: "terraform",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-	}
-
-	var packer = &cobra.Command{
-		Use: "packer",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-	}
-
-	var vagrant = &cobra.Command{
-		Use: "vagrant",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-	}
-
-	nomad.AddCommand(InstallNomadCommand())
-	nomad.AddCommand(UninstallCommand("nomad"))
-	nomad.AddCommand(GetCommand("nomad"))
-
-	consul.AddCommand(InstallConsulCommand())
-	consul.AddCommand(UninstallCommand("consul"))
-	consul.AddCommand(GetCommand("consul"))
-
-	vault.AddCommand(InstallVaultCommand())
-	vault.AddCommand(UninstallCommand("vault"))
-	vault.AddCommand(GetCommand("vault"))
-
-	boundary.AddCommand(InstallBoundaryCommand())
-	boundary.AddCommand(UninstallCommand("boundary"))
-	boundary.AddCommand(GetCommand("boundary"))
-
-	terraform.AddCommand(GetCommand("terraform"))
-	packer.AddCommand(GetCommand("packer"))
-	vagrant.AddCommand(GetCommand("vagrant"))
-
+	rootCmd := baseCommand("hashi-up")
 	rootCmd.AddCommand(VersionCommand())
 	rootCmd.AddCommand(CompletionCommand())
-	rootCmd.AddCommand(nomad)
-	rootCmd.AddCommand(consul)
-	rootCmd.AddCommand(vault)
-	rootCmd.AddCommand(boundary)
-	rootCmd.AddCommand(terraform)
-	rootCmd.AddCommand(packer)
-	rootCmd.AddCommand(vagrant)
+	rootCmd.AddCommand(productCommand("consul", InstallConsulCommand))
+	rootCmd.AddCommand(productCommand("nomad", InstallNomadCommand))
+	rootCmd.AddCommand(productCommand("vault", InstallVaultCommand))
+	rootCmd.AddCommand(productCommand("boundary", InstallBoundaryCommand))
+	rootCmd.AddCommand(productCommand("terraform", nil))
+	rootCmd.AddCommand(productCommand("packer", nil))
+	rootCmd.AddCommand(productCommand("vagrant", nil))
+	rootCmd.AddCommand(productCommand("waypoint", nil))
 
 	return rootCmd.Execute()
+}
+
+func baseCommand(name string) *cobra.Command {
+	return &cobra.Command{
+		Use: name,
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
+		},
+	}
+}
+
+func productCommand(name string, installer func() *cobra.Command) *cobra.Command {
+	command := baseCommand(name)
+	command.AddCommand(GetCommand(name))
+	if installer != nil {
+		command.AddCommand(installer())
+		command.AddCommand(UninstallCommand(name))
+	}
+	return command
 }
 
 func expandPath(path string) string {
