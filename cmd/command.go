@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type Installer func() *cobra.Command
+
 func Execute() error {
 
 	rootCmd := baseCommand("hashi-up")
@@ -15,11 +17,11 @@ func Execute() error {
 	rootCmd.AddCommand(productCommand("consul", InstallConsulCommand))
 	rootCmd.AddCommand(productCommand("nomad", InstallNomadCommand))
 	rootCmd.AddCommand(productCommand("vault", InstallVaultCommand))
-	rootCmd.AddCommand(productCommand("boundary", InstallBoundaryCommand))
-	rootCmd.AddCommand(productCommand("terraform", nil))
-	rootCmd.AddCommand(productCommand("packer", nil))
-	rootCmd.AddCommand(productCommand("vagrant", nil))
-	rootCmd.AddCommand(productCommand("waypoint", nil))
+	rootCmd.AddCommand(productCommand("boundary", InstallBoundaryCommand, InitBoundaryDatabaseCommand))
+	rootCmd.AddCommand(productCommand("terraform"))
+	rootCmd.AddCommand(productCommand("packer"))
+	rootCmd.AddCommand(productCommand("vagrant"))
+	rootCmd.AddCommand(productCommand("waypoint"))
 
 	return rootCmd.Execute()
 }
@@ -33,11 +35,13 @@ func baseCommand(name string) *cobra.Command {
 	}
 }
 
-func productCommand(name string, installer func() *cobra.Command) *cobra.Command {
+func productCommand(name string, installer ...Installer) *cobra.Command {
 	command := baseCommand(name)
 	command.AddCommand(GetCommand(name))
 	if installer != nil {
-		command.AddCommand(installer())
+		for _, y := range installer {
+			command.AddCommand(y())
+		}
 		command.AddCommand(UninstallCommand(name))
 	}
 	return command

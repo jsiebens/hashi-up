@@ -10,12 +10,6 @@ fatal() {
   exit 1
 }
 
-verify_system() {
-  if ! [ -d /run/systemd ]; then
-    fatal 'Can not find systemd to use as a process supervisor for Boundary'
-  fi
-}
-
 setup_env() {
   SUDO=sudo
   if [ "$(id -u)" -eq 0 ]; then
@@ -27,13 +21,7 @@ setup_env() {
     fi
   fi
 
-  BOUNDARY_DATA_DIR=/opt/boundary
-  BOUNDARY_CONFIG_DIR=/etc/boundary.d
-  BOUNDARY_SERVICE_FILE=/etc/systemd/system/boundary.service
-
   BIN_DIR=/usr/local/bin
-
-  PRE_INSTALL_HASHES=$(get_installed_hashes)
 }
 
 # --- set arch and suffix, fatal if architecture not supported ---
@@ -61,11 +49,6 @@ setup_verify_arch() {
     fatal "Unsupported architecture $ARCH"
     ;;
   esac
-}
-
-# --- get hashes of the current boundary bin and service files
-get_installed_hashes() {
-  $SUDO sha256sum ${BIN_DIR}/boundary ${BOUNDARY_CONFIG_DIR}/* ${BOUNDARY_SERVICE_FILE} 2>&1 || true
 }
 
 has_yum() {
@@ -114,74 +97,14 @@ download_and_install() {
   fi
 }
 
-create_user_and_config() {
-  if $(id boundary >/dev/null 2>&1); then
-    info "User 'boundary' already exists, will not create again"
-  else
-    info "Creating user named 'boundary'"
-    $SUDO useradd --system --home ${BOUNDARY_CONFIG_DIR} --shell /bin/false boundary
-  fi
-
-  $SUDO mkdir --parents ${BOUNDARY_DATA_DIR}
-  $SUDO mkdir --parents ${BOUNDARY_CONFIG_DIR}
-
-  $SUDO cp ${TMP_DIR}/config/* ${BOUNDARY_CONFIG_DIR}
-  $SUDO chown --recursive boundary:boundary /opt/boundary
-  $SUDO chown --recursive boundary:boundary /etc/boundary.d
-}
-
-# --- write systemd service file ---
-create_systemd_service_file() {
-  info "Adding system service file ${BOUNDARY_SERVICE_FILE}"
-  $SUDO tee ${BOUNDARY_SERVICE_FILE} >/dev/null <<EOF
-[Unit]
-Description=Boundary
-Documentation=https://boundaryproject.io/docs/
-Wants=network-online.target
-After=network-online.target
-
-[Service]
-ExecStart=${BIN_DIR}/boundary server -config ${BOUNDARY_CONFIG_DIR}/boundary.hcl
-User=boundary
-Group=boundary
-LimitMEMLOCK=infinity
-Capabilities=CAP_IPC_LOCK+ep
-CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
-
-[Install]
-WantedBy=multi-user.target
-EOF
-}
-
-# --- startup systemd service ---
-systemd_enable_and_start() {
-  [ "${SKIP_ENABLE}" = true ] && return
-
-  info "Enabling systemd service"
-  $SUDO systemctl enable ${BOUNDARY_SERVICE_FILE} >/dev/null
-  $SUDO systemctl daemon-reload >/dev/null
-
-  [ "${SKIP_START}" = true ] && return
-
-  POST_INSTALL_HASHES=$(get_installed_hashes)
-  if [ "${PRE_INSTALL_HASHES}" = "${POST_INSTALL_HASHES}" ]; then
-    info "No change detected so skipping service start"
-    return
-  fi
-
-  info "Starting systemd service"
-  $SUDO systemctl restart boundary
-
-  return 0
+init_database() {
+  $SUDO ${BIN_DIR}/boundary database init -config ${TMP_DIR}/config/boundary.hcl
 }
 
 cd $TMP_DIR
 
 setup_env
 setup_verify_arch
-verify_system
 install_dependencies
-create_user_and_config
 download_and_install
-create_systemd_service_file
-systemd_enable_and_start
+init_database

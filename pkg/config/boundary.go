@@ -38,6 +38,10 @@ func (c *BoundaryConfig) IsControllerEnabled() bool {
 	return len(c.ControllerName) != 0
 }
 
+func (c *BoundaryConfig) HasRootKey() bool {
+	return len(c.RootKey) != 0
+}
+
 func (c *BoundaryConfig) HasAllRequiredControllerKeys() bool {
 	return len(c.RootKey) != 0 && len(c.WorkerAuthKey) != 0 && len(c.RecoveryKey) != 0
 }
@@ -68,6 +72,25 @@ func (c *BoundaryConfig) ProxyTLSEnabled() bool {
 
 func (c *BoundaryConfig) ClusterTLSEnabled() bool {
 	return len(c.ClusterCertFile) != 0 && len(c.ClusterKeyFile) != 0
+}
+
+func (c *BoundaryConfig) GenerateDbConfigFile() string {
+	f := hclwrite.NewEmptyFile()
+	rootBody := f.Body()
+	if len(c.DatabaseURL) != 0 {
+		controllerBlock := rootBody.AppendNewBlock("controller", []string{})
+
+		databaseBlock := controllerBlock.Body().AppendNewBlock("database", []string{})
+		databaseBlock.Body().SetAttributeValue("url", cty.StringVal(c.DatabaseURL))
+	}
+	if len(c.RootKey) != 0 {
+		rootKeyBlock := rootBody.AppendNewBlock("kms", []string{"aead"})
+		rootKeyBlock.Body().SetAttributeValue("purpose", cty.StringVal("root"))
+		rootKeyBlock.Body().SetAttributeValue("aead_type", cty.StringVal("aes-gcm"))
+		rootKeyBlock.Body().SetAttributeValue("key", cty.StringVal(c.RootKey))
+		rootKeyBlock.Body().SetAttributeValue("key_id", cty.StringVal("global_root"))
+	}
+	return string(f.Bytes())
 }
 
 func (c *BoundaryConfig) GenerateConfigFile() string {

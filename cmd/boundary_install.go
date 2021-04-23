@@ -20,7 +20,6 @@ func InstallBoundaryCommand() *cobra.Command {
 	var binary string
 	var version string
 
-	var initDatabase bool
 	var configFile string
 	var files []string
 
@@ -39,7 +38,6 @@ func InstallBoundaryCommand() *cobra.Command {
 	command.Flags().StringVar(&binary, "package", "", "Upload and use this Boundary package instead of downloading")
 	command.Flags().StringVarP(&version, "version", "v", "", "Version of Boundary to install")
 
-	command.Flags().BoolVarP(&initDatabase, "init-database", "d", false, "Initialize the Boundary database")
 	command.Flags().StringVarP(&configFile, "config-file", "c", "", "Custom Boundary configuration file to upload")
 	command.Flags().StringArrayVarP(&files, "file", "f", []string{}, "Additional files, e.g. certificates, to upload")
 
@@ -183,7 +181,7 @@ func InstallBoundaryCommand() *cobra.Command {
 			}
 
 			info("Installing Boundary ...")
-			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' INIT_DATABASE='%t' BOUNDARY_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, dir, initDatabase, version, skipEnable, skipStart))
+			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' BOUNDARY_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, dir, version, skipEnable, skipStart))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
