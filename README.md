@@ -12,7 +12,7 @@ This project is heavily inspired on the work of [Alex Ellis](https://www.alexell
 
 ## What's this for?
 
-This tool uses `ssh` to install HashiCorp Consul, Nomad or Vault to a remote Linux host. You can also use it to join existing Linux hosts into a Consul, Nomad or Vault cluster. First, Consul, Nomad or Vault is installed using a utility script, along with a minimal configuration to run the agent as server or client.
+This tool uses `ssh` to install HashiCorp Consul, Nomad or Vault to a remote Linux host. You can also use it to join existing Linux hosts into a Consul, Nomad, Vault or Boundary cluster. First, Consul, Nomad or Vault is installed using a utility script, along with a minimal configuration to run the agent as server or client.
 
 `hashi-up` was developed to automate what can be a very manual and confusing process for many developers, who are already short on time. Once you've provisioned a VM with your favourite tooling, `hashi-up` means you are only 60 seconds away from running `nomad status` on your own computer.
 
@@ -47,6 +47,7 @@ The `--ssh-target-key` flag can be used when no agent is available or when a spe
 - [Installing Consul](docs/consul.md)
 - [Installing Nomad](docs/nomad.md)
 - [Installing Vault](docs/vault.md)
+- [Installing Boundary](docs/boundary.md)
 
 ## Resources
 
