@@ -4,3 +4,8 @@ dist
 
 hashi-up
 pkged.go
+
+.terraform
+*.tfstate
+*.tfstate.backup
+*.tfvars
