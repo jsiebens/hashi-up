@@ -1,4 +1,4 @@
-# `hashi-up` and Vault
+# Installing Vault with hashi-up
 
 There are two ways to install Vault with `hashi-up`.
 
@@ -124,11 +124,13 @@ During installation the following steps are executed on the target host
 
 ```text
 $ hashi-up vault install --help
+Install Vault on a server via SSH
+
 Usage:
   hashi-up vault install [flags]
 
 Flags:
-      --address stringArray           Vault: the address to bind to for listening. (see Vault documentation for more info) (default [0.0.0.0:8200])
+      --address strings               Vault: the address to bind to for listening. (see Vault documentation for more info) (default [0.0.0.0:8200])
       --api-addr string               Vault: the address (full URL) to advertise to other Vault servers in the cluster for client redirection. (see Vault documentation for more info)
       --cert-file string              Vault: the certificate for TLS. (see Vault documentation for more info)
       --cluster-addr string           Vault: the address to advertise to other Vault servers in the cluster for request forwarding. (see Vault documentation for more info)
@@ -139,18 +141,18 @@ Flags:
       --consul-tls-cert-file string   Vault: the path to the certificate for Consul communication. (see Vault documentation for more info)
       --consul-tls-key-file string    Vault: the path to the private key for Consul communication. (see Vault documentation for more info)
       --consul-token string           Vault: the Consul ACL token with permission to read and write from the path in Consul's key-value store. (see Vault documentation for more info)
-  -f, --file stringArray              Additional files, e.g. certificates, to upload
+  -f, --file strings                  Additional files, e.g. certificates, to upload
   -h, --help                          help for install
       --key-file string               Vault: the private key for the certificate. (see Vault documentation for more info)
-  -p, --package string                Upload and use this Vault package instead of downloading
+      --local                         Running the installation locally, without ssh
+      --package string                Upload and use this Vault package instead of downloading
       --skip-enable                   If set to true will not enable or start Vault service
       --skip-start                    If set to true will not start Vault service
+  -r, --ssh-target-addr string        Remote SSH target address (e.g. 127.0.0.1:22
+  -k, --ssh-target-key string         The ssh key to use for SSH login
+  -p, --ssh-target-password string    The ssh password to use for SSH login
+  -s, --ssh-target-sudo-pass string   The ssh password to use for SSH login
+  -u, --ssh-target-user string        Username for SSH login (default "root")
       --storage string                Vault: the type of storage backend. Currently only "file" of "consul" is supported. (see Vault documentation for more info) (default "file")
   -v, --version string                Version of Vault to install
-
-Global Flags:
-      --local                    Running the installation locally, without ssh
-      --ssh-target-addr string   Remote SSH target address (e.g. 127.0.0.1:22
-      --ssh-target-key string    The ssh key to use for SSH login
-      --ssh-target-user string   Username for SSH login (default "root")
 ```

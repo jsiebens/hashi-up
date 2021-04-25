@@ -1,4 +1,4 @@
-# `hashi-up` and Consul
+# Installing Consul with hashi-up
 
 There are two ways to install Consul with `hashi-up`.
 
@@ -25,7 +25,7 @@ hashi-up consul install \
     --ssh-target-addr $IP \
     --ssh-target-user ubuntu \
     --server \
-    --client 0.0.0.0
+    --client-addr-addr 0.0.0.0
 ```
 
 When the command finishes, try to access Consul using the UI at http://192.168.100:8500 or with the cli:
@@ -73,7 +73,7 @@ hashi-up consul install \
   --ssh-target-addr $SERVER_1_IP \
   --ssh-target-user ubuntu \
   --server \
-  --client 0.0.0.0 \
+  --client-addr 0.0.0.0 \
   --bootstrap-expect 3 \
   --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
   
@@ -81,7 +81,7 @@ hashi-up consul install \
   --ssh-target-addr $SERVER_2_IP \
   --ssh-target-user ubuntu \
   --server \
-  --client 0.0.0.0 \
+  --client-addr 0.0.0.0 \
   --bootstrap-expect 3 \
   --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
   
@@ -89,7 +89,7 @@ hashi-up consul install \
   --ssh-target-addr $SERVER_3_IP \
   --ssh-target-user ubuntu \
   --server \
-  --client 0.0.0.0 \
+  --client-addr 0.0.0.0 \
   --bootstrap-expect 3 \
   --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
 ```
@@ -177,37 +177,43 @@ During installation the following steps are executed on the target host
 
 ```text
 $ hashi-up consul install --help
+Install Consul on a server via SSH
+
 Usage:
   hashi-up consul install [flags]
 
 Flags:
-      --acl                      Consul: enables Consul ACL system. (see Consul documentation for more info)
-      --advertise string         Consul: sets the advertise address to use. (see Consul documentation for more info)
-      --agent-token string       Consul: the token that the agent will use for internal agent operations.. (see Consul documentation for more info)
-      --auto-encrypt             Consul: this option enables auto_encrypt and allows servers to automatically distribute certificates from the Connect CA to the clients. (see Consul documentation for more info)
-      --bind string              Consul: sets the bind address for cluster communication. (see Consul documentation for more info)
-      --bootstrap-expect int     Consul: sets server to expect bootstrap mode. (see Consul documentation for more info) (default 1)
-      --ca-file string           Consul: the certificate authority used to check the authenticity of client and server connections. (see Consul documentation for more info)
-      --cert-file string         Consul: the certificate to verify the agent's authenticity. (see Consul documentation for more info)
-      --client string            Consul: sets the address to bind for client access. (see Consul documentation for more info)
-  -c, --config-file string       Custom Consul configuration file to upload, setting this will disable config file generation meaning the other flags are ignored
-      --connect                  Consul: enables the Connect feature on the agent. (see Consul documentation for more info)
-      --datacenter string        Consul: specifies the data center of the local agent. (see Consul documentation for more info) (default "dc1")
-      --encrypt string           Consul: provides the gossip encryption key. (see Consul documentation for more info)
-  -f, --file stringArray         Additional files, e.g. certificates, to upload
-  -h, --help                     help for install
-      --https-only               Consul: if true, HTTP port is disabled on both clients and servers and to only accept HTTPS connections when TLS enabled. (default true)
-      --key-file string          Consul: the key used with the certificate to verify the agent's authenticity. (see Consul documentation for more info)
-  -p, --package string           Upload and use this Consul package instead of downloading
-      --retry-join stringArray   Consul: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Consul documentation for more info)
-      --server                   Consul: switches agent to server mode. (see Consul documentation for more info)
-      --skip-enable              If set to true will not enable or start Consul service
-      --skip-start               If set to true will not start Consul service
-  -v, --version string           Version of Consul to install
-
-Global Flags:
-      --local                    Running the installation locally, without ssh
-      --ssh-target-addr string   Remote SSH target address (e.g. 127.0.0.1:22
-      --ssh-target-key string    The ssh key to use for SSH login
-      --ssh-target-user string   Username for SSH login (default "root")
+      --acl                           Consul: enables Consul ACL system. (see Consul documentation for more info)
+      --advertise-addr string         Consul: sets the advertise address to use. (see Consul documentation for more info)
+      --agent-token string            Consul: the token that the agent will use for internal agent operations.. (see Consul documentation for more info)
+      --auto-encrypt                  Consul: this option enables auto_encrypt and allows servers to automatically distribute certificates from the Connect CA to the clients. (see Consul documentation for more info)
+      --bind-addr string              Consul: sets the bind address for cluster communication. (see Consul documentation for more info)
+      --bootstrap-expect int          Consul: sets server to expect bootstrap mode. 0 are less disables bootstrap mode. (see Consul documentation for more info) (default 1)
+      --ca-file string                Consul: the certificate authority used to check the authenticity of client and server connections. (see Consul documentation for more info)
+      --cert-file string              Consul: the certificate to verify the agent's authenticity. (see Consul documentation for more info)
+      --client-addr string            Consul: sets the address to bind for client access. (see Consul documentation for more info)
+  -c, --config-file string            Custom Consul configuration file to upload, setting this will disable config file generation meaning the other flags are ignored
+      --connect                       Consul: enables the Connect feature on the agent. (see Consul documentation for more info)
+      --datacenter string             Consul: specifies the data center of the local agent. (see Consul documentation for more info) (default "dc1")
+      --dns-addr string               Consul: sets the address for the DNS server. (see Consul documentation for more info)
+      --encrypt string                Consul: provides the gossip encryption key. (see Consul documentation for more info)
+  -f, --file strings                  Additional files, e.g. certificates, to upload
+      --grpc-addr string              Consul: sets the address for the gRPC API server. (see Consul documentation for more info)
+  -h, --help                          help for install
+      --http-addr string              Consul: sets the address for the HTTP API server. (see Consul documentation for more info)
+      --https-addr string             Consul: sets the address for the HTTPS API server. (see Consul documentation for more info)
+      --https-only                    Consul: if true, HTTP port is disabled on both clients and servers and to only accept HTTPS connections when TLS enabled. (default true)
+      --key-file string               Consul: the key used with the certificate to verify the agent's authenticity. (see Consul documentation for more info)
+      --local                         Running the installation locally, without ssh
+      --package string                Upload and use this Consul package instead of downloading
+      --retry-join strings            Consul: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Consul documentation for more info)
+      --server                        Consul: switches agent to server mode. (see Consul documentation for more info)
+      --skip-enable                   If set to true will not enable or start Consul service
+      --skip-start                    If set to true will not start Consul service
+  -r, --ssh-target-addr string        Remote SSH target address (e.g. 127.0.0.1:22
+  -k, --ssh-target-key string         The ssh key to use for SSH login
+  -p, --ssh-target-password string    The ssh password to use for SSH login
+  -s, --ssh-target-sudo-pass string   The ssh password to use for SSH login
+  -u, --ssh-target-user string        Username for SSH login (default "root")
+  -v, --version string                Version of Consul to install
 ```

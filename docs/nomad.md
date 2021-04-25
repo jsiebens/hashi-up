@@ -1,4 +1,4 @@
-# `hashi-up` and Nomad
+# Installing Nomad with hashi-up
 
 There are two ways to install Nomad with `hashi-up`.
 
@@ -214,34 +214,36 @@ During installation the following steps are executed on the target host
 
 ```text
 $ hashi-up nomad install --help
+Install Nomad on a server via SSH
+
 Usage:
   hashi-up nomad install [flags]
 
 Flags:
-      --acl                      Nomad: enables Nomad ACL system. (see Nomad documentation for more info)
-      --address string           Nomad: the address the agent will bind to for all of its various network services. (see Nomad documentation for more info)
-      --advertise string         Nomad: the address the agent will advertise to for all of its various network services. (see Nomad documentation for more info)
-      --bootstrap-expect int     Nomad: sets server to expect bootstrap mode. (see Nomad documentation for more info) (default 1)
-      --ca-file string           Nomad: the certificate authority used to check the authenticity of client and server connections. (see Nomad documentation for more info)
-      --cert-file string         Nomad: the certificate to verify the agent's authenticity. (see Nomad documentation for more info)
-      --client                   Nomad: enables the client mode of the agent. (see Nomad documentation for more info)
-  -c, --config-file string       Custom Nomad configuration file to upload, setting this will disable config file generation meaning the other flags are ignored
-      --datacenter string        Nomad: specifies the data center of the local agent. (see Nomad documentation for more info) (default "dc1")
-      --encrypt string           Nomad: Provides the gossip encryption key. (see Nomad documentation for more info)
-  -f, --file stringArray         Additional files, e.g. certificates, to upload
-  -h, --help                     help for install
-      --key-file string          Nomad: the key used with the certificate to verify the agent's authenticity. (see Nomad documentation for more info)
-  -p, --package string           Upload and use this Nomad package instead of downloading
-      --retry-join stringArray   Nomad: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Nomad documentation for more info)
-      --server                   Nomad: enables the server mode of the agent. (see Nomad documentation for more info)
-      --skip-enable              If set to true will not enable or start Nomad service
-      --skip-start               If set to true will not start Nomad service
-  -v, --version string           Version of Nomad to install
-
-Global Flags:
-      --local                    Running the installation locally, without ssh
-      --ssh-target-addr string   Remote SSH target address (e.g. 127.0.0.1:22
-      --ssh-target-key string    The ssh key to use for SSH login
-      --ssh-target-user string   Username for SSH login (default "root")
-
+      --acl                           Nomad: enables Nomad ACL system. (see Nomad documentation for more info)
+      --address string                Nomad: the address the agent will bind to for all of its various network services. (see Nomad documentation for more info)
+      --advertise string              Nomad: the address the agent will advertise to for all of its various network services. (see Nomad documentation for more info)
+      --bootstrap-expect int          Nomad: sets server to expect bootstrap mode. 0 are less disables bootstrap mode. (see Nomad documentation for more info) (default 1)
+      --ca-file string                Nomad: the certificate authority used to check the authenticity of client and server connections. (see Nomad documentation for more info)
+      --cert-file string              Nomad: the certificate to verify the agent's authenticity. (see Nomad documentation for more info)
+      --client                        Nomad: enables the client mode of the agent. (see Nomad documentation for more info)
+  -c, --config-file string            Custom Nomad configuration file to upload, setting this will disable config file generation meaning the other flags are ignored
+      --datacenter string             Nomad: specifies the data center of the local agent. (see Nomad documentation for more info) (default "dc1")
+      --encrypt string                Nomad: Provides the gossip encryption key. (see Nomad documentation for more info)
+  -f, --file strings                  Additional files, e.g. certificates, to upload
+  -h, --help                          help for install
+      --key-file string               Nomad: the key used with the certificate to verify the agent's authenticity. (see Nomad documentation for more info)
+      --local                         Running the installation locally, without ssh
+      --node-class string             Nomad: specifies an arbitrary string used to logically group client nodes by user-defined class. (see Nomad documentation for more info)
+      --package string                Upload and use this Nomad package instead of downloading
+      --retry-join strings            Nomad: address of an agent to join at start time with retries enabled. Can be specified multiple times. (see Nomad documentation for more info)
+      --server                        Nomad: enables the server mode of the agent. (see Nomad documentation for more info)
+      --skip-enable                   If set to true will not enable or start Nomad service
+      --skip-start                    If set to true will not start Nomad service
+  -r, --ssh-target-addr string        Remote SSH target address (e.g. 127.0.0.1:22
+  -k, --ssh-target-key string         The ssh key to use for SSH login
+  -p, --ssh-target-password string    The ssh password to use for SSH login
+  -s, --ssh-target-sudo-pass string   The ssh password to use for SSH login
+  -u, --ssh-target-user string        Username for SSH login (default "root")
+  -v, --version string                Version of Nomad to install
 ```
