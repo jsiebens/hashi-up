@@ -14,6 +14,8 @@ var (
 func VersionCommand() *cobra.Command {
 	var command = &cobra.Command{
 		Use:          "version",
+		Short:        "Prints the hashi-up version",
+		Long:         "Prints the hashi-up version",
 		SilenceUsage: true,
 	}
 

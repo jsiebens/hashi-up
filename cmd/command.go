@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -39,6 +40,8 @@ func baseCommand(name string) *cobra.Command {
 
 func productCommand(name string, installer ...Installer) *cobra.Command {
 	command := baseCommand(name)
+	command.Short = fmt.Sprintf("Install or download %s", strings.Title(name))
+	command.Long = fmt.Sprintf("Install or download %s", strings.Title(name))
 	command.AddCommand(GetCommand(name))
 	if installer != nil {
 		for _, y := range installer {
