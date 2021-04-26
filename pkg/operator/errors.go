@@ -1,10 +1,29 @@
 package operator
 
-type Error string
+import "fmt"
 
-func (e Error) Error() string {
-	return string(e)
+type TargetConnectError struct {
+	reason error
 }
 
-const SshAgentError = Error("SshAgentError")
-const TargetConnectError = Error("TargetConnectError")
+func NewTargetConnectError(message error) *TargetConnectError {
+	return &TargetConnectError{
+		reason: message,
+	}
+}
+func (e *TargetConnectError) Error() string {
+	return fmt.Sprintf("%s", e.reason)
+}
+
+type SshAgentError struct {
+	reason error
+}
+
+func NewSshAgentError(message error) *SshAgentError {
+	return &SshAgentError{
+		reason: message,
+	}
+}
+func (e *SshAgentError) Error() string {
+	return fmt.Sprintf("%s", e.reason)
+}

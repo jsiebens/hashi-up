@@ -11,14 +11,15 @@ import (
 func main() {
 	if err := cmd.Execute(); err != nil {
 
-		switch err {
-		case operator.SshAgentError:
-			fmt.Print(sshAgentErrorMessage)
-		case operator.TargetConnectError:
-			fmt.Print(targetConnectError)
+		switch err.(type) {
+		case *operator.TargetConnectError:
+			fmt.Printf(targetConnectErrorMessage, err)
+		case *operator.SshAgentError:
+			fmt.Printf(sshAgentErrorMessage, err)
 		default:
 			fmt.Println(err)
 		}
+
 		os.Exit(1)
 	}
 }
@@ -27,6 +28,8 @@ const sshAgentErrorMessage = `
 There was an issue finding a private key. 
 This could happen when hashi-up can not reach an authentication agent or when no private key is loaded.
 
+Reason: %s
+
 How to fix this?
 
 - check if an authentication agent is running and add a private key, e.g. 'ssh-add ~/.ssh/id_rsa'
@@ -34,9 +37,11 @@ How to fix this?
 
 `
 
-const targetConnectError = `
+const targetConnectErrorMessage = `
 There was an issue connecting to your target host. 
 This could happen when hashi-up can not reach the target host or when the private key authentication is invalid.
+
+Reason: %s
 
 How to fix this?
 

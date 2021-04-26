@@ -42,7 +42,7 @@ func ExecuteRemote(host string, user string, privateKey string, password string,
 		sshAgentConn, err := net.Dial("unix", os.Getenv("SSH_AUTH_SOCK"))
 
 		if err != nil {
-			return SshAgentError
+			return NewSshAgentError(err)
 		}
 
 		defer sshAgentConn.Close()
@@ -51,7 +51,7 @@ func ExecuteRemote(host string, user string, privateKey string, password string,
 		list, err := client.List()
 
 		if err != nil || len(list) == 0 {
-			return SshAgentError
+			return NewSshAgentError(err)
 		}
 
 		method = ssh.PublicKeysCallback(client.Signers)
@@ -144,7 +144,7 @@ func executeRemote(address string, user string, authMethod ssh.AuthMethod, callb
 	operator, err := NewSSHOperator(net.JoinHostPort(host, port), config)
 
 	if err != nil {
-		return TargetConnectError
+		return NewTargetConnectError(err)
 	}
 
 	defer operator.Close()
@@ -156,5 +156,3 @@ func expandPath(path string) string {
 	res, _ := homedir.Expand(path)
 	return res
 }
-
-

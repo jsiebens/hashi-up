@@ -32,6 +32,7 @@ func baseCommand(name string) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Help()
 		},
+		SilenceErrors: true,
 	}
 }
 
