@@ -12,6 +12,7 @@ type Installer func() *cobra.Command
 func Execute() error {
 
 	rootCmd := baseCommand("hashi-up")
+	rootCmd.AddCommand(TlsCommands())
 	rootCmd.AddCommand(VersionCommand())
 	rootCmd.AddCommand(CompletionCommand())
 	rootCmd.AddCommand(productCommand("consul", InstallConsulCommand))
