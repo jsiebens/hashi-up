@@ -6,14 +6,17 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/mitchellh/go-homedir"
 )
 
 func Unzip(source, destination string) error {
 
-	expandedDestination, err := homedir.Expand(destination)
+	expanded, err := homedir.Expand(destination)
+	if err != nil {
+		return err
+	}
+	absoluteDestination, err := filepath.Abs(expanded)
 	if err != nil {
 		return err
 	}
@@ -28,7 +31,7 @@ func Unzip(source, destination string) error {
 		}
 	}()
 
-	if err := os.MkdirAll(expandedDestination, 0755); err != nil {
+	if err := os.MkdirAll(absoluteDestination, 0755); err != nil {
 		return err
 	}
 
@@ -44,10 +47,7 @@ func Unzip(source, destination string) error {
 			}
 		}()
 
-		path := filepath.Join(expandedDestination, f.Name)
-		if !strings.HasPrefix(path, filepath.Clean(expandedDestination)+string(os.PathSeparator)) {
-			return fmt.Errorf("%s: Illegal file path", path)
-		}
+		path := filepath.Join(absoluteDestination, f.Name)
 
 		if f.FileInfo().IsDir() {
 			os.MkdirAll(path, f.Mode())
@@ -72,7 +72,7 @@ func Unzip(source, destination string) error {
 	}
 
 	for _, f := range r.File {
-		fmt.Printf("Extracting file: %s to %s\n", f.Name, expandedDestination)
+		fmt.Printf("Extracting file: %s to %s\n", f.Name, absoluteDestination)
 		err := extractAndWriteFile(f)
 		if err != nil {
 			return err
