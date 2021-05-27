@@ -146,8 +146,8 @@ User=consul
 Group=consul
 ExecStart=${BIN_DIR}/consul agent -config-file=${CONSUL_CONFIG_DIR}/consul.hcl -config-dir=${CONSUL_CONFIG_DIR}/config
 ExecReload=${BIN_DIR}/consul reload
-ExecStop=${BIN_DIR}/consul leave
 KillMode=process
+KillSignal=SIGTERM
 Restart=on-failure
 LimitNOFILE=65536
 
