@@ -149,7 +149,7 @@ type NomadConfig struct {
 	AdvertiseAddr   string
 	Server          bool
 	Client          bool
-	NodeClass		string
+	NodeClass       string
 	BootstrapExpect int64
 	RetryJoin       []string
 	Encrypt         string
