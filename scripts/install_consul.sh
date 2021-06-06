@@ -145,7 +145,7 @@ Type=${SERVICE_TYPE}
 User=consul
 Group=consul
 ExecStart=${BIN_DIR}/consul agent -config-file=${CONSUL_CONFIG_DIR}/consul.hcl -config-dir=${CONSUL_CONFIG_DIR}/config
-ExecReload=${BIN_DIR}/consul reload
+ExecReload=/bin/kill --signal HUP $MAINPID
 KillMode=process
 KillSignal=SIGTERM
 Restart=on-failure
