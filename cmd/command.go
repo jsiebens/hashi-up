@@ -24,6 +24,9 @@ func Execute() error {
 	rootCmd.AddCommand(productCommand("packer"))
 	rootCmd.AddCommand(productCommand("vagrant"))
 	rootCmd.AddCommand(productCommand("waypoint"))
+	rootCmd.AddCommand(productCommand("levant"))
+	rootCmd.AddCommand(productCommand("consul-template"))
+	rootCmd.AddCommand(productCommand("envconsul"))
 
 	return rootCmd.Execute()
 }
