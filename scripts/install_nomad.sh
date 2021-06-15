@@ -132,8 +132,8 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
-ExecReload=/bin/kill -HUP $MAINPID
 ExecStart=${BIN_DIR}/nomad agent -config ${NOMAD_CONFIG_DIR}/nomad.hcl -config=${NOMAD_CONFIG_DIR}/config
+ExecReload=/bin/kill -s HUP \$MAINPID
 KillMode=process
 KillSignal=SIGINT
 LimitNOFILE=infinity

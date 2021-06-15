@@ -142,6 +142,7 @@ After=network-online.target
 
 [Service]
 ExecStart=${BIN_DIR}/boundary server -config ${BOUNDARY_CONFIG_DIR}/boundary.hcl
+ExecReload=/bin/kill -s HUP \$MAINPID
 User=boundary
 Group=boundary
 LimitMEMLOCK=infinity
