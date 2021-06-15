@@ -178,7 +178,7 @@ systemd_enable_and_start() {
   return 0
 }
 
-cd $TMP_DIRm
+cd $TMP_DIR
 
 setup_env
 setup_verify_arch
