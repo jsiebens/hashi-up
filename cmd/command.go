@@ -50,6 +50,10 @@ func productCommand(name string, installer ...Installer) *cobra.Command {
 		for _, y := range installer {
 			command.AddCommand(y())
 		}
+		command.AddCommand(ManageServiceCommand("stop", name))
+		command.AddCommand(ManageServiceCommand("start", name))
+		command.AddCommand(ManageServiceCommand("restart", name))
+		command.AddCommand(ManageServiceCommand("reload", name))
 		command.AddCommand(UninstallCommand(name))
 	}
 	return command
