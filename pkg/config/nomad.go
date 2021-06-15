@@ -92,5 +92,5 @@ func (c NomadConfig) GenerateConfigFile() string {
 		aclBlock.Body().SetAttributeValue("enabled", cty.BoolVal(true))
 	}
 
-	return string(f.Bytes())
+	return generate(f)
 }

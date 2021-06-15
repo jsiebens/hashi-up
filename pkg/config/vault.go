@@ -77,5 +77,5 @@ func (c VaultConfig) GenerateConfigFile() string {
 		}
 	}
 
-	return string(f.Bytes())
+	return generate(f)
 }

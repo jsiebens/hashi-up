@@ -90,7 +90,7 @@ func (c *BoundaryConfig) GenerateDbConfigFile() string {
 		rootKeyBlock.Body().SetAttributeValue("key", cty.StringVal(c.RootKey))
 		rootKeyBlock.Body().SetAttributeValue("key_id", cty.StringVal("global_root"))
 	}
-	return string(f.Bytes())
+	return generate(f)
 }
 
 func (c *BoundaryConfig) GenerateConfigFile() string {
@@ -186,7 +186,7 @@ func (c *BoundaryConfig) GenerateConfigFile() string {
 		recoveryKeyBlock.Body().SetAttributeValue("key_id", cty.StringVal("global_recovery"))
 	}
 
-	return string(f.Bytes())
+	return generate(f)
 }
 
 func allOrNothing(a, b string) bool {

@@ -137,5 +137,5 @@ func (c ConsulConfig) GenerateConfigFile() string {
 		connectBlock.Body().SetAttributeValue("enabled", cty.BoolVal(true))
 	}
 
-	return string(f.Bytes())
+	return generate(f)
 }
