@@ -65,7 +65,7 @@ setup_verify_arch() {
 
 # --- get hashes of the current consul bin and service files
 get_installed_hashes() {
-  $SUDO sha256sum ${BIN_DIR}/consul ${CONSUL_CONFIG_DIR}/* ${FILE_CONSUL_SERVICE} 2>&1 || true
+  $SUDO sha256sum ${BIN_DIR}/consul ${CONSUL_CONFIG_DIR}/* ${CONSUL_SERVICE_FILE} 2>&1 || true
 }
 
 has_yum() {
@@ -178,7 +178,7 @@ systemd_enable_and_start() {
   return 0
 }
 
-cd $TMP_DIR
+cd $TMP_DIRm
 
 setup_env
 setup_verify_arch
