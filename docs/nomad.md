@@ -48,7 +48,7 @@ hashi-up nomad install \
   --retry-join $SERVER_IP
   
 hashi-up nomad install \
-  --ssh-target-addr $AGENT_1_IP \
+  --ssh-target-addr $AGENT_2_IP \
   --ssh-target-user ubuntu \
   --client \
   --retry-join $SERVER_IP
