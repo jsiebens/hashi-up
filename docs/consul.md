@@ -25,7 +25,7 @@ hashi-up consul install \
     --ssh-target-addr $IP \
     --ssh-target-user ubuntu \
     --server \
-    --client-addr-addr 0.0.0.0
+    --client-addr 0.0.0.0
 ```
 
 When the command finishes, try to access Consul using the UI at http://192.168.100:8500 or with the cli:
