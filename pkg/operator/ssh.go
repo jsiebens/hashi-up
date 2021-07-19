@@ -1,10 +1,8 @@
 package operator
 
 import (
-	"bytes"
 	"io"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/bramvdbogaerde/go-scp"
@@ -33,54 +31,19 @@ func (s SSHOperator) Close() error {
 	return s.conn.Close()
 }
 
-func (s SSHOperator) Execute(command string) (CommandRes, error) {
+func (s SSHOperator) Execute(command string) error {
 	sess, err := s.conn.NewSession()
 	if err != nil {
-		return CommandRes{}, err
+		return err
 	}
 
 	defer sess.Close()
 
-	sessStdOut, err := sess.StdoutPipe()
-	if err != nil {
-		return CommandRes{}, err
-	}
-
-	output := bytes.Buffer{}
-
-	wg := sync.WaitGroup{}
-
-	stdOutWriter := io.MultiWriter(os.Stdout, &output)
-	wg.Add(1)
-	go func() {
-		io.Copy(stdOutWriter, sessStdOut)
-		wg.Done()
-	}()
-	sessStderr, err := sess.StderrPipe()
-	if err != nil {
-		return CommandRes{}, err
-	}
-
-	errorOutput := bytes.Buffer{}
-	stdErrWriter := io.MultiWriter(os.Stderr, &errorOutput)
-	wg.Add(1)
-	go func() {
-		io.Copy(stdErrWriter, sessStderr)
-		wg.Done()
-	}()
-
+	sess.Stdout = os.Stdout
+	sess.Stderr = os.Stderr
 	err = sess.Run(command)
 
-	wg.Wait()
-
-	if err != nil {
-		return CommandRes{}, err
-	}
-
-	return CommandRes{
-		StdErr: errorOutput.Bytes(),
-		StdOut: output.Bytes(),
-	}, nil
+	return err
 }
 
 func (s SSHOperator) Upload(source io.Reader, remotePath string, mode string) error {

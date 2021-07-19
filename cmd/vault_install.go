@@ -84,7 +84,7 @@ func InstallVaultCommand() *cobra.Command {
 
 			defer op.Execute("rm -rf " + dir)
 
-			_, err := op.Execute("mkdir -p " + dir + "/config")
+			err := op.Execute("mkdir -p " + dir + "/config")
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
@@ -150,7 +150,7 @@ func InstallVaultCommand() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
-			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | SUDO_PASS=\"%s\" TMP_DIR='%s' VAULT_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, sudoPass, dir, version, skipEnable, skipStart))
+			err = op.Execute(fmt.Sprintf("cat %s/install.sh | SUDO_PASS=\"%s\" TMP_DIR='%s' VAULT_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, sudoPass, dir, version, skipEnable, skipStart))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}

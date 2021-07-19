@@ -119,7 +119,7 @@ func InstallBoundaryCommand() *cobra.Command {
 
 			defer op.Execute("rm -rf " + dir)
 
-			_, err := op.Execute("mkdir -p " + dir + "/config")
+			err := op.Execute("mkdir -p " + dir + "/config")
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
@@ -183,7 +183,7 @@ func InstallBoundaryCommand() *cobra.Command {
 			}
 
 			info("Installing Boundary ...")
-			_, err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' BOUNDARY_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, dir, version, skipEnable, skipStart))
+			err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' BOUNDARY_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, dir, version, skipEnable, skipStart))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}

@@ -32,7 +32,7 @@ func ManageServiceCommand(action, product string) *cobra.Command {
 
 			defer op.Execute("rm -rf " + dir)
 
-			_, err := op.Execute("mkdir -p " + dir)
+			err := op.Execute("mkdir -p " + dir)
 			if err != nil {
 				return fmt.Errorf("error received during preparation: %s", err)
 			}
@@ -55,7 +55,7 @@ func ManageServiceCommand(action, product string) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("error received during execution: %s", err)
 			}
-			_, err = op.Execute(fmt.Sprintf("cat %s/run.sh | ACTION=%s SERVICE=%s SUDO_PASS=\"%s\" sh -\n", dir, action, product, sudoPass))
+			err = op.Execute(fmt.Sprintf("cat %s/run.sh | ACTION=%s SERVICE=%s SUDO_PASS=\"%s\" sh -\n", dir, action, product, sudoPass))
 			if err != nil {
 				return fmt.Errorf("error received during execution: %s", err)
 			}

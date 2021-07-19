@@ -32,7 +32,7 @@ func UninstallCommand(product string) *cobra.Command {
 
 			defer op.Execute("rm -rf " + dir)
 
-			_, err := op.Execute("mkdir -p " + dir + "/config")
+			err := op.Execute("mkdir -p " + dir + "/config")
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
@@ -55,7 +55,7 @@ func UninstallCommand(product string) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
-			_, err = op.Execute(fmt.Sprintf("cat %s/run.sh | SERVICE=%s SUDO_PASS=\"%s\" sh -\n", dir, product, sudoPass))
+			err = op.Execute(fmt.Sprintf("cat %s/run.sh | SERVICE=%s SUDO_PASS=\"%s\" sh -\n", dir, product, sudoPass))
 			if err != nil {
 				return fmt.Errorf("error received during uninstallation: %s", err)
 			}

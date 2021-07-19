@@ -15,22 +15,19 @@ func NewLocalOperator() *LocalOperator {
 	return &LocalOperator{}
 }
 
-func (e LocalOperator) Execute(command string) (CommandRes, error) {
+func (e LocalOperator) Execute(command string) error {
 	task := goexecute.ExecTask{
 		Command:     command,
 		Shell:       true,
 		StreamStdio: true,
 	}
 
-	res, err := task.Execute()
+	_, err := task.Execute()
 	if err != nil {
-		return CommandRes{}, err
+		return err
 	}
 
-	return CommandRes{
-		StdErr: []byte(res.Stderr),
-		StdOut: []byte(res.Stdout),
-	}, nil
+	return nil
 }
 
 func (e LocalOperator) UploadFile(path string, remotePath string, mode string) error {
