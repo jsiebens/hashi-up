@@ -61,7 +61,7 @@ func (c VaultConfig) GenerateConfigFile() string {
 	}
 
 	if len(c.ClusterAddr) != 0 {
-		rootBody.SetAttributeValue("cluster_addr", cty.StringVal(c.ConsulAddr))
+		rootBody.SetAttributeValue("cluster_addr", cty.StringVal(c.ClusterAddr))
 	}
 
 	for _, a := range c.Address {
