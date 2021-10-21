@@ -27,6 +27,7 @@ func Execute() error {
 	rootCmd.AddCommand(productCommand("levant"))
 	rootCmd.AddCommand(productCommand("consul-template"))
 	rootCmd.AddCommand(productCommand("envconsul"))
+	rootCmd.AddCommand(productCommand("nomad-pack"))
 
 	return rootCmd.Execute()
 }
