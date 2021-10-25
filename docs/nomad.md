@@ -162,7 +162,7 @@ In this case, use the `--config-file` and the `--file` options to upload this co
 First create a config file and additional resources like certificates and keys, e.g. `server.hcl`:
 
 ```hcl
-data_dir = "/op/nomad"
+data_dir = "/opt/nomad"
 
 # Enable the server
 server {
