@@ -2,10 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/Masterminds/semver"
 	"io"
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/cheggaaa/pb/v3"
@@ -18,7 +21,9 @@ import (
 func GetCommand(product string) *cobra.Command {
 
 	var version string
+	var arch string
 	var destination string
+	var extract bool
 
 	var command = &cobra.Command{
 		Use:          "get",
@@ -30,7 +35,9 @@ func GetCommand(product string) *cobra.Command {
 	title := strings.Title(product)
 
 	command.Flags().StringVarP(&version, "version", "v", "", fmt.Sprintf("Version of %s to install", title))
-	command.Flags().StringVarP(&destination, "dest", "d", expandPath("~/bin"), "Target directory for the downloaded binary")
+	command.Flags().StringVar(&arch, "arch", runtime.GOARCH, "Target architecture")
+	command.Flags().BoolVar(&extract, "extract", true, "Extract the binary from the downloaded archive")
+	command.Flags().StringVarP(&destination, "dest", "d", expandPath("~/bin"), "Target directory for the downloaded archive or binary")
 
 	command.RunE = func(command *cobra.Command, args []string) error {
 
@@ -44,14 +51,25 @@ func GetCommand(product string) *cobra.Command {
 			version = latest
 		}
 
-		file, err := downloadFile(config.GetDownloadURL(product, version))
+		semVersion, err := semver.NewVersion(version)
+		if err != nil {
+			return err
+		}
+
+		file, err := downloadFile(config.GetDownloadURL(product, arch, semVersion))
 
 		if err != nil {
 			return errors.Wrapf(err, "unable to download %s distribution", title)
 		}
 
-		if err := archive.Unzip(file, destination); err != nil {
-			return errors.Wrapf(err, "unable to install %s distribution", title)
+		if extract {
+			if err := archive.Unzip(file, destination); err != nil {
+				return errors.Wrapf(err, "unable to install %s distribution", title)
+			}
+		} else {
+			if err := os.Rename(file, filepath.Join(destination, filepath.Base(file))); err != nil {
+				return errors.Wrapf(err, "unable to install %s distribution", title)
+			}
 		}
 
 		return nil

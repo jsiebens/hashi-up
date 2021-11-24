@@ -70,10 +70,10 @@ func GetLatestVersion(product string) (string, error) {
 	return vs[0].String(), nil
 }
 
-func GetDownloadURL(product, version string) string {
-	var arch = runtime.GOARCH
+func GetDownloadURL(product, arch string, version *semver.Version) string {
+	v := semver.MustParse("1.10.4")
 
-	if arch == "arm" && product == "consul" {
+	if arch == "arm" && product == "consul" && version.LessThan(v) {
 		arch = "armhfv6"
 	}
 
