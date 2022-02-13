@@ -115,7 +115,11 @@ func InitBoundaryDatabaseCommand() *cobra.Command {
 			}
 
 			info("Initializing Boundary database ...")
-			err = op.Execute(fmt.Sprintf("cat %s/install.sh | sh -\n", dir))
+			sudoPass, err := target.sudoPass()
+			if err != nil {
+				return fmt.Errorf("error received during installation: %s", err)
+			}
+			err = op.Execute(fmt.Sprintf("cat %s/install.sh | SUDO_PASS=\"%s\" sh -\n", dir, sudoPass))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
