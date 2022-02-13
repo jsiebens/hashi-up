@@ -1,11 +1,10 @@
 package operator
 
 import (
+	"context"
+	"github.com/bramvdbogaerde/go-scp"
 	"io"
 	"os"
-	"time"
-
-	"github.com/bramvdbogaerde/go-scp"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -57,11 +56,10 @@ func (s SSHOperator) Upload(source io.Reader, remotePath string, mode string) er
 	client := scp.Client{
 		Session:      sess,
 		Conn:         s.conn,
-		Timeout:      time.Minute,
 		RemoteBinary: "scp",
 	}
 
-	err = client.CopyFile(source, remotePath, mode)
+	err = client.CopyFile(context.Background(), source, remotePath, mode)
 
 	return err
 }
