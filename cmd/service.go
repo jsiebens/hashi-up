@@ -6,13 +6,13 @@ import (
 
 	"github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/jsiebens/hashi-up/scripts"
-	"github.com/spf13/cobra"
+	"github.com/muesli/coral"
 	"github.com/thanhpk/randstr"
 )
 
-func ManageServiceCommand(action, product string) *cobra.Command {
+func ManageServiceCommand(action, product string) *coral.Command {
 
-	var command = &cobra.Command{
+	var command = &coral.Command{
 		Use:          action,
 		Short:        fmt.Sprintf("%s %s systemd service on a server via SSH", strings.Title(action), strings.Title(product)),
 		Long:         fmt.Sprintf("%s %s systemd service on a server via SSH", strings.Title(action), strings.Title(product)),
@@ -22,7 +22,7 @@ func ManageServiceCommand(action, product string) *cobra.Command {
 	var target = Target{}
 	target.prepareCommand(command)
 
-	command.RunE = func(command *cobra.Command, args []string) error {
+	command.RunE = func(command *coral.Command, args []string) error {
 		if !target.Local && len(target.Addr) == 0 {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}

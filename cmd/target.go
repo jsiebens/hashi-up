@@ -7,7 +7,7 @@ import (
 
 	"github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/mitchellh/go-homedir"
-	"github.com/spf13/cobra"
+	"github.com/muesli/coral"
 )
 
 const SshTargetPassword = "SSH_TARGET_PASSWORD"
@@ -22,7 +22,7 @@ type Target struct {
 	Local    bool
 }
 
-func (t *Target) prepareCommand(cmd *cobra.Command) {
+func (t *Target) prepareCommand(cmd *coral.Command) {
 	cmd.Flags().StringVarP(&t.Addr, "ssh-target-addr", "r", "", "Remote SSH target address (e.g. 127.0.0.1:22")
 	cmd.Flags().StringVarP(&t.User, "ssh-target-user", "u", "root", "Username for SSH login")
 	cmd.Flags().StringVarP(&t.Key, "ssh-target-key", "k", "", "The ssh key to use for SSH login")

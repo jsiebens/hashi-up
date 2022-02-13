@@ -9,8 +9,8 @@ require (
 	github.com/cheggaaa/pb/v3 v3.0.5
 	github.com/hashicorp/hcl/v2 v2.8.0
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/muesli/coral v1.0.0
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/cobra v1.0.0
 	github.com/thanhpk/randstr v1.0.4
 	github.com/zclconf/go-cty v1.5.1
 	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897

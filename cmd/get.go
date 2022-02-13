@@ -14,18 +14,18 @@ import (
 	"github.com/cheggaaa/pb/v3"
 	"github.com/jsiebens/hashi-up/pkg/archive"
 	"github.com/jsiebens/hashi-up/pkg/config"
+	"github.com/muesli/coral"
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 )
 
-func GetCommand(product string) *cobra.Command {
+func GetCommand(product string) *coral.Command {
 
 	var version string
 	var arch string
 	var destination string
 	var extract bool
 
-	var command = &cobra.Command{
+	var command = &coral.Command{
 		Use:          "get",
 		Short:        fmt.Sprintf("Download %s on your local machine", strings.Title(product)),
 		Long:         fmt.Sprintf("Download %s on your local machine", strings.Title(product)),
@@ -39,7 +39,7 @@ func GetCommand(product string) *cobra.Command {
 	command.Flags().BoolVar(&extract, "extract", true, "Extract the binary from the downloaded archive")
 	command.Flags().StringVarP(&destination, "dest", "d", expandPath("~/bin"), "Target directory for the downloaded archive or binary")
 
-	command.RunE = func(command *cobra.Command, args []string) error {
+	command.RunE = func(command *coral.Command, args []string) error {
 
 		if len(version) == 0 {
 			latest, err := config.GetLatestVersion(product)

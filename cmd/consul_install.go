@@ -8,12 +8,12 @@ import (
 	"github.com/jsiebens/hashi-up/pkg/config"
 	"github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/jsiebens/hashi-up/scripts"
+	"github.com/muesli/coral"
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 	"github.com/thanhpk/randstr"
 )
 
-func InstallConsulCommand() *cobra.Command {
+func InstallConsulCommand() *coral.Command {
 
 	var skipEnable bool
 	var skipStart bool
@@ -25,7 +25,7 @@ func InstallConsulCommand() *cobra.Command {
 
 	var flags = config.ConsulConfig{}
 
-	var command = &cobra.Command{
+	var command = &coral.Command{
 		Use:          "install",
 		Short:        "Install Consul on a server via SSH",
 		Long:         "Install Consul on a server via SSH",
@@ -73,7 +73,7 @@ func InstallConsulCommand() *cobra.Command {
 	_ = command.Flags().MarkDeprecated("bind", "use the new flag bind-addr")
 	_ = command.Flags().MarkDeprecated("advertise", "use the new flag advertise-addr")
 
-	command.RunE = func(command *cobra.Command, args []string) error {
+	command.RunE = func(command *coral.Command, args []string) error {
 		if !target.Local && len(target.Addr) == 0 {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}

@@ -8,12 +8,12 @@ import (
 	"github.com/jsiebens/hashi-up/pkg/config"
 	"github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/jsiebens/hashi-up/scripts"
+	"github.com/muesli/coral"
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 	"github.com/thanhpk/randstr"
 )
 
-func InstallBoundaryCommand() *cobra.Command {
+func InstallBoundaryCommand() *coral.Command {
 
 	var skipEnable bool
 	var skipStart bool
@@ -25,7 +25,7 @@ func InstallBoundaryCommand() *cobra.Command {
 
 	var flags = config.BoundaryConfig{}
 
-	var command = &cobra.Command{
+	var command = &coral.Command{
 		Use:          "install",
 		Short:        "Install Boundary on a server via SSH",
 		Long:         "Install Boundary on a server via SSH",
@@ -62,7 +62,7 @@ func InstallBoundaryCommand() *cobra.Command {
 	command.Flags().StringVar(&flags.PublicAddress, "public-addr", "", "Boundary: specifies the public host or IP address (and optionally port) at which the worker can be reached by clients for proxying.")
 	command.Flags().StringArrayVar(&flags.Controllers, "controller", []string{"127.0.0.1"}, "Boundary: a list of hosts/IP addresses and optionally ports for reaching controllers.")
 
-	command.RunE = func(command *cobra.Command, args []string) error {
+	command.RunE = func(command *coral.Command, args []string) error {
 		if !target.Local && len(target.Addr) == 0 {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}

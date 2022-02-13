@@ -8,12 +8,12 @@ import (
 	"github.com/jsiebens/hashi-up/pkg/config"
 	"github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/jsiebens/hashi-up/scripts"
+	"github.com/muesli/coral"
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 	"github.com/thanhpk/randstr"
 )
 
-func InstallVaultCommand() *cobra.Command {
+func InstallVaultCommand() *coral.Command {
 
 	var skipEnable bool
 	var skipStart bool
@@ -25,7 +25,7 @@ func InstallVaultCommand() *cobra.Command {
 
 	var flags = config.VaultConfig{}
 
-	var command = &cobra.Command{
+	var command = &coral.Command{
 		Use:          "install",
 		Short:        "Install Vault on a server via SSH",
 		Long:         "Install Vault on a server via SSH",
@@ -56,7 +56,7 @@ func InstallVaultCommand() *cobra.Command {
 	command.Flags().StringVar(&flags.ConsulCertFile, "consul-tls-cert-file", "", "Vault: the path to the certificate for Consul communication. (see Vault documentation for more info)")
 	command.Flags().StringVar(&flags.ConsulKeyFile, "consul-tls-key-file", "", "Vault: the path to the private key for Consul communication. (see Vault documentation for more info)")
 
-	command.RunE = func(command *cobra.Command, args []string) error {
+	command.RunE = func(command *coral.Command, args []string) error {
 		if !target.Local && len(target.Addr) == 0 {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}

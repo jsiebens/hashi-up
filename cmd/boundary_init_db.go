@@ -7,12 +7,12 @@ import (
 	"github.com/jsiebens/hashi-up/pkg/config"
 	"github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/jsiebens/hashi-up/scripts"
+	"github.com/muesli/coral"
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 	"github.com/thanhpk/randstr"
 )
 
-func InitBoundaryDatabaseCommand() *cobra.Command {
+func InitBoundaryDatabaseCommand() *coral.Command {
 
 	var binary string
 	var version string
@@ -21,7 +21,7 @@ func InitBoundaryDatabaseCommand() *cobra.Command {
 
 	var flags = config.BoundaryConfig{}
 
-	var command = &cobra.Command{
+	var command = &coral.Command{
 		Use:          "init-database",
 		SilenceUsage: true,
 	}
@@ -37,7 +37,7 @@ func InitBoundaryDatabaseCommand() *cobra.Command {
 	command.Flags().StringVar(&flags.DatabaseURL, "db-url", "", "Boundary: configures the URL for connecting to Postgres")
 	command.Flags().StringVar(&flags.RootKey, "root-key", "", "Boundary: a KEK (Key Encrypting Key) for the scope-specific KEKs (also referred to as the scope's root key).")
 
-	command.RunE = func(command *cobra.Command, args []string) error {
+	command.RunE = func(command *coral.Command, args []string) error {
 		if !target.Local && len(target.Addr) == 0 {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}

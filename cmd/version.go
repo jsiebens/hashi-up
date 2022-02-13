@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
+	"github.com/muesli/coral"
 )
 
 var (
@@ -11,15 +11,15 @@ var (
 	GitCommit string
 )
 
-func VersionCommand() *cobra.Command {
-	var command = &cobra.Command{
+func VersionCommand() *coral.Command {
+	var command = &coral.Command{
 		Use:          "version",
 		Short:        "Prints the hashi-up version",
 		Long:         "Prints the hashi-up version",
 		SilenceUsage: true,
 	}
 
-	command.Run = func(cmd *cobra.Command, args []string) {
+	command.Run = func(cmd *coral.Command, args []string) {
 		if len(Version) == 0 {
 			fmt.Println("Version: dev")
 		} else {

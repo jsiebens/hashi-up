@@ -12,10 +12,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/spf13/cobra"
+	"github.com/muesli/coral"
 )
 
-func TlsCommands() *cobra.Command {
+func TlsCommands() *coral.Command {
 	tlsCmd := baseCommand("tls")
 	tlsCmd.Short = "Builtin helpers for creating certificates"
 	tlsCmd.Long = "Builtin helpers for creating certificates"
@@ -23,24 +23,24 @@ func TlsCommands() *cobra.Command {
 	return tlsCmd
 }
 
-func certCommands() *cobra.Command {
+func certCommands() *coral.Command {
 	certCmd := baseCommand("cert")
 	certCmd.AddCommand(createCertificateCommand())
 	return certCmd
 }
 
-func createCertificateCommand() *cobra.Command {
+func createCertificateCommand() *coral.Command {
 
 	var hosts []string
 
-	command := &cobra.Command{
+	command := &coral.Command{
 		Use:          "create",
 		SilenceUsage: true,
 	}
 
 	command.Flags().StringSliceVar(&hosts, "host", []string{}, "Hostnames and IPs to generate a certificate for")
 
-	command.RunE = func(command *cobra.Command, args []string) error {
+	command.RunE = func(command *coral.Command, args []string) error {
 
 		privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 

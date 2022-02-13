@@ -8,12 +8,12 @@ import (
 	"github.com/jsiebens/hashi-up/pkg/config"
 	"github.com/jsiebens/hashi-up/pkg/operator"
 	"github.com/jsiebens/hashi-up/scripts"
+	"github.com/muesli/coral"
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 	"github.com/thanhpk/randstr"
 )
 
-func InstallNomadCommand() *cobra.Command {
+func InstallNomadCommand() *coral.Command {
 
 	var skipEnable bool
 	var skipStart bool
@@ -25,7 +25,7 @@ func InstallNomadCommand() *cobra.Command {
 
 	var flags = config.NomadConfig{}
 
-	var command = &cobra.Command{
+	var command = &coral.Command{
 		Use:          "install",
 		Short:        "Install Nomad on a server via SSH",
 		Long:         "Install Nomad on a server via SSH",
@@ -57,7 +57,7 @@ func InstallNomadCommand() *cobra.Command {
 	command.Flags().StringVar(&flags.KeyFile, "key-file", "", "Nomad: the key used with the certificate to verify the agent's authenticity. (see Nomad documentation for more info)")
 	command.Flags().BoolVar(&flags.EnableACL, "acl", false, "Nomad: enables Nomad ACL system. (see Nomad documentation for more info)")
 
-	command.RunE = func(command *cobra.Command, args []string) error {
+	command.RunE = func(command *coral.Command, args []string) error {
 		if !target.Local && len(target.Addr) == 0 {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}

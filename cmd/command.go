@@ -5,17 +5,16 @@ import (
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
-	"github.com/spf13/cobra"
+	"github.com/muesli/coral"
 )
 
-type Installer func() *cobra.Command
+type Installer func() *coral.Command
 
 func Execute() error {
 
 	rootCmd := baseCommand("hashi-up")
 	rootCmd.AddCommand(TlsCommands())
 	rootCmd.AddCommand(VersionCommand())
-	rootCmd.AddCommand(CompletionCommand())
 	rootCmd.AddCommand(productCommand("consul", InstallConsulCommand))
 	rootCmd.AddCommand(productCommand("nomad", InstallNomadCommand))
 	rootCmd.AddCommand(productCommand("vault", InstallVaultCommand))
@@ -32,17 +31,17 @@ func Execute() error {
 	return rootCmd.Execute()
 }
 
-func baseCommand(name string) *cobra.Command {
-	return &cobra.Command{
+func baseCommand(name string) *coral.Command {
+	return &coral.Command{
 		Use: name,
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(cmd *coral.Command, args []string) {
 			cmd.Help()
 		},
 		SilenceErrors: true,
 	}
 }
 
-func productCommand(name string, installer ...Installer) *cobra.Command {
+func productCommand(name string, installer ...Installer) *coral.Command {
 	command := baseCommand(name)
 	command.Short = fmt.Sprintf("Install or download %s", strings.Title(name))
 	command.Long = fmt.Sprintf("Install or download %s", strings.Title(name))
