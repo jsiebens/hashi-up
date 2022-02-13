@@ -79,3 +79,14 @@ func GetDownloadURL(product, arch string, version *semver.Version) string {
 
 	return fmt.Sprintf("https://releases.hashicorp.com/%s/%s/%s_%s_%s_%s.zip", product, version, product, version, runtime.GOOS, arch)
 }
+
+func GetArmSuffix(product string, version string) string {
+	if product == "consul" {
+		m := semver.MustParse("1.10.4")
+		v := semver.MustParse(version)
+		if v.LessThan(m) {
+			return "armhfv6"
+		}
+	}
+	return "arm"
+}

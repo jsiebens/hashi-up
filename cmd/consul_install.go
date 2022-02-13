@@ -99,7 +99,7 @@ func InstallConsulCommand() *cobra.Command {
 		callback := func(op operator.CommandOperator) error {
 			dir := "/tmp/hashi-up." + randstr.String(6)
 
-			defer op.Execute("rm -rf " + dir)
+			//defer op.Execute("rm -rf " + dir)
 
 			err := op.Execute("mkdir -p " + dir + "/config")
 			if err != nil {
@@ -145,22 +145,31 @@ func InstallConsulCommand() *cobra.Command {
 				}
 			}
 
-			installScript, err := scripts.Open("install_consul.sh")
+			var serviceType = "notify"
+			if len(flags.RetryJoin) == 0 {
+				serviceType = "exec"
+			}
+
+			data := map[string]interface{}{
+				"TmpDir":      dir,
+				"ServiceType": serviceType,
+				"SkipEnable":  skipEnable,
+				"SkipStart":   skipStart,
+				"Version":     version,
+				"ArmSuffix":   config.GetArmSuffix("consul", version),
+			}
+
+			installScript, err := scripts.RenderScript("install_consul.sh", data)
 
 			if err != nil {
 				return err
 			}
 
-			defer installScript.Close()
+			//defer installScript.Close()
 
 			err = op.Upload(installScript, dir+"/install.sh", "0755")
 			if err != nil {
 				return fmt.Errorf("error received during upload install script: %s", err)
-			}
-
-			var serviceType = "notify"
-			if len(flags.RetryJoin) == 0 {
-				serviceType = "exec"
 			}
 
 			info("Installing Consul ...")
@@ -168,7 +177,7 @@ func InstallConsulCommand() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}
-			err = op.Execute(fmt.Sprintf("cat %s/install.sh | SUDO_PASS=\"%s\" TMP_DIR='%s' SERVICE_TYPE='%s' CONSUL_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, sudoPass, dir, serviceType, version, skipEnable, skipStart))
+			err = op.Execute(fmt.Sprintf("cat %s/install.sh | SUDO_PASS=\"%s\" sh -\n", dir, sudoPass))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}

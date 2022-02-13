@@ -99,13 +99,15 @@ func InitBoundaryDatabaseCommand() *cobra.Command {
 				}
 			}
 
-			installScript, err := scripts.Open("install_boundary_db.sh")
+			data := map[string]interface{}{
+				"TmpDir":  dir,
+				"Version": version,
+			}
 
+			installScript, err := scripts.RenderScript("install_boundary_db.sh", data)
 			if err != nil {
 				return err
 			}
-
-			defer installScript.Close()
 
 			err = op.Upload(installScript, dir+"/install.sh", "0755")
 			if err != nil {
@@ -113,7 +115,7 @@ func InitBoundaryDatabaseCommand() *cobra.Command {
 			}
 
 			info("Initializing Boundary database ...")
-			err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' BOUNDARY_VERSION='%s' sh -\n", dir, dir, version))
+			err = op.Execute(fmt.Sprintf("cat %s/install.sh | sh -\n", dir))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}

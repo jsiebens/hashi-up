@@ -34,6 +34,13 @@ setup_env() {
   BIN_DIR=/usr/local/bin
 
   PRE_INSTALL_HASHES=$(get_installed_hashes)
+
+  TMP_DIR={{.TmpDir}}
+  SKIP_ENABLE={{.SkipEnable}}
+  SKIP_START={{.SkipStart}}
+  NOMAD_VERSION={{.Version}}
+
+  cd $TMP_DIR
 }
 
 # --- set arch and suffix, fatal if architecture not supported ---
@@ -170,8 +177,6 @@ systemd_enable_and_start() {
 
   return 0
 }
-
-cd $TMP_DIR
 
 setup_env
 setup_verify_arch

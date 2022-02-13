@@ -22,6 +22,11 @@ setup_env() {
   fi
 
   BIN_DIR=/usr/local/bin
+
+  TMP_DIR={{.TmpDir}}
+  BOUNDARY_VERSION={{.Version}}
+
+  cd $TMP_DIR
 }
 
 # --- set arch and suffix, fatal if architecture not supported ---
@@ -100,8 +105,6 @@ download_and_install() {
 init_database() {
   $SUDO ${BIN_DIR}/boundary database init -config ${TMP_DIR}/config/boundary.hcl
 }
-
-cd $TMP_DIR
 
 setup_env
 setup_verify_arch

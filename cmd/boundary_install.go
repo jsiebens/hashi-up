@@ -169,13 +169,17 @@ func InstallBoundaryCommand() *cobra.Command {
 				}
 			}
 
-			installScript, err := scripts.Open("install_boundary.sh")
+			data := map[string]interface{}{
+				"TmpDir":     dir,
+				"SkipEnable": skipEnable,
+				"SkipStart":  skipStart,
+				"Version":    version,
+			}
 
+			installScript, err := scripts.RenderScript("install_boundary.sh", data)
 			if err != nil {
 				return err
 			}
-
-			defer installScript.Close()
 
 			err = op.Upload(installScript, dir+"/install.sh", "0755")
 			if err != nil {
@@ -183,7 +187,7 @@ func InstallBoundaryCommand() *cobra.Command {
 			}
 
 			info("Installing Boundary ...")
-			err = op.Execute(fmt.Sprintf("cat %s/install.sh | TMP_DIR='%s' BOUNDARY_VERSION='%s' SKIP_ENABLE='%t' SKIP_START='%t' sh -\n", dir, dir, version, skipEnable, skipStart))
+			err = op.Execute(fmt.Sprintf("cat %s/install.sh | sh -\n", dir))
 			if err != nil {
 				return fmt.Errorf("error received during installation: %s", err)
 			}

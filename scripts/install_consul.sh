@@ -34,6 +34,15 @@ setup_env() {
   BIN_DIR=/usr/local/bin
 
   PRE_INSTALL_HASHES=$(get_installed_hashes)
+
+  TMP_DIR={{.TmpDir}}
+  SERVICE_TYPE={{.ServiceType}}
+  SKIP_ENABLE={{.SkipEnable}}
+  SKIP_START={{.SkipStart}}
+  CONSUL_VERSION={{.Version}}
+  CONSUL_ARM_SUFFIX={{.ArmSuffix}}
+
+  cd $TMP_DIR
 }
 
 # --- set arch and suffix, fatal if architecture not supported ---
@@ -55,7 +64,7 @@ setup_verify_arch() {
     SUFFIX=arm64
     ;;
   arm*)
-    SUFFIX=armhfv6
+    SUFFIX=${CONSUL_ARM_SUFFIX}
     ;;
   *)
     fatal "Unsupported architecture $ARCH"
@@ -177,8 +186,6 @@ systemd_enable_and_start() {
 
   return 0
 }
-
-cd $TMP_DIR
 
 setup_env
 setup_verify_arch
