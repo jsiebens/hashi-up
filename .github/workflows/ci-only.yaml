@@ -2,7 +2,7 @@ name: ci-only
 
 on:
   push:
-    branches: [ master ]
+    branches: [ '*' ]
   pull_request:
     branches: [ master ]
 
@@ -25,4 +25,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - run: make dist
+      - run: go build
