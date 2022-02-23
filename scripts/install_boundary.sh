@@ -132,7 +132,11 @@ create_user_and_config() {
   $SUDO mkdir --parents ${BOUNDARY_DATA_DIR}
   $SUDO mkdir --parents ${BOUNDARY_CONFIG_DIR}
 
-  $SUDO cp ${TMP_DIR}/config/* ${BOUNDARY_CONFIG_DIR}
+  if [ "$(ls -A ${TMP_DIR}/config/)" ]; then
+    info "Copying configuration files"
+    $SUDO cp ${TMP_DIR}/config/* ${BOUNDARY_CONFIG_DIR}
+  fi
+
   $SUDO chown --recursive boundary:boundary /opt/boundary
   $SUDO chown --recursive boundary:boundary /etc/boundary.d
 }

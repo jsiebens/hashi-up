@@ -15,6 +15,7 @@ import (
 
 func InstallVaultCommand() *coral.Command {
 
+	var skipConfig bool
 	var skipEnable bool
 	var skipStart bool
 	var binary string
@@ -35,6 +36,7 @@ func InstallVaultCommand() *coral.Command {
 	var target = Target{}
 	target.prepareCommand(command)
 
+	command.Flags().BoolVar(&skipConfig, "skip-config", false, "If set to true will install Vault service without touching existing config files")
 	command.Flags().BoolVar(&skipEnable, "skip-enable", false, "If set to true will not enable or start Vault service")
 	command.Flags().BoolVar(&skipStart, "skip-start", false, "If set to true will not start Vault service")
 	command.Flags().StringVar(&binary, "package", "", "Upload and use this Vault package instead of downloading")
@@ -61,7 +63,7 @@ func InstallVaultCommand() *coral.Command {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}
 
-		ignoreConfigFlags := len(configFile) != 0
+		ignoreConfigFlags := skipConfig || len(configFile) != 0
 
 		var generatedConfig string
 
@@ -97,37 +99,39 @@ func InstallVaultCommand() *coral.Command {
 				}
 			}
 
-			if !ignoreConfigFlags {
-				info("Uploading generated Vault configuration ...")
-				err = op.Upload(strings.NewReader(generatedConfig), dir+"/config/vault.hcl", "0640")
-				if err != nil {
-					return fmt.Errorf("error received during upload consul configuration: %s", err)
-				}
-
-				files = []string{}
-
-				if flags.EnableTLS() {
-					files = append(files, flags.KeyFile, flags.CertFile)
-				}
-
-				if flags.EnableConsulTLS() {
-					files = append(files, flags.ConsulCaFile, flags.ConsulCertFile, flags.ConsulKeyFile)
-				}
-			} else {
-				info(fmt.Sprintf("Uploading %s as vault.hcl...", configFile))
-				err = op.UploadFile(expandPath(configFile), dir+"/config/vault.hcl", "0640")
-				if err != nil {
-					return fmt.Errorf("error received during upload nomad configuration: %s", err)
-				}
-			}
-
-			for _, s := range files {
-				if len(s) != 0 {
-					info(fmt.Sprintf("Uploading %s...", s))
-					_, filename := filepath.Split(expandPath(s))
-					err = op.UploadFile(expandPath(s), dir+"/config/"+filename, "0640")
+			if !skipConfig {
+				if !ignoreConfigFlags {
+					info("Uploading generated Vault configuration ...")
+					err = op.Upload(strings.NewReader(generatedConfig), dir+"/config/vault.hcl", "0640")
 					if err != nil {
-						return fmt.Errorf("error received during upload file: %s", err)
+						return fmt.Errorf("error received during upload consul configuration: %s", err)
+					}
+
+					files = []string{}
+
+					if flags.EnableTLS() {
+						files = append(files, flags.KeyFile, flags.CertFile)
+					}
+
+					if flags.EnableConsulTLS() {
+						files = append(files, flags.ConsulCaFile, flags.ConsulCertFile, flags.ConsulKeyFile)
+					}
+				} else {
+					info(fmt.Sprintf("Uploading %s as vault.hcl...", configFile))
+					err = op.UploadFile(expandPath(configFile), dir+"/config/vault.hcl", "0640")
+					if err != nil {
+						return fmt.Errorf("error received during upload nomad configuration: %s", err)
+					}
+				}
+
+				for _, s := range files {
+					if len(s) != 0 {
+						info(fmt.Sprintf("Uploading %s...", s))
+						_, filename := filepath.Split(expandPath(s))
+						err = op.UploadFile(expandPath(s), dir+"/config/"+filename, "0640")
+						if err != nil {
+							return fmt.Errorf("error received during upload file: %s", err)
+						}
 					}
 				}
 			}
