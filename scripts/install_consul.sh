@@ -133,7 +133,11 @@ create_user_and_config() {
   $SUDO mkdir --parents ${CONSUL_DATA_DIR}
   $SUDO mkdir --parents ${CONSUL_CONFIG_DIR}/config
 
-  $SUDO cp ${TMP_DIR}/config/* ${CONSUL_CONFIG_DIR}
+  if [ "$(ls -A ${TMP_DIR}/config/)" ]; then
+    info "Copying configuration files"
+    $SUDO cp ${TMP_DIR}/config/* ${CONSUL_CONFIG_DIR}
+  fi
+
   $SUDO chown --recursive consul:consul /opt/consul
   $SUDO chown --recursive consul:consul /etc/consul.d
 }

@@ -15,6 +15,7 @@ import (
 
 func InstallNomadCommand() *coral.Command {
 
+	var skipConfig bool
 	var skipEnable bool
 	var skipStart bool
 	var binary string
@@ -35,6 +36,7 @@ func InstallNomadCommand() *coral.Command {
 	var target = Target{}
 	target.prepareCommand(command)
 
+	command.Flags().BoolVar(&skipConfig, "skip-config", false, "If set to true will install Nomad service without touching existing config files")
 	command.Flags().BoolVar(&skipEnable, "skip-enable", false, "If set to true will not enable or start Nomad service")
 	command.Flags().BoolVar(&skipStart, "skip-start", false, "If set to true will not start Nomad service")
 	command.Flags().StringVar(&binary, "package", "", "Upload and use this Nomad package instead of downloading")
@@ -62,7 +64,7 @@ func InstallNomadCommand() *coral.Command {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}
 
-		ignoreConfigFlags := len(configFile) != 0
+		ignoreConfigFlags := skipConfig || len(configFile) != 0
 
 		var generatedConfig string
 
@@ -98,33 +100,35 @@ func InstallNomadCommand() *coral.Command {
 				}
 			}
 
-			if !ignoreConfigFlags {
-				info("Uploading generated Nomad configuration ...")
-				err = op.Upload(strings.NewReader(generatedConfig), dir+"/config/nomad.hcl", "0640")
-				if err != nil {
-					return fmt.Errorf("error received during upload nomad configuration: %s", err)
-				}
-
-				files = []string{}
-
-				if flags.EnableTLS() {
-					files = []string{flags.CaFile, flags.KeyFile, flags.CertFile}
-				}
-			} else {
-				info(fmt.Sprintf("Uploading %s as nomad.hcl...", configFile))
-				err = op.UploadFile(expandPath(configFile), dir+"/config/nomad.hcl", "0640")
-				if err != nil {
-					return fmt.Errorf("error received during upload nomad configuration: %s", err)
-				}
-			}
-
-			for _, s := range files {
-				if len(s) != 0 {
-					info(fmt.Sprintf("Uploading %s...", s))
-					_, filename := filepath.Split(expandPath(s))
-					err = op.UploadFile(expandPath(s), dir+"/config/"+filename, "0640")
+			if !skipConfig {
+				if !ignoreConfigFlags {
+					info("Uploading generated Nomad configuration ...")
+					err = op.Upload(strings.NewReader(generatedConfig), dir+"/config/nomad.hcl", "0640")
 					if err != nil {
-						return fmt.Errorf("error received during upload file: %s", err)
+						return fmt.Errorf("error received during upload nomad configuration: %s", err)
+					}
+
+					files = []string{}
+
+					if flags.EnableTLS() {
+						files = []string{flags.CaFile, flags.KeyFile, flags.CertFile}
+					}
+				} else {
+					info(fmt.Sprintf("Uploading %s as nomad.hcl...", configFile))
+					err = op.UploadFile(expandPath(configFile), dir+"/config/nomad.hcl", "0640")
+					if err != nil {
+						return fmt.Errorf("error received during upload nomad configuration: %s", err)
+					}
+				}
+
+				for _, s := range files {
+					if len(s) != 0 {
+						info(fmt.Sprintf("Uploading %s...", s))
+						_, filename := filepath.Split(expandPath(s))
+						err = op.UploadFile(expandPath(s), dir+"/config/"+filename, "0640")
+						if err != nil {
+							return fmt.Errorf("error received during upload file: %s", err)
+						}
 					}
 				}
 			}

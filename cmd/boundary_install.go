@@ -15,6 +15,7 @@ import (
 
 func InstallBoundaryCommand() *coral.Command {
 
+	var skipConfig bool
 	var skipEnable bool
 	var skipStart bool
 	var binary string
@@ -35,6 +36,7 @@ func InstallBoundaryCommand() *coral.Command {
 	var target = Target{}
 	target.prepareCommand(command)
 
+	command.Flags().BoolVar(&skipConfig, "skip-config", false, "If set to true will install Boundary service without touching existing config files")
 	command.Flags().BoolVar(&skipEnable, "skip-enable", false, "If set to true will not enable or start Boundary service")
 	command.Flags().BoolVar(&skipStart, "skip-start", false, "If set to true will not start Boundary service")
 	command.Flags().StringVar(&binary, "package", "", "Upload and use this Boundary package instead of downloading")
@@ -67,7 +69,7 @@ func InstallBoundaryCommand() *coral.Command {
 			return fmt.Errorf("required ssh-target-addr flag is missing")
 		}
 
-		ignoreConfigFlags := len(configFile) != 0
+		ignoreConfigFlags := skipConfig || len(configFile) != 0
 
 		var generatedConfig string
 
@@ -132,39 +134,41 @@ func InstallBoundaryCommand() *coral.Command {
 				}
 			}
 
-			if !ignoreConfigFlags {
-				info("Uploading generated Boundary configuration ...")
-				err = op.Upload(strings.NewReader(generatedConfig), dir+"/config/boundary.hcl", "0640")
-				if err != nil {
-					return fmt.Errorf("error received during upload boundary configuration: %s", err)
-				}
-
-				files = []string{}
-
-				if flags.ApiTLSEnabled() {
-					files = []string{flags.ApiCertFile, flags.ApiKeyFile}
-				}
-				if flags.ClusterTLSEnabled() {
-					files = []string{flags.ClusterKeyFile, flags.ClusterCertFile}
-				}
-				if flags.ProxyTLSEnabled() {
-					files = []string{flags.ProxyKeyFile, flags.ProxyCertFile}
-				}
-			} else {
-				info(fmt.Sprintf("Uploading %s as boundary.hcl...", configFile))
-				err = op.UploadFile(expandPath(configFile), dir+"/config/boundary.hcl", "0640")
-				if err != nil {
-					return fmt.Errorf("error received during upload boundary configuration: %s", err)
-				}
-			}
-
-			for _, s := range files {
-				if len(s) != 0 {
-					info(fmt.Sprintf("Uploading %s...", s))
-					_, filename := filepath.Split(expandPath(s))
-					err = op.UploadFile(expandPath(s), dir+"/config/"+filename, "0640")
+			if !skipConfig {
+				if !ignoreConfigFlags {
+					info("Uploading generated Boundary configuration ...")
+					err = op.Upload(strings.NewReader(generatedConfig), dir+"/config/boundary.hcl", "0640")
 					if err != nil {
-						return fmt.Errorf("error received during upload file: %s", err)
+						return fmt.Errorf("error received during upload boundary configuration: %s", err)
+					}
+
+					files = []string{}
+
+					if flags.ApiTLSEnabled() {
+						files = []string{flags.ApiCertFile, flags.ApiKeyFile}
+					}
+					if flags.ClusterTLSEnabled() {
+						files = []string{flags.ClusterKeyFile, flags.ClusterCertFile}
+					}
+					if flags.ProxyTLSEnabled() {
+						files = []string{flags.ProxyKeyFile, flags.ProxyCertFile}
+					}
+				} else {
+					info(fmt.Sprintf("Uploading %s as boundary.hcl...", configFile))
+					err = op.UploadFile(expandPath(configFile), dir+"/config/boundary.hcl", "0640")
+					if err != nil {
+						return fmt.Errorf("error received during upload boundary configuration: %s", err)
+					}
+				}
+
+				for _, s := range files {
+					if len(s) != 0 {
+						info(fmt.Sprintf("Uploading %s...", s))
+						_, filename := filepath.Split(expandPath(s))
+						err = op.UploadFile(expandPath(s), dir+"/config/"+filename, "0640")
+						if err != nil {
+							return fmt.Errorf("error received during upload file: %s", err)
+						}
 					}
 				}
 			}

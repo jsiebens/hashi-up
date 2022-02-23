@@ -134,7 +134,10 @@ create_user_and_config() {
   $SUDO mkdir --parents ${VAULT_DATA_DIR}
   $SUDO mkdir --parents ${VAULT_CONFIG_DIR}
 
-  $SUDO cp ${TMP_DIR}/config/* ${VAULT_CONFIG_DIR}
+  if [ "$(ls -A ${TMP_DIR}/config/)" ]; then
+    info "Copying configuration files"
+    $SUDO cp ${TMP_DIR}/config/* ${VAULT_CONFIG_DIR}
+  fi
 
   $SUDO chown --recursive vault:vault /opt/vault
   $SUDO chown --recursive vault:vault /etc/vault.d

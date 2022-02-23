@@ -125,7 +125,10 @@ create_user_and_config() {
   $SUDO mkdir --parents ${NOMAD_DATA_DIR}
   $SUDO mkdir --parents ${NOMAD_CONFIG_DIR}/config
 
-  $SUDO cp ${TMP_DIR}/config/* ${NOMAD_CONFIG_DIR}
+    if [ "$(ls -A ${TMP_DIR}/config/)" ]; then
+      info "Copying configuration files"
+      $SUDO cp ${TMP_DIR}/config/* ${NOMAD_CONFIG_DIR}
+    fi
 }
 
 # --- write systemd service file ---
