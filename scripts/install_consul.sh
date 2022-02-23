@@ -36,7 +36,6 @@ setup_env() {
   PRE_INSTALL_HASHES=$(get_installed_hashes)
 
   TMP_DIR={{.TmpDir}}
-  SERVICE_TYPE={{.ServiceType}}
   SKIP_ENABLE={{.SkipEnable}}
   SKIP_START={{.SkipStart}}
   CONSUL_VERSION={{.Version}}
@@ -148,13 +147,14 @@ Description="HashiCorp Consul - A service mesh solution"
 Documentation=https://www.consul.io/
 Requires=network-online.target
 After=network-online.target
+ConditionFileNotEmpty=${CONSUL_CONFIG_DIR}/consul.hcl
 
 [Service]
-Type=${SERVICE_TYPE}
+EnvironmentFile=-/etc/consul.d/consul.env
 User=consul
 Group=consul
 ExecStart=${BIN_DIR}/consul agent -config-file=${CONSUL_CONFIG_DIR}/consul.hcl -config-dir=${CONSUL_CONFIG_DIR}/config
-ExecReload=/bin/kill -s HUP \$MAINPID
+ExecReload=/bin/kill --signal HUP \$MAINPID
 KillMode=process
 KillSignal=SIGTERM
 Restart=on-failure

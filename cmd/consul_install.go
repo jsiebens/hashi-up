@@ -145,18 +145,12 @@ func InstallConsulCommand() *coral.Command {
 				}
 			}
 
-			var serviceType = "notify"
-			if len(flags.RetryJoin) == 0 {
-				serviceType = "exec"
-			}
-
 			data := map[string]interface{}{
-				"TmpDir":      dir,
-				"ServiceType": serviceType,
-				"SkipEnable":  skipEnable,
-				"SkipStart":   skipStart,
-				"Version":     version,
-				"ArmSuffix":   config.GetArmSuffix("consul", version),
+				"TmpDir":     dir,
+				"SkipEnable": skipEnable,
+				"SkipStart":  skipStart,
+				"Version":    version,
+				"ArmSuffix":  config.GetArmSuffix("consul", version),
 			}
 
 			installScript, err := scripts.RenderScript("install_consul.sh", data)
