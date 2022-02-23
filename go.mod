@@ -1,6 +1,6 @@
 module github.com/jsiebens/hashi-up
 
-go 1.16
+go 1.17
 
 require (
 	github.com/Masterminds/semver v1.5.0
@@ -24,4 +24,12 @@ require (
 	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
+)
+
+require (
+	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 )
