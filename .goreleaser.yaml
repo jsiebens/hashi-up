@@ -1,0 +1,86 @@
+project_name: hashi-up
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: default
+    env: [ CGO_ENABLED=0 ]
+    goos:
+      - linux
+      - windows
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/jsiebens/hashi-up/cmd.Version={{.Version}} -X github.com/jsiebens/hashi-up/cmd.GitCommit={{.ShortCommit}}
+  - id: arm
+    env: [ CGO_ENABLED=0 ]
+    goos:
+      - linux
+    goarch:
+      - arm64
+      - arm
+    ldflags:
+      - -s -w -X github.com/jsiebens/hashi-up/cmd.Version={{.Version}} -X github.com/jsiebens/hashi-up/cmd.GitCommit={{.ShortCommit}}
+  - id: darwin
+    env: [ CGO_ENABLED=0 ]
+    goos:
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/jsiebens/hashi-up/cmd.Version={{.Version}} -X github.com/jsiebens/hashi-up/cmd.GitCommit={{.ShortCommit}}
+
+archives:
+  - id: default
+    builds:
+      - default
+    format: binary
+    name_template: "{{ .ProjectName }}"
+  - id: darwin
+    builds:
+      - darwin
+    format: binary
+    name_template: "{{ .ProjectName }}-{{ .Os }}"
+  - id: arm
+    builds:
+      - arm
+    format: binary
+    name_template: "{{ .ProjectName }}-{{ .Arch }}{{ if .Arm }}hf{{ end }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+signs:
+  - cmd: cosign
+    env:
+      - COSIGN_EXPERIMENTAL=1
+    certificate: '${artifact}.pem'
+    args:
+      - sign-blob
+      - '--output-certificate=${certificate}'
+      - '--output-signature=${signature}'
+      - '${artifact}'
+    artifacts: checksum
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^test:'
+      - '^chore'
+      - '^docs'
+      - Merge pull request
+      - Merge remote-tracking branch
+      - Merge branch
+      - go mod tidy
+  groups:
+    - title: 'New Features'
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: 'Bug fixes'
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 10
+    - title: Other work
+      order: 999
