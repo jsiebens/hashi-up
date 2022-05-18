@@ -6,19 +6,20 @@ import (
 	"io/ioutil"
 	"net/http"
 	"runtime"
-	"sort"
 	"time"
 
 	"github.com/Masterminds/semver"
 )
 
-type Versions struct {
-	Name     string                 `json:"vault"`
-	Versions map[string]interface{} `json:"versions"`
+type Product struct {
+}
+
+type Version struct {
+	Version string `json:"version"`
 }
 
 func GetLatestVersion(product string) (string, error) {
-	url := fmt.Sprintf("https://releases.hashicorp.com/%s/index.json", product)
+	url := fmt.Sprintf("https://api.releases.hashicorp.com/v1/releases/%s?license_class=oss", product)
 
 	client := http.Client{
 		Timeout: time.Second * 2,
@@ -46,28 +47,20 @@ func GetLatestVersion(product string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	result := Versions{}
 
-	err = json.Unmarshal(body, &result)
-	if err != nil {
+	var result []Version
+	if err := json.Unmarshal(body, &result); err != nil {
 		return "", err
 	}
 
-	vs := make([]*semver.Version, 0)
-	for i := range result.Versions {
-		v, err := semver.NewVersion(i)
+	for _, i := range result {
+		v, err := semver.NewVersion(i.Version)
 		if err == nil && len(v.Metadata()) == 0 && len(v.Prerelease()) == 0 {
-			vs = append(vs, v)
+			return i.Version, nil
 		}
 	}
 
-	if len(vs) == 0 {
-		return "", fmt.Errorf("unable to find default version of %s", product)
-	}
-
-	sort.Sort(sort.Reverse(semver.Collection(vs)))
-
-	return vs[0].String(), nil
+	return "", fmt.Errorf("unable to find latest version of %s", product)
 }
 
 func GetDownloadURL(product, arch string, version *semver.Version) string {
