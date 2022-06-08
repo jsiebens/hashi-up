@@ -1,14 +1,14 @@
-DB_PUBLIC_IP=$(terraform output db_public_ip)
-DB_PRIVATE_IP=$(terraform output db_private_ip)
+DB_PUBLIC_IP=$(terraform output -raw db_public_ip)
+DB_PRIVATE_IP=$(terraform output -raw db_private_ip)
 
-CONTROLLER_PUBLIC_IP=$(terraform output controller_public_ip)
-CONTROLLER_PRIVATE_IP=$(terraform output controller_private_ip)
+CONTROLLER_PUBLIC_IP=$(terraform output -raw controller_public_ip)
+CONTROLLER_PRIVATE_IP=$(terraform output -raw controller_private_ip)
 
-WORKER1_PUBLIC_IP=$(terraform output worker1_public_ip)
-WORKER1_PRIVATE_IP=$(terraform output worker1_private_ip)
+WORKER1_PUBLIC_IP=$(terraform output -raw worker1_public_ip)
+WORKER1_PRIVATE_IP=$(terraform output -raw worker1_private_ip)
 
-WORKER2_PUBLIC_IP=$(terraform output worker2_public_ip)
-WORKER2_PRIVATE_IP=$(terraform output worker2_private_ip)
+WORKER2_PUBLIC_IP=$(terraform output -raw worker2_public_ip)
+WORKER2_PRIVATE_IP=$(terraform output -raw worker2_private_ip)
 
 ROOT_KEY=JuZetUPcWEbsO4cTP7/E93O8Zrl6CQnYYb25CLFVAJM=
 WORKER_AUTH_KEY=uDuFypRqVPq7DM0Ujgrl5PoRRgqqy4eFdW7ORNIHHhU=
