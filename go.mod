@@ -1,6 +1,6 @@
 module github.com/jsiebens/hashi-up
 
-go 1.17
+go 1.19
 
 require (
 	github.com/Masterminds/semver v1.5.0
