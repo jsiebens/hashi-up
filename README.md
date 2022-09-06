@@ -39,8 +39,7 @@ The `ssh-agent` that comes with OpenSSH is commonly used, but other agents, like
 
 The `--ssh-target-key` flag can be used when no agent is available or when a specific private key is preferred.
 
-> `hashi-up` does not support ssh password login.
-
+The `--ssh-target-user` and `--ssh-target-password` flags allow you to authenticate using a username and a password.
 
 ### Guides
 
