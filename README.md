@@ -9,7 +9,6 @@ This project is heavily inspired on the work of [Alex Ellis](https://www.alexell
 [![Go Report Card](https://goreportcard.com/badge/github.com/jsiebens/hashi-up)](https://goreportcard.com/report/github.com/jsiebens/hashi-up)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![GitHub All Releases](https://img.shields.io/github/downloads/jsiebens/hashi-up/total)
-![matomo](https://matomo.nosceon.io/matomo.php?idsite=2&rec=1&action_name=gh-home)
 
 ## What's this for?
 
