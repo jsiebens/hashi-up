@@ -109,7 +109,7 @@ hashi-up consul install \
   --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
 
 hashi-up consul install \
-  --ssh-target-addr $AGENT_1_IP \
+  --ssh-target-addr $AGENT_2_IP \
   --ssh-target-user ubuntu \
   --retry-join $SERVER_1_IP --retry-join $SERVER_2_IP --retry-join $SERVER_3_IP
 ```
